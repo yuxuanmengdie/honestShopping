@@ -61,6 +61,9 @@ UICollectionViewDelegateFlowLayout>
 static NSString *const kCategariesCollectionViewCellIdentifier = @"CommodityCellIdentifier";
 
 static const float kFFScrollViewHeight = 200;
+static const float kItemSize = 10;
+
+
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -95,6 +98,9 @@ static const float kFFScrollViewHeight = 200;
     [self getCommofityCategaries:nil];
     [self getBannerImages];
     
+    
+       
+
     
     
 }
@@ -238,6 +244,9 @@ static const float kFFScrollViewHeight = 200;
         [self.view layoutIfNeeded];
     }
     
+    HSCategariesModel *cateModel = _categariesArray[indexPath.row];
+    [self GetItemsWithCid:cateModel.id size:kItemSize key:[public md5Str:[public getIPAddress:YES]] page:1];
+    
 }
 
 //
@@ -317,6 +326,10 @@ static const float kFFScrollViewHeight = 200;
                 
                 HSCategariesModel *model = [[HSCategariesModel alloc] initWithDictionary:obj error:nil];
                 [tmpArray addObject:model];
+                
+                if (idx == 0) {
+                    [self GetItemsWithCid:model.id size:10 key:[public md5Str:[public getIPAddress:YES]] page:1];
+                }
                 
             }];
             _categariesArray = tmpArray;
@@ -402,13 +415,13 @@ static const float kFFScrollViewHeight = 200;
     AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
     
     
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
-                                                   kPostJsonCid:cid,
+    NSDictionary *parametersDic = @{kPostJsonKey:key,
+                                    kPostJsonCid:[NSNumber numberWithLongLong:[cid longLongValue]],
                                     kPostJsonSize:[NSNumber numberWithInteger:size],
                                     kPostJsonPage:[NSNumber numberWithInteger:page]};
     
-    [manager GET:kGetItemById parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
-        NSLog(@"JSON: %@", responseObject);
+    [manager POST:kGetItemsByCate parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSLog(@"JSON: %@/n %@", responseObject,[public dictionaryToJson:parametersDic]);
         
         NSString *str = (NSString *)responseObject;
         NSData *data =  [str dataUsingEncoding:NSUTF8StringEncoding];
@@ -418,6 +431,7 @@ static const float kFFScrollViewHeight = 200;
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"response=%@",operation.responseString);
+         NSLog(@"JSON:  %@",[public dictionaryToJson:parametersDic]);
         NSString *str = (NSString *)operation.responseString;
         
         NSData *data =  [str dataUsingEncoding:NSUTF8StringEncoding];
@@ -444,6 +458,7 @@ static const float kFFScrollViewHeight = 200;
                 
             }];
             [_cateItemsDataDic setObject:tmpArray forKey:cid];
+            [_commodityViewController setItemsData:tmpArray];
            
             
             

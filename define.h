@@ -99,6 +99,8 @@ static NSString *const kPostJsonSize = @"size";
 #define kGetItemById  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Item&a=getItemById"]
 /// 用户优惠劵
 #define kGetCouponsByUidURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=getCouponsByUid"]
+/// 列表下的商品信息
+#define kGetItemsByCate  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Item&a=getItemsByCate"]
 
 /// 获取banner
 #define kGetBannerURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Item&a=getBanner"]

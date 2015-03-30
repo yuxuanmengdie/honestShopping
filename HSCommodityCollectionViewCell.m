@@ -14,4 +14,12 @@
     // Initialization code
 }
 
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+    
+//    NSLog(@"%s %@",__func__,NSStringFromCGSize(_imgView.frame.size));
+//    _imgView.image = [public drawInRectImage:_imgView.image size:_imgView.frame.size];
+}
+
 @end

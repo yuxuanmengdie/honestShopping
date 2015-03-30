@@ -10,4 +10,8 @@
 
 @interface HSCommodityViewController : UIViewController
 
+
+/// 设置数据源
+- (void)setItemsData:(NSArray *)itemsData;
+
 @end

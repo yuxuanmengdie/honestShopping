@@ -25,11 +25,12 @@
     
     self.title = @"放心吃";
     
+    
     UIBarButtonItem *rightItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(rightNavItemAction)];
     self.navigationItem.rightBarButtonItem = rightItem;
     
     
-    
+    /// 获取版本号 判断是否需要引导页
     NSString *verson = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
     
     NSString *saveedVerson = [[NSUserDefaults standardUserDefaults] objectForKey:kAPPCurrentVersion];
@@ -41,7 +42,28 @@
     }
     
     
+    UITabBarItem *tabBarItem1 = [self.tabBar.items objectAtIndex:2];
+    UIImage *img =  [public ImageWithColor:[UIColor blueColor] frame:CGRectMake(0, 0, 50, 300)];
+    UIImage *oriImg = [public ImageWithColor:[UIColor yellowColor] frame:CGRectMake(0, 0, 50, 100)];
+    //    tabBarItem1.imageInsets = UIEdgeInsetsMake(-10, -10, -10, -10);
+    tabBarItem1.selectedImage = [img imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
     
+    tabBarItem1.image = [oriImg imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+    tabBarItem1.enabled = YES;
+
+
+    
+//    UIView *customView = [[UIView alloc] init];
+//    customView.backgroundColor = [UIColor blueColor];
+//    customView.frame = CGRectMake(80, CGRectGetMaxY(self.view.frame)-60, CGRectGetWidth(self.view.frame)/self.tabBar.items.count, 60);
+////    [self.view addSubview:customView];
+//    self.tabBar.clipsToBounds = NO;
+//    NSLog(@"frame=%@,item=%f",NSStringFromCGRect(self.tabBar.frame),self.tabBar.itemWidth);
+//
+//    UITabBarItem *tabBarItem1 = [self.tabBar.items objectAtIndex:2];
+//    [tabBarItem1 setImage:[public ImageWithColor:[UIColor blueColor] frame:customView.bounds]];
+//    tabBarItem1.imageInsets = UIEdgeInsetsMake(0, -10, -6, -10);
+   
     
 }
 
@@ -83,5 +105,16 @@
 {
     
 }
+
+
+//- (void)tabBar:(UITabBar *)tabBar didSelectItem:(UITabBarItem *)item
+//{
+//
+//    UITabBarItem *tabBarItem1 = [self.tabBar.items objectAtIndex:2];
+//    if (item == tabBarItem1) {
+//        return;
+//    }
+//}
+
 
 @end

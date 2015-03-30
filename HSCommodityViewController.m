@@ -9,10 +9,17 @@
 #import "HSCommodityViewController.h"
 #import "HSCommodityCollectionViewCell.h"
 #import "CHTCollectionViewWaterfallLayout.h"
+#import "HSCommodtyItemModel.h"
+#import "UIImageView+WebCache.h"
 
 @interface HSCommodityViewController ()<CHTCollectionViewDelegateWaterfallLayout,
 UICollectionViewDataSource,
 UICollectionViewDelegate>
+{
+    NSArray *_itemsData;
+    
+    NSMutableDictionary *_imageSizeDic;
+}
 
 @property (weak, nonatomic) IBOutlet UICollectionView *commdityCollectionView;
 @end
@@ -21,6 +28,10 @@ UICollectionViewDelegate>
 
 
 static NSString *const kCommodityCellIndentifier = @"CommodityCellIndentifier";
+
+
+static NSString *const kImageURLKey = @"imageURLKey";
+static NSString *const kImageSizeKey = @"imageSizeKey";
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -40,6 +51,9 @@ static NSString *const kCommodityCellIndentifier = @"CommodityCellIndentifier";
     layout.minimumInteritemSpacing = 5;
     layout.columnCount = 2;
     _commdityCollectionView.collectionViewLayout = layout;
+    
+    
+    _imageSizeDic = [[NSMutableDictionary alloc] init];
 
 }
 
@@ -81,10 +95,17 @@ static NSString *const kCommodityCellIndentifier = @"CommodityCellIndentifier";
 */
 
 
+- (void)setItemsData:(NSArray *)itemsData
+{
+    _itemsData = itemsData;
+    [_commdityCollectionView reloadData];
+}
+
+
 #pragma  mark collectionView dataSource and delegate
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-    return 100;
+    return _itemsData.count;
 }
 
 
@@ -92,7 +113,36 @@ static NSString *const kCommodityCellIndentifier = @"CommodityCellIndentifier";
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
     HSCommodityCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:kCommodityCellIndentifier forIndexPath:indexPath];
-    cell.imgView.backgroundColor = [UIColor redColor];
+    HSCommodtyItemModel *itemModel = _itemsData[indexPath.row];
+//    [cell.imgView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]]];
+    [[SDWebImageManager sharedManager] downloadImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]]
+                                                    options:0
+                                                   progress:^(NSInteger receivedSize, NSInteger expectedSize) {
+                                                       // progression tracking code
+                                                   }
+                                                  completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+                                                      if (image) {
+                                                          // do something with image
+                                                          cell.imgView.image = image;
+                                                          
+                                                          NSValue *imgSize =  [NSValue valueWithCGSize:image.size];
+                                                          NSDictionary *dic = [_imageSizeDic objectForKey:indexPath];
+                                                          if (dic != nil ) {
+                                                              NSURL *imgURL = dic[kImageURLKey];
+                                                              NSValue *sizeValue = dic[kImageSizeKey];
+                                                              if ([imgURL isEqual:imageURL] && [sizeValue isEqual:imgSize]) {
+                                                                  return ;
+                                                              }
+                                                          }
+                                                          
+                                                          NSDictionary *tmpDic = @{kImageSizeKey:imgSize,
+                                                                                   kImageURLKey:imageURL};
+                                                          
+                                                          [_imageSizeDic setObject:tmpDic forKey:indexPath];
+                                                          [collectionView reloadItemsAtIndexPaths:@[indexPath]];
+                                                      }
+                                                  }];
+
        
     return cell;
 }
@@ -100,11 +150,39 @@ static NSString *const kCommodityCellIndentifier = @"CommodityCellIndentifier";
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    int hei =  arc4random()%150+50;
-    int wid = (CGRectGetWidth(collectionView.frame)-5*2-10)/2.0;//;
+//    __block float hei =  20;//arc4random()%150+50;
+//    __block float wid = 20;//(CGRectGetWidth(collectionView.frame)-5*2-10)/2.0;//;
+//    HSCommodtyItemModel *itemModel = _itemsData[indexPath.row];
+////    [[SDWebImageManager sharedManager] downloadImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]] options:SDWebImageDownloaderUseNSURLCache progress:^(NSInteger receivedSize, NSInteger expectedSize) {
+////        
+////    } completed:^(UIImage *image, NSData *data, NSError *error, BOOL finished) {
+////        
+////        wid = image.size.width;
+////        hei = image.size.height;
+////    }];
+//    
+//    [[SDWebImageManager sharedManager] downloadImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]]
+//                          options:0
+//                         progress:^(NSInteger receivedSize, NSInteger expectedSize) {
+//                             // progression tracking code
+//                         }
+//                        completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+//                            if (image) {
+//                                // do something with image
+//                                wid = image.size.width;
+//                                hei = image.size.height;
+//
+//                            }
+//                        }];
+////    [cell.imgView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]]];
     
+    NSDictionary *dic = [_imageSizeDic objectForKey:indexPath];
+    if (dic != nil) {
+        NSValue *sizeValue = dic[kImageSizeKey];
+        return CGSizeMake(sizeValue.CGSizeValue.width, sizeValue.CGSizeValue.height);
+    }
     
-    return CGSizeMake(wid, hei);
+    return CGSizeMake(0, 0);
 
 }
 
