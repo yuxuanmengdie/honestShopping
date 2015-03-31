@@ -49,6 +49,9 @@ UICollectionViewDelegateFlowLayout>
     
     /// 顶部滚动高度约束
     NSLayoutConstraint *_ffScrollViewHeightConstraint;
+    
+    /// 滑动内容
+    UICollectionView *_contentCollectionView;
 }
 
 @property (weak, nonatomic) IBOutlet UICollectionView *topCategariesCollectionView;

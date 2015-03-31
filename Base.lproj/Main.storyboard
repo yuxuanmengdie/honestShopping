@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6254" systemVersion="13F34" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="UzJ-WC-11Q">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6254" systemVersion="13F34" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="5xw-5X-Xg9">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6247"/>
@@ -63,6 +63,46 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="W5J-7L-Pyd" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="750" y="-320"/>
+        </scene>
+        <!--Commodity Detail View Controller-->
+        <scene sceneID="7mZ-Vt-xhU">
+            <objects>
+                <viewController storyboardIdentifier="commodityDetail" id="5xw-5X-Xg9" customClass="HSCommodityDetailViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="Hyr-tL-H0q"/>
+                        <viewControllerLayoutGuide type="bottom" id="6W9-8I-ej8"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="Rs0-K2-OxU">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" placeholderIntrinsicWidth="infinite" placeholderIntrinsicHeight="49" translatesAutoresizingMaskIntoConstraints="NO" id="yE9-dn-D9I" customClass="HSBuyNumView">
+                                <rect key="frame" x="0.0" y="551" width="600" height="49"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </view>
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zik-w6-LG4">
+                                <rect key="frame" x="0.0" y="20" width="600" height="531"/>
+                            </scrollView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="6W9-8I-ej8" firstAttribute="top" secondItem="yE9-dn-D9I" secondAttribute="bottom" id="8Me-GU-mRn"/>
+                            <constraint firstItem="zik-w6-LG4" firstAttribute="top" secondItem="Hyr-tL-H0q" secondAttribute="bottom" id="8uM-od-ok6"/>
+                            <constraint firstAttribute="trailing" secondItem="zik-w6-LG4" secondAttribute="trailing" id="FWK-65-h2t"/>
+                            <constraint firstItem="yE9-dn-D9I" firstAttribute="top" secondItem="zik-w6-LG4" secondAttribute="bottom" id="GYz-3O-peG"/>
+                            <constraint firstItem="yE9-dn-D9I" firstAttribute="leading" secondItem="Rs0-K2-OxU" secondAttribute="leading" id="LQq-k0-pw1"/>
+                            <constraint firstItem="zik-w6-LG4" firstAttribute="leading" secondItem="Rs0-K2-OxU" secondAttribute="leading" id="dST-0I-75Y"/>
+                            <constraint firstAttribute="trailing" secondItem="yE9-dn-D9I" secondAttribute="trailing" id="y3Z-kZ-UGX"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="buyNumView" destination="yE9-dn-D9I" id="TPu-JV-29G"/>
+                        <outlet property="contentScrollView" destination="zik-w6-LG4" id="JEI-Hc-RQE"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="QRI-SH-17U" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2054" y="-1075"/>
         </scene>
         <!--Commodity View Controller-->
         <scene sceneID="vZA-ZB-jzo">

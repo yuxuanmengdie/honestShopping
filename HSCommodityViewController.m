@@ -11,6 +11,7 @@
 #import "CHTCollectionViewWaterfallLayout.h"
 #import "HSCommodtyItemModel.h"
 #import "UIImageView+WebCache.h"
+#import "MJRefresh.h"
 
 @interface HSCommodityViewController ()<CHTCollectionViewDelegateWaterfallLayout,
 UICollectionViewDataSource,
@@ -19,6 +20,9 @@ UICollectionViewDelegate>
     NSArray *_itemsData;
     
     NSMutableDictionary *_imageSizeDic;
+    
+    
+    
 }
 
 @property (weak, nonatomic) IBOutlet UICollectionView *commdityCollectionView;
@@ -54,6 +58,26 @@ static NSString *const kImageSizeKey = @"imageSizeKey";
     
     
     _imageSizeDic = [[NSMutableDictionary alloc] init];
+    
+    
+    __weak typeof(self) weakSelf = self;
+    [_commdityCollectionView addLegendHeaderWithRefreshingBlock:^{
+        [weakSelf.commdityCollectionView.header endRefreshing];
+    }];
+    
+    [_commdityCollectionView addLegendFooterWithRefreshingBlock:^{
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//            [weakSelf.collectionView reloadData];
+//            
+//            // 结束刷新
+//            [weakSelf.collectionView.footer endRefreshing];
+            [weakSelf.commdityCollectionView.footer endRefreshing];
+        });
+
+        
+    }];
+ //   [_commdityCollectionView.footer beginRefreshing];
+    
 
 }
 

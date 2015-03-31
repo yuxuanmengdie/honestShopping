@@ -29,7 +29,7 @@
 /// 保存的版本
 #define kAPPCurrentVersion @"currentVersion"
 
-
+#define kAPPTintColor [UIColor greenColor]
 
 #endif
 
