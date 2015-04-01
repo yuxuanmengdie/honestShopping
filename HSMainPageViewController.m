@@ -18,6 +18,7 @@
 #import "HSBannerModel.h"
 #import "HSItemPageModel.h"
 #import "HSCommodtyItemModel.h"
+#import "HSContentCollectionViewCell.h"
 
 
 @interface HSMainPageViewController ()<
@@ -28,9 +29,11 @@ UICollectionViewDelegateFlowLayout>
     /// 类别数组
     NSArray *_categariesArray;
     
-    ///轮播图
+    ///轮播图 model
     NSArray *_bannerArray;
     
+    /// 轮播图地址
+    NSArray *_bannerImages;
     
     /// 保存不同类别的item
     NSMutableDictionary *_cateItemsDataDic;
@@ -50,12 +53,13 @@ UICollectionViewDelegateFlowLayout>
     /// 顶部滚动高度约束
     NSLayoutConstraint *_ffScrollViewHeightConstraint;
     
-    /// 滑动内容
-    UICollectionView *_contentCollectionView;
+//    /// 滑动内容
+//    UICollectionView *_contentCollectionView;
 }
 
 @property (weak, nonatomic) IBOutlet UICollectionView *topCategariesCollectionView;
 
+@property (weak, nonatomic) IBOutlet UICollectionView *contentCollectionView;
 
 @end
 
@@ -63,9 +67,12 @@ UICollectionViewDelegateFlowLayout>
 
 static NSString *const kCategariesCollectionViewCellIdentifier = @"CommodityCellIdentifier";
 
+static NSString *const kContentCollectionViewIdentifier = @"contentCollectionViewIdentifier";
+
 static const float kFFScrollViewHeight = 200;
 static const float kItemSize = 10;
 
+static const int kContentViewTag = 1000;
 
 
 - (void)viewDidLoad {
@@ -81,6 +88,13 @@ static const float kItemSize = 10;
     [_topCategariesCollectionView registerNib:[UINib nibWithNibName:NSStringFromClass([HSCommodityCategaryCollectionViewCell class]) bundle:nil] forCellWithReuseIdentifier:kCategariesCollectionViewCellIdentifier];
     _topCategariesCollectionView.delegate = self;
     _topCategariesCollectionView.dataSource = self;
+    
+    
+    [_contentCollectionView registerNib:[UINib nibWithNibName:NSStringFromClass([HSContentCollectionViewCell class]) bundle:nil] forCellWithReuseIdentifier:kContentCollectionViewIdentifier];
+    _contentCollectionView.delegate = self;
+    _contentCollectionView.dataSource = self;
+    _contentCollectionView.pagingEnabled = YES;
+    
 
    
     _cateItemsDataDic = [[NSMutableDictionary alloc] init];
@@ -93,9 +107,11 @@ static const float kItemSize = 10;
     UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
     _commodityViewController = [storyboard instantiateViewControllerWithIdentifier:@"commodityViewController"];
     _sanpinViewController = [storyboard instantiateViewControllerWithIdentifier:@"sanpinViewController"];
-    [self ffScrollViewInit];
-    [self commodityLatout];
-    [self sanpinLayout];
+    
+    
+//    [self ffScrollViewInit];
+//    [self commodityLatout];
+//    [self sanpinLayout];
     NSLog(@"ip:%@",[public getIPAddress:YES]);
     
     [self getCommofityCategaries:nil];
@@ -118,6 +134,73 @@ static const float kItemSize = 10;
     NSLog(@"!!!!!wid=%f，sss=%f",wid,CGRectGetWidth(_ffScrollView.frame));
 
 }
+
+
+- (void)setViewControllers:(NSArray *)viewControllers
+{
+    [viewControllers enumerateObjectsUsingBlock:^(UIViewController *obj, NSUInteger idx, BOOL *stop) {
+        if ([obj.view superview] == self.view) {
+            [obj.view removeFromSuperview];
+        }
+
+        
+        if ([obj parentViewController] == self) {
+            [obj willMoveToParentViewController:nil];
+            [obj removeFromParentViewController];
+
+        }
+        
+        
+    }];
+    
+    _viewControllers = viewControllers;
+    
+    [_viewControllers enumerateObjectsUsingBlock:^(UIViewController *obj, NSUInteger idx, BOOL *stop) {
+        
+            [self addChildViewController:obj];
+            [obj didMoveToParentViewController:self];
+        
+        
+    }];
+
+}
+
+- (void)commodityViewControllersAddChild:(NSUInteger)num
+{
+    NSMutableArray *tmp = [[NSMutableArray alloc] init];
+    
+    
+    for (int j= 0; j<num; j++) {
+        UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+        HSCommodityViewController *commodityViewController = [storyboard instantiateViewControllerWithIdentifier:@"commodityViewController"];
+        
+        if (j == 0) {
+            commodityViewController.isShowBanner = YES;
+        }
+        [tmp addObject:commodityViewController];
+
+    }
+     [self setViewControllers:tmp];
+    
+//    dispatch_queue_t queue=dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+//    dispatch_async(queue, ^{
+//        dispatch_apply(num, queue, ^(size_t index) {
+//            UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+//            HSCommodityViewController *commodityViewController = [storyboard instantiateViewControllerWithIdentifier:@"commodityViewController"];
+//
+//            if (num == 0) {
+//                commodityViewController.isShowBanner = YES;
+//            }
+//            [tmp addObject:commodityViewController];
+//            
+//            dispatch_sync(dispatch_get_main_queue(), ^{
+//                [self setViewControllers:tmp];
+//            });
+//        });
+//    });
+}
+
+
 
 - (void)ffScrollViewInit
 {
@@ -195,13 +278,42 @@ static const float kItemSize = 10;
 #pragma  mark collectionView dataSource and delegate
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
+
     return _categariesArray.count;
+    
 }
 
 
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
+    
+     HSCategariesModel *model = _categariesArray[indexPath.row];
+    if (collectionView == _contentCollectionView) {
+        
+        HSContentCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:kContentCollectionViewIdentifier forIndexPath:indexPath];
+        HSCommodityViewController *commodityVC = _viewControllers[indexPath.row];
+        
+        UIView *subView = [cell.contentView viewWithTag:kContentViewTag];
+        if (subView != nil ) {
+            [subView removeFromSuperview];
+        }
+        UIView *sView = commodityVC.view;
+        sView.tag = kContentViewTag;
+        sView.frame =cell.contentView.bounds;
+        [cell.contentView addSubview:sView];
+        
+        if (indexPath.row == 0) {
+            [commodityVC setBannerImages:_bannerImages];
+        }
+        [commodityVC setItemsData:[_cateItemsDataDic objectForKey:model.id
+                                   ]];
+        
+        
+        return cell;
+    }
+    
+    
     HSCommodityCategaryCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:kCategariesCollectionViewCellIdentifier forIndexPath:indexPath];
     
     if ([indexPath isEqual:_selectedCategary]) {
@@ -211,13 +323,20 @@ static const float kItemSize = 10;
     {
         [cell changeTitleColorAndFont:NO];
     }
-    HSCategariesModel *model = _categariesArray[indexPath.row];
+   
     cell.categaryTitleLabel.text = model.name;
     
     return cell;
 }
 
 
+- (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (collectionView == _contentCollectionView) {
+        return NO;
+    }
+    return YES;
+}
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
     
@@ -230,39 +349,72 @@ static const float kItemSize = 10;
     [collectionView reloadItemsAtIndexPaths:@[indexPath]];
     
     [collectionView scrollToItemAtIndexPath:_selectedCategary atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:YES];
+   [_contentCollectionView scrollToItemAtIndexPath:_selectedCategary atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:YES];
     
     
     BOOL isShow = indexPath.row == 1 ? YES : NO;
     [self sanpinViewShow:isShow];
     
-    if (indexPath.row == 0) {
-        _ffScrollViewHeightConstraint.constant = kFFScrollViewHeight;
-        [self.view updateConstraints];
-        [self.view layoutIfNeeded];
-    }
-    else
-    {
-        _ffScrollViewHeightConstraint.constant = 0;
-        [self.view updateConstraints];
-        [self.view layoutIfNeeded];
-    }
+    
     
     HSCategariesModel *cateModel = _categariesArray[indexPath.row];
-    [self GetItemsWithCid:cateModel.id size:kItemSize key:[public md5Str:[public getIPAddress:YES]] page:1];
+    [self GetItemsWithCid:cateModel.id size:kItemSize key:[public md5Str:[public getIPAddress:YES]] page:1 index:_selectedCategary];
     
 }
 
-//
-//- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
-//{
-//    return CGSizeMake(80, 50);
-//    
-//}
-//
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (collectionView == _contentCollectionView) {
+        
+        NSLog(@"");
+        return _contentCollectionView.frame.size;
+    }
+    
+    return CGSizeMake(70, 40);
+    
+}
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
+{
+    if (scrollView == _contentCollectionView) {
+        
+      
+        int page = _contentCollectionView.contentOffset.x / CGRectGetWidth(_contentCollectionView.frame);
+        
+          NSLog(@"%d",page);
+        NSIndexPath *index = [NSIndexPath indexPathForRow:page inSection:0];
+        if ([index isEqual:_selectedCategary]) {
+            return;
+        }
+        
+        [_topCategariesCollectionView scrollToItemAtIndexPath:index atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:YES];
+        
+        NSIndexPath *tmp = _selectedCategary;
+        _selectedCategary = index;
+        
+        [_topCategariesCollectionView reloadItemsAtIndexPaths:@[tmp,index]];
+        
+        }
+}
+
 //-(UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section
 //{
-//    return UIEdgeInsetsMake(5, 5, 5, 5);
+//    if (collectionView == _contentCollectionView) {
+//        UIEdgeInsetsMake(0, 0, 0, 0);
+//    }
+//    return UIEdgeInsetsMake(0, 0, 0, 0);
 //}
+//- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section
+//{
+//    if (collectionView == _contentCollectionView) {
+//        return 0;
+//    }
+//
+//    return 0;
+//}
+
+
 
 
 
@@ -331,13 +483,14 @@ static const float kItemSize = 10;
                 [tmpArray addObject:model];
                 
                 if (idx == 0) {
-                    [self GetItemsWithCid:model.id size:10 key:[public md5Str:[public getIPAddress:YES]] page:1];
+                    [self GetItemsWithCid:model.id size:10 key:[public md5Str:[public getIPAddress:YES]] page:1 index:_selectedCategary];
                 }
                 
             }];
             _categariesArray = tmpArray;
+            [self commodityViewControllersAddChild:tmpArray.count];
             [_topCategariesCollectionView reloadData];
-            
+            [_contentCollectionView reloadData];
         }
         
         
@@ -398,9 +551,7 @@ static const float kItemSize = 10;
                 
             }];
             _bannerArray = tmpArray;
-            _ffScrollView.sourceArr = tmpBannner;
-            [_ffScrollView iniSubviewsWithFrame:CGRectMake(0, 0,CGRectGetWidth(_ffScrollView.frame), kFFScrollViewHeight)];
-            
+            _bannerImages = tmpBannner;
         }
         
         
@@ -413,7 +564,7 @@ static const float kItemSize = 10;
 }
 
 
-- (void)GetItemsWithCid:(NSString *)cid size:(NSUInteger)size key:(NSString *)key page:(NSUInteger)page
+- (void)GetItemsWithCid:(NSString *)cid size:(NSUInteger)size key:(NSString *)key page:(NSUInteger)page index:(NSIndexPath *)index
 {
     AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
     
@@ -461,7 +612,8 @@ static const float kItemSize = 10;
                 
             }];
             [_cateItemsDataDic setObject:tmpArray forKey:cid];
-            [_commodityViewController setItemsData:tmpArray];
+            //[_contentCollectionView reloadItemsAtIndexPaths:@[index]];
+            [_contentCollectionView reloadData];
            
             
             

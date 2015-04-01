@@ -12,6 +12,8 @@
 #import "HSCommodtyItemModel.h"
 #import "UIImageView+WebCache.h"
 #import "MJRefresh.h"
+#import "FFScrollView.h"
+#import "HSBannerHeaderCollectionReusableView.h"
 
 @interface HSCommodityViewController ()<CHTCollectionViewDelegateWaterfallLayout,
 UICollectionViewDataSource,
@@ -22,8 +24,16 @@ UICollectionViewDelegate>
     NSMutableDictionary *_imageSizeDic;
     
     
+    /// 热销顶部的滚动试图
+    FFScrollView *_ffScrollView;
+    
+    
+    /// 顶部滚动高度约束
+    NSLayoutConstraint *_ffScrollViewHeightConstraint;
+
     
 }
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *commodityTopConstraint;
 
 @property (weak, nonatomic) IBOutlet UICollectionView *commdityCollectionView;
 @end
@@ -33,18 +43,46 @@ UICollectionViewDelegate>
 
 static NSString *const kCommodityCellIndentifier = @"CommodityCellIndentifier";
 
+static NSString *const kHeaderIdentifier = @"bannerHeaderIdentifier";
+
 
 static NSString *const kImageURLKey = @"imageURLKey";
 static NSString *const kImageSizeKey = @"imageSizeKey";
+
+
+static const float kFFScrollViewHeight = 200;
+
+
+- (id)init
+{
+    LogFunc;
+    self = [super init];
+    if (self) {
+        _isShowBanner = NO;
+        
+    }
+    
+    return self;
+    
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
     [_commdityCollectionView registerNib:[UINib nibWithNibName:NSStringFromClass([HSCommodityCollectionViewCell class]) bundle:nil] forCellWithReuseIdentifier:kCommodityCellIndentifier];
+    if (_isShowBanner)
+    {
+        //注册headerView Nib的view需要继承UICollectionReusableView
+        [_commdityCollectionView registerNib:[UINib nibWithNibName:NSStringFromClass([HSBannerHeaderCollectionReusableView class]) bundle:nil] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:kHeaderIdentifier];
+    }
+
+    
     
     _commdityCollectionView.dataSource = self;
     _commdityCollectionView.delegate = self;
+    
+    
     
     CHTCollectionViewWaterfallLayout *layout = [[CHTCollectionViewWaterfallLayout alloc] init];
     
@@ -82,25 +120,63 @@ static NSString *const kImageSizeKey = @"imageSizeKey";
 }
 
 #pragma mark 瀑布流
-/*
+
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    [self updateLayoutForOrientation:[UIApplication sharedApplication].statusBarOrientation];
+    LogFunc;
+    [_commdityCollectionView reloadData];
+//    [self updateLayoutForOrientation:[UIApplication sharedApplication].statusBarOrientation];
 }
 
-- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
-    [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
-    [self updateLayoutForOrientation:toInterfaceOrientation];
+//- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
+//    [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
+//    [self updateLayoutForOrientation:toInterfaceOrientation];
+//}
+//
+//
+//
+//- (void)updateLayoutForOrientation:(UIInterfaceOrientation)orientation {
+//    CHTCollectionViewWaterfallLayout *layout =
+//    (CHTCollectionViewWaterfallLayout *)_commdityCollectionView.collectionViewLayout;
+//    layout.columnCount = UIInterfaceOrientationIsPortrait(orientation) ? 2 : 3;
+//}
+
+
+- (void)ffScrollViewInitWithSubView:(UIView *)spView
+{
+    if (_ffScrollView != nil && [_ffScrollView superview] == spView) {
+        return;
+    }
+    
+    _ffScrollView = [[FFScrollView alloc] initWithFrame:CGRectZero];
+    
+    [spView addSubview:_ffScrollView];
+    _ffScrollView.translatesAutoresizingMaskIntoConstraints = NO;
+    NSString *vfl1 = @"H:|[_ffScrollView]|";
+    NSString *vfl2 = @"V:|[_ffScrollView]";
+    NSDictionary *dic = NSDictionaryOfVariableBindings(_ffScrollView,spView);
+    NSArray *arr1 = [NSLayoutConstraint constraintsWithVisualFormat:vfl1 options:0 metrics:nil views:dic];
+    NSArray *arr2 = [NSLayoutConstraint constraintsWithVisualFormat:vfl2 options:0 metrics:nil views:dic];
+    
+    _ffScrollViewHeightConstraint  = [NSLayoutConstraint constraintWithItem:_ffScrollView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:kFFScrollViewHeight];
+    [spView addConstraints:arr1];
+    [spView addConstraints:arr2];
+    [spView addConstraint:_ffScrollViewHeightConstraint];
+    
+    
 }
 
-
-
-- (void)updateLayoutForOrientation:(UIInterfaceOrientation)orientation {
-    CHTCollectionViewWaterfallLayout *layout =
-    (CHTCollectionViewWaterfallLayout *)_commdityCollectionView.collectionViewLayout;
-    layout.columnCount = UIInterfaceOrientationIsPortrait(orientation) ? 2 : 3;
+- (void)setBannerImages:(NSArray *)images
+{
+    if (!_isShowBanner) {
+        return;
+    }
+    
+    _ffScrollView.sourceArr = images;
+   
+    [_ffScrollView iniSubviewsWithFrame:CGRectMake(0, 0,CGRectGetWidth(_ffScrollView.frame), kFFScrollViewHeight)];
 }
-*/
+
 
 
 - (void)didReceiveMemoryWarning {
@@ -210,7 +286,57 @@ static NSString *const kImageSizeKey = @"imageSizeKey";
 
 }
 
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
+{
+    return 1;
+    
+}
 
+- (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+{
+    NSString *reuseIdentifier;
+    if ([kind isEqualToString: UICollectionElementKindSectionHeader ] && _isShowBanner){
+        reuseIdentifier = kHeaderIdentifier;
+        HSBannerHeaderCollectionReusableView *view =  [collectionView dequeueReusableSupplementaryViewOfKind :kind   withReuseIdentifier:reuseIdentifier   forIndexPath:indexPath];
+        [self ffScrollViewInitWithSubView:view];
+        return view;
+
+    }else{
+        
+        return nil;
+    }
+    
+//    UICollectionReusableView *view =  [collectionView dequeueReusableSupplementaryViewOfKind :kind   withReuseIdentifier:reuseIdentifier   forIndexPath:indexPath];
+//    
+//    UILabel *label = (UILabel *)[view viewWithTag:1];
+//    if ([kind isEqualToString:UICollectionElementKindSectionHeader]){
+//        label.text = [NSString stringWithFormat:@"这是header:%d",indexPath.section];
+//    }
+//    else if ([kind isEqualToString:UICollectionElementKindSectionFooter]){
+//        view.backgroundColor = [UIColor lightGrayColor];
+//        label.text = [NSString stringWithFormat:@"这是footer:%d",indexPath.section];
+//    }
+//    return view;
+}
+
+////返回头footerView的大小
+//- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section
+//{
+//    CGSize size={320,45};
+//    return size;
+//}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section
+{
+    if (_isShowBanner) {
+        CGSize size = CGSizeMake(CGRectGetWidth(_commdityCollectionView.frame), kFFScrollViewHeight);
+        return size;
+    }
+//    CGSize size={320,45};
+    return CGSizeZero;
+}
+
+ 
 
 
 

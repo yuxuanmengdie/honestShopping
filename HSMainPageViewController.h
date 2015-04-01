@@ -10,4 +10,6 @@
 
 @interface HSMainPageViewController : UIViewController
 
+@property (strong, nonatomic) NSArray *viewControllers;
+
 @end

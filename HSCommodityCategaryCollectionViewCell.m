@@ -17,7 +17,7 @@
 
 - (void)changeTitleColorAndFont:(BOOL)isSelected
 {
-//    [UIView animateWithDuration:0.25 animations:^{
+ //   [UIView animateWithDuration:1.0 animations:^{
     
         
         if (isSelected) {//选中状态

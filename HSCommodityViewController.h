@@ -10,8 +10,15 @@
 
 @interface HSCommodityViewController : UIViewController
 
+/// 是否显示banner
+@property (assign, nonatomic) BOOL isShowBanner;
+
 
 /// 设置数据源
 - (void)setItemsData:(NSArray *)itemsData;
+
+
+/// 设置banner数据源
+- (void)setBannerImages:(NSArray *)images;
 
 @end
