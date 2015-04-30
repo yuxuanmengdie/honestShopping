@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface HSMainPageViewController : UIViewController
+@interface HSMainPageViewController : HSBaseViewController
 
 @property (strong, nonatomic) NSArray *viewControllers;
 

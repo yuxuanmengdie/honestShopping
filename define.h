@@ -116,4 +116,11 @@ static NSString *const kBannerImageHeaderURL = @"http://203.192.7.23/data/upload
 /// 普通图片路径
 static NSString *const kImageHeaderURL = @"http://203.192.7.23/data/upload/item/";
 
+
+#pragma mark -
+#pragma mark userdefault中保存用户是否登录 的key
+static NSString *const kUserIsLoginKey = @"HS_kUserIsLoginKey";
+/// 保存到用户信息保存到doc 的plist文件
+static NSString *const kUserInfoPlistName = @"HSuser";
+
 #endif

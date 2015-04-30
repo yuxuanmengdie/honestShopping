@@ -9,6 +9,7 @@
 #import "HSMainViewController.h"
 #import "define.h"
 #import "HSIntroViewController.h"
+#import "HSLoginInViewController.h"
 
 @interface HSMainViewController ()
 {
@@ -22,9 +23,11 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    
+    self.navigationController.navigationBarHidden = YES;
     self.title = @"放心吃";
-    
+    self.tabBar.selectedImageTintColor =  kAPPTintColor;
+    self.tabBar.translucent = NO;
+//    [self.tabBarItem setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIColor redColor],NSForegroundColorAttributeName, nil] forState:UIControlStateNormal];
     
     UIBarButtonItem *rightItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(rightNavItemAction)];
     self.navigationItem.rightBarButtonItem = rightItem;
@@ -51,6 +54,9 @@
     tabBarItem1.image = [oriImg imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
     tabBarItem1.enabled = YES;
 
+    [self.tabBar.items enumerateObjectsUsingBlock:^(UITabBarItem *barItem, NSUInteger idx, BOOL *stop) {
+        [barItem setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIColor redColor],NSForegroundColorAttributeName, nil] forState:UIControlStateNormal];
+    }];
 
     
 //    UIView *customView = [[UIView alloc] init];
@@ -107,14 +113,17 @@
 }
 
 
-//- (void)tabBar:(UITabBar *)tabBar didSelectItem:(UITabBarItem *)item
-//{
-//
-//    UITabBarItem *tabBarItem1 = [self.tabBar.items objectAtIndex:2];
-//    if (item == tabBarItem1) {
-//        return;
-//    }
-//}
+- (void)tabBar:(UITabBar *)tabBar didSelectItem:(UITabBarItem *)item
+{
+
+    UITabBarItem *tabBarItem1 = [self.tabBar.items objectAtIndex:2];
+    if (item == tabBarItem1) {
+        UIStoryboard *story = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+        HSLoginInViewController *loginVC = [story instantiateViewControllerWithIdentifier:NSStringFromClass([HSLoginInViewController class])];
+        [self.navigationController pushViewController:loginVC animated:YES];
+        return;
+    }
+}
 
 
 @end

@@ -1,16 +1,14 @@
 //
-//  HSCommodtyItemModel.h
+//  HSCommodityItemDetailPicModel.h
 //  honestShopping
 //
-//  Created by 张国俗 on 15-3-27.
+//  Created by 张国俗 on 15-4-24.
 //  Copyright (c) 2015年 张国俗. All rights reserved.
 //
 
 #import "JSONModel.h"
 
-
-@interface HSCommodtyItemModel : JSONModel
-
+@interface HSCommodityItemDetailPicModel : JSONModel
 
 @property (copy, nonatomic) NSString *id;
 @property (copy, nonatomic) NSString *cate_id;
@@ -27,7 +25,7 @@
 @property (copy, nonatomic) NSString *ordid;
 @property (copy, nonatomic) NSString *status;
 @property (copy, nonatomic) NSString *info;
-@property (strong, nonatomic) NSString *tuwen; ///详细内容都是图片
+@property (strong, nonatomic) NSArray *tuwen; ///详细内容都是图片
 @property (copy, nonatomic) NSString *news;
 @property (copy, nonatomic) NSString *tuijian;
 @property (copy, nonatomic) NSString *goods_stock;
@@ -53,60 +51,23 @@
 
 @end
 
-
 /*
-
-
-
- "id":"155",
- "cate_id":"352",
- "orig_id":"0",
- "title":"\u5f52\u6765\u516e\u7ea2\u82b1\u9999\u7c73",
- "intro":"\u65b0\u534e\u793e\u4e3a\u519c\u670d\u52a1\u8bda\u4fe1\u5e73\u53f0\u4e3a\u4f60\u8bda\u610f\u63a8\u8350\r\n",
- "img":"1407\/01\/53b23b659d5e3.png",
- "price":"200.00",
- "rates":"0.00",
- "type":"1",
- "comments":"0",
- "cmt_taobao_time":"0",
- "add_time":"1404189543",
- "ordid":"255",
- "status":"1",
- "info":"",
- "news":"0",
- "tuwen":[
- ".\/data\/upload\/editer\/image\/2014\/10\/31\/545330876fae1.png",
- ".\/data\/upload\/editer\/image\/2014\/10\/31\/54533087cc847.png",
- ".\/data\/upload\/editer\/image\/2014\/10\/31\/5453308843b6b.png",
- ".\/data\/upload\/editer\/image\/2014\/10\/31\/54533088b63d2.png",
- ".\/data\/upload\/editer\/image\/2014\/10\/31\/54533089be4d7.png",
- ".\/data\/upload\/editer\/image\/2014\/10\/31\/54533089eed3d.png",
- ".\/data\/upload\/editer\/image\/2014\/10\/31\/5453308ac2003.png",
- ".\/data\/upload\/editer\/image\/2014\/10\/31\/5453308bb29ea.jpg"
- ],
- "tuijian":"0",
- "goods_stock":"1000",
- "buy_num":"12",
- "brand":"2",
- "pingyou":"0.00",
- "kuaidi":"0.00",
- "ems":"0.00",
- "free":"1",
- "color":null,
- "size":null,
- "maxbuy":"10",
- "ischeck":"2",
- "standard":"10\u65a4\/\u888b",
- "tuan":"0",
- "tuan_price":"0.00",
- "tuan_time":"0",
- "maill_price":"0",
- "ordernum":"70",
- "likes":"1813",
- "banner":[
- "1410\/31\/545330b1ebc41.png",
- "1410\/31\/545330b0ec708.png"
- ]
+ {
+ "add_time" = 0;
+ "board_id" = 1;
+ clicks = 0;
+ content = "1503/27/5514c5054542b.jpg";
+ desc = 390;
+ "end_time" = 1448899200;
+ extimg = "";
+ extval = "";
+ id = 16;
+ name = "\U7eff\U73e0";
+ ordid = 3;
+ "start_time" = 1417363200;
+ status = 1;
+ type = image;
+ url = "http://ecommerce.news.cn/index.php?m=Item&a=index&cid=363&id=390";
  },
-
-*/
+ 
+ */

@@ -126,6 +126,15 @@
     
 }
 
++ (BOOL)addSkipBackupAttributeDoc
+{
+    NSString *doc = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
+    NSURL *URL = [NSURL fileURLWithPath:doc];
+    NSError *error = nil;
+    BOOL success = [URL setResourceValue:[NSNumber numberWithBool:YES] forKey:NSURLIsExcludedFromBackupKey error:&error];
+    return success;
+}
+
 
 #pragma mark 判断是否是邮箱
 + (BOOL)isEmaliRegex:(NSString *)email
@@ -134,6 +143,15 @@
     NSPredicate *pred = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", red];
     BOOL isMatch = [pred evaluateWithObject:email];
     return isMatch;
+}
+
++ (BOOL)isPhoneNumberRegex:(NSString *)phone
+{
+    //手机号以13， 15，18开头，八个 \d 数字字符
+    NSString *phoneRegex = @"^((13[0-9])|(15[^4,\\D])|(18[0,0-9]))\\d{8}$";
+    NSPredicate *phoneTest = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",phoneRegex];
+    //    NSLog(@"phoneTest is %@",phoneTest);
+    return [phoneTest evaluateWithObject:phone];
 }
 
 
@@ -238,4 +256,22 @@
     return nil;
 }
 
+#pragma mark  -
+#pragma mark 保存用户信息
++ (void)saveUserInfoToPlist:(NSDictionary *)userDic
+{
+    NSString *doc = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
+    NSString *path = [doc stringByAppendingString:[NSString stringWithFormat:@"%@.plist",kUserInfoPlistName]];
+    [userDic writeToFile:path atomically:YES];
+}
+
+/// 取出用户信息
++ (NSDictionary *)userInfoFromPlist
+{
+    NSString *doc = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
+    NSString *path = [doc stringByAppendingString:[NSString stringWithFormat:@"%@.plist",kUserInfoPlistName]];
+
+    NSDictionary *dic = [[NSDictionary alloc] initWithContentsOfFile:path];
+    return dic;
+}
 @end

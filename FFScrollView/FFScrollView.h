@@ -31,6 +31,9 @@ typedef enum
 @property(strong,nonatomic) UIPageControl *pageControl;
 @property(assign,nonatomic) FFScrollViewSelecttionType selectionType;
 @property(assign,nonatomic) id <FFScrollViewDelegate> pageViewDelegate;
+
+/// 默认UIViewContentModeScaleToFill
+@property (nonatomic) UIViewContentMode imageContentMode;
 - (id)initPageViewWithFrame:(CGRect)frame views:(NSArray *)views;
 
 -(void)iniSubviewsWithFrame:(CGRect)frame;

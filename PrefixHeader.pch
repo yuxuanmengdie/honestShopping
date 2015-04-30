@@ -21,15 +21,19 @@
 #import "public.h"
 #import "define.h"
 #import "header.h"
+#import "HSBaseViewController.h"
 
 /// 服务器地址
 #define kURLHeader @"http://221.226.28.42/wsc"
+
+/// 商品详细介绍的图片
+#define kCommodityImgURLHeader @"http://203.192.7.23"
 
 
 /// 保存的版本
 #define kAPPCurrentVersion @"currentVersion"
 
-#define kAPPTintColor [UIColor greenColor]
+#define kAPPTintColor [UIColor colorWithRed:39/255.0 green:147/255.0 blue:68/255.0 alpha:1.0]
 
 #endif
 

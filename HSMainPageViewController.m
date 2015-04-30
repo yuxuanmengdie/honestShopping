@@ -19,12 +19,14 @@
 #import "HSItemPageModel.h"
 #import "HSCommodtyItemModel.h"
 #import "HSContentCollectionViewCell.h"
+#import "HSCommodityDetailViewController.h"
 
 
 @interface HSMainPageViewController ()<
 UICollectionViewDataSource,
 UICollectionViewDelegate,
-UICollectionViewDelegateFlowLayout>
+UICollectionViewDelegateFlowLayout,
+UISearchBarDelegate>
 {
     /// 类别数组
     NSArray *_categariesArray;
@@ -83,7 +85,10 @@ static const int kContentViewTag = 1000;
         
         [self setEdgesForExtendedLayout:UIRectEdgeNone];
     }
-
+    
+    [self setUpNavBar];
+    //[self.navigationController.navigationBar setBarTintColor:kAPPTintColor];
+    
     
     [_topCategariesCollectionView registerNib:[UINib nibWithNibName:NSStringFromClass([HSCommodityCategaryCollectionViewCell class]) bundle:nil] forCellWithReuseIdentifier:kCategariesCollectionViewCellIdentifier];
     _topCategariesCollectionView.delegate = self;
@@ -94,10 +99,10 @@ static const int kContentViewTag = 1000;
     _contentCollectionView.delegate = self;
     _contentCollectionView.dataSource = self;
     _contentCollectionView.pagingEnabled = YES;
-    
-
+    _contentCollectionView.showsHorizontalScrollIndicator = NO;
+    _contentCollectionView.showsVerticalScrollIndicator = NO;
    
-    _cateItemsDataDic = [[NSMutableDictionary alloc] init];
+      _cateItemsDataDic = [[NSMutableDictionary alloc] init];
     
     
 //    _categariesArray = @[@"热销",@"三品一标",@"果蔬",@"禽蛋",@"粮油",@"养生",@"干货",@"茶叶",@"特产"];
@@ -107,20 +112,10 @@ static const int kContentViewTag = 1000;
     UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
     _commodityViewController = [storyboard instantiateViewControllerWithIdentifier:@"commodityViewController"];
     _sanpinViewController = [storyboard instantiateViewControllerWithIdentifier:@"sanpinViewController"];
-    
-    
-//    [self ffScrollViewInit];
-//    [self commodityLatout];
-//    [self sanpinLayout];
-    NSLog(@"ip:%@",[public getIPAddress:YES]);
+      NSLog(@"ip:%@",[public getIPAddress:YES]);
     
     [self getCommofityCategaries:nil];
     [self getBannerImages];
-    
-    
-       
-
-    
     
 }
 
@@ -133,6 +128,25 @@ static const int kContentViewTag = 1000;
     float wid = [_ffScrollView systemLayoutSizeFittingSize:UILayoutFittingCompressedSize].width;
     NSLog(@"!!!!!wid=%f，sss=%f",wid,CGRectGetWidth(_ffScrollView.frame));
 
+}
+
+
+#pragma mark -
+#pragma mark 导航栏
+- (void)setUpNavBar
+{
+    UISearchBar *searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.view.frame) - 160, 30)]; //
+    searchBar.showsCancelButton = NO;
+    searchBar.delegate = self;
+    searchBar.tintColor = kAPPTintColor;
+    UIBarButtonItem *barItem = [[UIBarButtonItem alloc] initWithCustomView:searchBar];
+    self.navigationItem.rightBarButtonItem = barItem;
+    
+    UIImageView *imgView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 100, 30)];
+    imgView.backgroundColor = [UIColor redColor];
+    UIBarButtonItem *leftItem = [[UIBarButtonItem alloc] initWithCustomView:imgView];
+    self.navigationItem.leftBarButtonItem = leftItem;
+    
 }
 
 
@@ -218,8 +232,6 @@ static const int kContentViewTag = 1000;
     [self.view addConstraints:arr1];
     [self.view addConstraints:arr2];
     [self.view addConstraint:_ffScrollViewHeightConstraint];
-
-    
 }
 
 
@@ -304,10 +316,21 @@ static const int kContentViewTag = 1000;
         [cell.contentView addSubview:sView];
         
         if (indexPath.row == 0) {
+            commodityVC.isShowBanner = YES;
             [commodityVC setBannerImages:_bannerImages];
         }
         [commodityVC setItemsData:[_cateItemsDataDic objectForKey:model.id
                                    ]];
+        
+        ///push 到商品详情
+        __weak typeof(self) wself = self;
+        commodityVC.cellSelectedBlock = ^(HSCommodtyItemModel *itemModel){
+            UIStoryboard *storyBorad = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+            HSCommodityDetailViewController *detailVC = [storyBorad instantiateViewControllerWithIdentifier:NSStringFromClass([HSCommodityDetailViewController class])];
+            //detailVC.hidesBottomBarWhenPushed = YES;
+            detailVC.itemModel = itemModel;
+            [wself.navigationController pushViewController:detailVC animated:YES];
+        };
         
         
         return cell;
@@ -435,7 +458,7 @@ static const int kContentViewTag = 1000;
     }
 }
 
-
+#pragma mark -
 #pragma mark 获取数据
 
 - (void)getCommofityCategaries:(NSString *)key
@@ -501,7 +524,7 @@ static const int kContentViewTag = 1000;
 
 }
 
-
+#pragma mark -
 #pragma mark 获取banner 图片
 - (void)getBannerImages
 {
@@ -569,6 +592,7 @@ static const int kContentViewTag = 1000;
     AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
     
     
+     //{"id":155,"key":"f528764d624db129b32c21fbca0cb8d6"}
     NSDictionary *parametersDic = @{kPostJsonKey:key,
                                     kPostJsonCid:[NSNumber numberWithLongLong:[cid longLongValue]],
                                     kPostJsonSize:[NSNumber numberWithInteger:size],
@@ -620,13 +644,23 @@ static const int kContentViewTag = 1000;
         }
         
         
-        
-        
-        
     }];
 
     
 }
 
+#pragma mark - 
+#pragma mark searchBar delegate
+- (BOOL)searchBarShouldBeginEditing:(UISearchBar *)searchBar
+{
+    NSLog(@"%s",__func__);
+    return NO;
+}
+
+
+- (void)searchBarTextDidBeginEditing:(UISearchBar *)searchBar
+{
+   
+}
 
 @end

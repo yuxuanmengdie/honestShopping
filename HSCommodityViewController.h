@@ -7,6 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "HSCommodtyItemModel.h"
+
+typedef void(^HSCommodityCollectionCellSelectedBlock)(HSCommodtyItemModel *itemModel);
 
 @interface HSCommodityViewController : UIViewController
 
@@ -20,5 +23,8 @@
 
 /// 设置banner数据源
 - (void)setBannerImages:(NSArray *)images;
+
+/// 点击单个cell的block
+@property (nonatomic, copy) HSCommodityCollectionCellSelectedBlock cellSelectedBlock;
 
 @end

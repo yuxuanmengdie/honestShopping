@@ -8,6 +8,11 @@
 
 #import <UIKit/UIKit.h>
 
-@interface HSCommodityDetailViewController : UIViewController
+#import "HSCommodtyItemModel.h"
+
+@interface HSCommodityDetailViewController : HSBaseViewController
+
+
+@property (nonatomic, strong)  HSCommodtyItemModel *itemModel;
 
 @end

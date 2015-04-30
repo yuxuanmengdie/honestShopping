@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "PKYStepper.h"
 @class PKYStepper;
 
 /// 购买的block

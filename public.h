@@ -22,9 +22,14 @@
 
 //添加不要云备份属性。
 + (BOOL)addSkipBAckupAttributeItemAtURL:(NSURL *)URL;
+/// doc 添加不要保存云备份
++ (BOOL)addSkipBackupAttributeDoc;
 
 ///判断是否为邮箱格式
 + (BOOL)isEmaliRegex:(NSString *)email;
+
+//判断是否为手机号码
++ (BOOL)isPhoneNumberRegex:(NSString *)phone;
 
 ///返回 md5
 + (NSString *)md5Str:(NSString *)oriStr;
@@ -37,4 +42,11 @@
 
 /// 字典转str
 + (NSString*)dictionaryToJson:(NSDictionary *)dic;
+
+/// 保存用户信息到plist文件中
++ (void)saveUserInfoToPlist:(NSDictionary *)userDic;
+
+/// 取出用户信息
++ (NSDictionary *)userInfoFromPlist;
+
 @end

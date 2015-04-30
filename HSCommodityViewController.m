@@ -14,6 +14,7 @@
 #import "MJRefresh.h"
 #import "FFScrollView.h"
 #import "HSBannerHeaderCollectionReusableView.h"
+#import "HSCommodityDetailViewController.h"
 
 @interface HSCommodityViewController ()<CHTCollectionViewDelegateWaterfallLayout,
 UICollectionViewDataSource,
@@ -23,10 +24,8 @@ UICollectionViewDelegate>
     
     NSMutableDictionary *_imageSizeDic;
     
-    
     /// 热销顶部的滚动试图
     FFScrollView *_ffScrollView;
-    
     
     /// 顶部滚动高度约束
     NSLayoutConstraint *_ffScrollViewHeightConstraint;
@@ -81,8 +80,6 @@ static const float kFFScrollViewHeight = 200;
     
     _commdityCollectionView.dataSource = self;
     _commdityCollectionView.delegate = self;
-    
-    
     
     CHTCollectionViewWaterfallLayout *layout = [[CHTCollectionViewWaterfallLayout alloc] init];
     
@@ -171,7 +168,6 @@ static const float kFFScrollViewHeight = 200;
     if (!_isShowBanner) {
         return;
     }
-    
     _ffScrollView.sourceArr = images;
    
     [_ffScrollView iniSubviewsWithFrame:CGRectMake(0, 0,CGRectGetWidth(_ffScrollView.frame), kFFScrollViewHeight)];
@@ -282,7 +278,7 @@ static const float kFFScrollViewHeight = 200;
         return CGSizeMake(sizeValue.CGSizeValue.width, sizeValue.CGSizeValue.height);
     }
     
-    return CGSizeMake(0, 0);
+    return CGSizeMake(80, 80);
 
 }
 
@@ -332,12 +328,24 @@ static const float kFFScrollViewHeight = 200;
         CGSize size = CGSizeMake(CGRectGetWidth(_commdityCollectionView.frame), kFFScrollViewHeight);
         return size;
     }
-//    CGSize size={320,45};
-    return CGSizeZero;
+    
+    return  CGSizeMake(80, 80);// CGSizeZero;
 }
 
  
-
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    [collectionView deselectItemAtIndexPath:indexPath animated:YES];
+    
+    HSCommodtyItemModel *itemModel = _itemsData[indexPath.row];
+    
+    /// 点击后委托父控制器push
+    if (self.cellSelectedBlock) {
+        self.cellSelectedBlock(itemModel);
+    }
+    
+    
+}
 
 
 @end

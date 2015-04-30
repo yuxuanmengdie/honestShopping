@@ -24,6 +24,7 @@ static const float kTimerInterval = 5.0;
     self = [super initWithFrame:frame];
     if (self) {
         selectionType = FFScrollViewSelecttionTypeTap;
+        _imageContentMode = UIViewContentModeScaleToFill;
     }
     return self;
 }
@@ -43,6 +44,11 @@ static const float kTimerInterval = 5.0;
 
 -(void)iniSubviewsWithFrame:(CGRect)frame
 {
+    if (sourceArr.count < 1) {
+        return;
+    }
+    
+    
     CGFloat width = frame.size.width;
     CGFloat height = frame.size.height;
     CGRect fitRect = CGRectMake(0, 0, width, height);
@@ -62,6 +68,7 @@ static const float kTimerInterval = 5.0;
     
     for (int i = 0; i < sourceArr.count; i++) {
         UIImageView *imageview = [[UIImageView alloc]initWithFrame:CGRectMake(width*(i+1), 0, width, height)];
+        imageview.contentMode = _imageContentMode;
         NSString *model = [sourceArr objectAtIndex:i];
         [imageview sd_setImageWithURL:[NSURL URLWithString:model]];
 //       imageview.image = [UIImage imageNamed:model.img];
@@ -109,7 +116,7 @@ static const float kTimerInterval = 5.0;
     else {
         self.pageControl.currentPage = currentPage-1;
     }
-    int currPageNumber = self.pageControl.currentPage;
+    int currPageNumber = (int)self.pageControl.currentPage;
     CGSize viewSize = self.scrollView.frame.size;
     CGRect rect = CGRectMake((currPageNumber+2)*pageWidth, 0, viewSize.width, viewSize.height);
     [self.scrollView scrollRectToVisible:rect animated:YES];
@@ -176,7 +183,9 @@ static const float kTimerInterval = 5.0;
 
 - (void)dealloc
 {
-    
+    if ([timer isValid]) {
+        [timer invalidate];
+    }
 }
 
 

@@ -27,14 +27,20 @@
     [_stepper setValueChangedCallback:^(PKYStepper *stepper, float newValue){
         weakStepper.countLabel.text = [NSString stringWithFormat:@"%d",(int)newValue];
     }];
+    [_stepper setBorderColor:kAPPTintColor];
+    [_stepper setLabelTextColor:kAPPTintColor];
+    [_stepper setButtonTextColor:kAPPTintColor forState:UIControlStateNormal];
     [_stepper setup];
     
     [_buyBtn setTitle:@"立刻购买" forState:UIControlStateNormal];
     [_buyBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [_buyBtn setBackgroundImage:[public ImageWithColor:[UIColor yellowColor]] forState:UIControlStateNormal];
-    
+    [_buyBtn setBackgroundImage:[public ImageWithColor:ColorRGB(253, 169, 10)] forState:UIControlStateNormal];
     _buyBtn.layer.masksToBounds = YES;
     _buyBtn.layer.cornerRadius = 5.0;
+    
+    [_collectBtn setTitle:@"" forState:UIControlStateNormal];
+    [_collectBtn setImage:[UIImage imageNamed:@"icon_star_full"] forState:UIControlStateSelected];
+    [_collectBtn setImage:[UIImage imageNamed:@"icon_star_grey"] forState:UIControlStateNormal];
 }
 
 
