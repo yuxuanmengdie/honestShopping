@@ -184,11 +184,35 @@ static const int kShowMsgLoadingTag = 5002;
     //hud.animationType = MBProgressHUDAnimationZoomOut;// | MBProgressHUDAnimationZoomIn;
     hud.removeFromSuperViewOnHide = YES;
     [hud show:YES];
+    
 }
+
+- (void)showHudInWindowWithText:(NSString *)text
+{
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:[UIApplication sharedApplication].keyWindow animated:YES];
+    hud.mode = MBProgressHUDModeText;
+    hud.alpha = 0.9;
+    hud.labelText = text;
+    hud.margin = 10.f;
+    hud.yOffset = 150;
+    hud.animationType = MBProgressHUDAnimationZoomOut;// | MBProgressHUDAnimationZoomIn;
+    hud.removeFromSuperViewOnHide = YES;
+    [hud hide:YES afterDelay:2.0];
+}
+
 
 - (void)hiddenHudLoading
 {
     [_loadingHud hide:YES];
+}
+
+#pragma mark -
+#pragma mark push VC
+- (void)pushViewControllerWithIdentifer:(NSString *)identifier
+{
+    UIStoryboard *stroyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    UIViewController *vc = [stroyBoard instantiateViewControllerWithIdentifier:identifier];
+    [self.navigationController pushViewController:vc animated:YES];
 }
 
 #pragma mark -

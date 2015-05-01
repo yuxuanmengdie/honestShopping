@@ -9,7 +9,7 @@
 #ifndef honestShopping_define_h
 #define honestShopping_define_h
 
-
+#pragma mark -
 #pragma mark json 中key的宏定义
 ///JsonArray
 static NSString *const kJsonArray = @"JsonArray";
@@ -69,16 +69,24 @@ static NSString *const kPostJsonPage = @"page";
 
 static NSString *const kPostJsonSize = @"size";
 
+static NSString *const kPostJsonCode = @"code";
 
 
 
 
 
+#pragma mark -
 #pragma mark 请求url
 /// 注册
 #define kRegisterURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=register"]
 /// 登录
 #define kLoginURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=login"]
+///获取手机验证码
+#define kGetVerifyCodeURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=getVerifyCode"]
+/// 验证手机验证码
+#define kVerifyCodeURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=verifyCode"]
+/// 密码设置 找回
+#define kSetPasswordURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=setPassword"]
 /// 用户信息
 #define kGetUserInfoURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=getUserInfo"]
 /// 个人信息更新

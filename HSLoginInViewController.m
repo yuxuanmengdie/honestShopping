@@ -9,10 +9,13 @@
 #import "HSLoginInViewController.h"
 #import "UIView+HSLayout.h"
 #import "HSUserInfoModel.h"
+#import "HSRegisterViewController.h"
 
 @interface HSLoginInViewController ()<UITextFieldDelegate>
 {
     HSUserInfoModel *_userInfoModel;
+    
+    HSRegisterViewController *_registerViewController;
 }
 
 @property (weak, nonatomic) IBOutlet UIImageView *iconImageView;
@@ -45,12 +48,14 @@ static NSString *const kRemeberPWNormalImageName = @"icon_activity";
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    self.title = @"登 录";
-    [self setNavBarRightBarWithTitle:@"去注册" action:@selector(accoutRegister)];
+    self.title = @"登录";
+    [self setNavBarRightBarWithTitle:@"注册" action:@selector(accoutRegister)];
     self.navigationController.navigationBarHidden = NO;
     [self buttonStyle];
     [self leftViewWithTextFiled:_userNameTextField imgName:kUserImageName];
     [self leftViewWithTextFiled:_passWordTextFiled imgName:kPassWordImageName];
+    NSDictionary *userInfo = [public userInfoFromPlist];
+    NSLog(@"userInfo=%@",userInfo);
 }
 
 - (void)didReceiveMemoryWarning {
@@ -63,7 +68,23 @@ static NSString *const kRemeberPWNormalImageName = @"icon_activity";
 #pragma mark 注册
 - (void)accoutRegister
 {
+    [self SetUpregisterVC];
+    _registerViewController.title = @"注册";
+    _registerViewController.isRegister = YES;
+}
+
+- (void)SetUpregisterVC
+{
+    UIStoryboard *stroyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    _registerViewController = [stroyBoard instantiateViewControllerWithIdentifier:NSStringFromClass([HSRegisterViewController class])];
+    [self.navigationController pushViewController:_registerViewController animated:YES];
     
+    __weak typeof(self) wself = self;
+    _registerViewController.registerSuccessBlock = ^(NSString *userName, NSString *password){
+        [wself loginRequest:userName password:password];
+    };
+    
+
 }
 
 #pragma mark -
@@ -102,7 +123,7 @@ static NSString *const kRemeberPWNormalImageName = @"icon_activity";
     [_findPWButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     [_findPWButton setImage:[UIImage imageNamed:kPassWordImageName] forState:UIControlStateNormal];
     
-    [_commitButton setTitle:@"登 录" forState:UIControlStateNormal];
+    [_commitButton setTitle:@"登录" forState:UIControlStateNormal];
     [_commitButton setBackgroundImage:[public ImageWithColor:kAPPTintColor] forState:UIControlStateNormal];
     _commitButton.layer.masksToBounds = YES;
     _commitButton.layer.cornerRadius = 5.0;
@@ -126,6 +147,9 @@ static NSString *const kRemeberPWNormalImageName = @"icon_activity";
 }
 
 - (IBAction)findPWAction:(id)sender {
+    [self SetUpregisterVC];
+    _registerViewController.title = @"找回密码";
+    _registerViewController.isRegister = NO;
 }
 
 - (IBAction)commitAction:(id)sender {
@@ -135,22 +159,23 @@ static NSString *const kRemeberPWNormalImageName = @"icon_activity";
         return;
     }
     
-    [self loginRequest];
+    [self loginRequest:_userNameTextField.text password:_passWordTextFiled.text];
 }
 
 #pragma mark -
 #pragma mark 登录请求
-- (void)loginRequest
+- (void)loginRequest:(NSString *)userName password:(NSString *)passWord
 {
-    [self showhudLoadingWithText:nil isDimBackground:YES];
+    [self showhudLoadingWithText:@"正在登录..." isDimBackground:YES];
     NSDictionary *parametersDic = @{kPostJsonKey:[public getIPAddress:YES],
-                                    kPostJsonUserName:_userNameTextField.text,
-                                    kPostJsonPassWord:_passWordTextFiled.text
+                                    kPostJsonUserName:userName,
+                                    kPostJsonPassWord:passWord
                                     };
     // 142346261  123456
     
     [self.httpRequestOperationManager POST:kLoginURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         NSLog(@"success\n%@",operation.responseString);
+        [self showHudWithText:@"登录失败"];
         [self hiddenHudLoading];
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
@@ -166,7 +191,9 @@ static NSString *const kRemeberPWNormalImageName = @"icon_activity";
             
             _userInfoModel = [[HSUserInfoModel alloc] initWithDictionary:json error:nil];
             if (_userInfoModel.id.length > 0) { /// 登录后返回有数据
-                
+                [self showHudInWindowWithText:@"登录成功"];
+                [public saveUserInfoToPlist:[_userInfoModel toDictionary]];
+                [self backAction:nil];
             }
         }
         else

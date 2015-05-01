@@ -8,6 +8,13 @@
 
 #import <UIKit/UIKit.h>
 
+typedef void(^HSRegisterViewControllerRegisterSuccessBlock)(NSString *userName, NSString *password);
+
+/// 找回密码 和 注册 共有 页面
 @interface HSRegisterViewController : HSBaseViewController
+
+@property (assign, nonatomic) BOOL isRegister;
+
+@property (copy, nonatomic) HSRegisterViewControllerRegisterSuccessBlock registerSuccessBlock;
 
 @end

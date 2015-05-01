@@ -261,7 +261,8 @@
 + (void)saveUserInfoToPlist:(NSDictionary *)userDic
 {
     NSString *doc = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
-    NSString *path = [doc stringByAppendingString:[NSString stringWithFormat:@"%@.plist",kUserInfoPlistName]];
+    NSString *path = [doc stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.plist",kUserInfoPlistName]];
+
     [userDic writeToFile:path atomically:YES];
 }
 
@@ -269,7 +270,7 @@
 + (NSDictionary *)userInfoFromPlist
 {
     NSString *doc = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
-    NSString *path = [doc stringByAppendingString:[NSString stringWithFormat:@"%@.plist",kUserInfoPlistName]];
+    NSString *path = [doc stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.plist",kUserInfoPlistName]];
 
     NSDictionary *dic = [[NSDictionary alloc] initWithContentsOfFile:path];
     return dic;

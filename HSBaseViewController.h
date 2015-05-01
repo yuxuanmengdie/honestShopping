@@ -37,9 +37,16 @@
 /// hud 等待视图
 - (void)showhudLoadingWithText:(NSString *)text isDimBackground:(BOOL)isDim;
 
+/// 在window层 hud 2秒后hidden
+- (void)showHudInWindowWithText:(NSString *)text;
+
 /// 隐藏并移除 hud 等待视图
 - (void)hiddenHudLoading;
 
 /// 返回按钮的响应
 - (void)backAction:(id)sender;
+
+/// push stroyborad viewcontroller identifier 为类名
+- (void)pushViewControllerWithIdentifer:(NSString *)identifier;
+
 @end
