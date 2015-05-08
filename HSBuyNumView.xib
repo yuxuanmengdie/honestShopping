@@ -48,19 +48,41 @@
                         <action selector="buyBtnAction:" destination="-1" eventType="touchUpInside" id="X6S-wH-cRn"/>
                     </connections>
                 </button>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4vT-1c-aJ5">
+                    <rect key="frame" x="0.0" y="0.0" width="345" height="1"/>
+                    <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="0.5" id="412-TX-UQi"/>
+                        <constraint firstAttribute="height" id="Azf-tk-fLt"/>
+                    </constraints>
+                    <variation key="default">
+                        <mask key="constraints">
+                            <exclude reference="Azf-tk-fLt"/>
+                        </mask>
+                    </variation>
+                </view>
             </subviews>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
             <constraints>
                 <constraint firstAttribute="centerY" secondItem="qWh-zH-rnE" secondAttribute="centerY" id="2Mr-ot-Tr7"/>
                 <constraint firstItem="KeU-o9-bSw" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="tGs-FS-IC8" secondAttribute="trailing" constant="8" id="5zX-ry-5oi"/>
+                <constraint firstItem="qWh-zH-rnE" firstAttribute="leading" secondItem="4vT-1c-aJ5" secondAttribute="trailing" constant="58" id="71G-3N-aBR"/>
+                <constraint firstItem="4vT-1c-aJ5" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="ATR-hY-giT"/>
                 <constraint firstItem="KeU-o9-bSw" firstAttribute="height" secondItem="tGs-FS-IC8" secondAttribute="height" id="ZEg-PL-ydP"/>
                 <constraint firstItem="qWh-zH-rnE" firstAttribute="leading" secondItem="KeU-o9-bSw" secondAttribute="trailing" constant="8" id="dcX-lQ-juZ"/>
                 <constraint firstAttribute="centerY" secondItem="tGs-FS-IC8" secondAttribute="centerY" id="hSb-v3-feq"/>
                 <constraint firstAttribute="trailing" secondItem="qWh-zH-rnE" secondAttribute="trailing" constant="8" id="j1u-sI-kRM"/>
+                <constraint firstItem="4vT-1c-aJ5" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="lb5-r4-qp3"/>
                 <constraint firstAttribute="centerY" secondItem="KeU-o9-bSw" secondAttribute="centerY" id="rht-w7-6jR"/>
                 <constraint firstItem="tGs-FS-IC8" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="8" id="ruZ-zU-3lX"/>
+                <constraint firstAttribute="trailing" secondItem="4vT-1c-aJ5" secondAttribute="trailing" id="vSA-GD-3pD"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <variation key="default">
+                <mask key="constraints">
+                    <exclude reference="71G-3N-aBR"/>
+                </mask>
+            </variation>
             <point key="canvasLocation" x="107.5" y="-94.5"/>
         </view>
     </objects>

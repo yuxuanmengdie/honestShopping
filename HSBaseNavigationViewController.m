@@ -57,6 +57,7 @@
     navBar.translucent = NO;
     navBar.tintColor = [UIColor whiteColor];
     [navBar setBarTintColor:kAPPTintColor];
+    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent animated:NO];
     
     
     // 3.标题

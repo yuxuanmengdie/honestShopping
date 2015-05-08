@@ -7,24 +7,26 @@
 //
 
 #import "HSCommodityDetailViewController.h"
+#import "HSLoginInViewController.h"
 #import "HSBuyNumView.h"
 #import "HSCommodityItemDetailPicModel.h"
 #import "HSCommodityDetailTableViewCell.h"
 #import "HSCommodityItemTopBannerView.h"
 #import "UIImageView+WebCache.h"
 #import "AFHTTPRequestOperationManager.h"
+#import "HSUserInfoModel.h"
+#import "HSDBManager.h"
 
 @interface HSCommodityDetailViewController ()<UITableViewDataSource,
 UITableViewDelegate>
 {
     HSCommodityItemDetailPicModel *_detailPicModel;
     
-    
      NSMutableDictionary *_imageSizeDic;
     
-    
-    
     AFHTTPRequestOperationManager *_operationManager;
+    /// 是否已经收藏
+    BOOL _isCollected;
 }
 
 @property (weak, nonatomic) IBOutlet UITableView *detailTableView;
@@ -37,10 +39,6 @@ UITableViewDelegate>
 
 ///顶部的轮播图放到
 static const int kTopExistCellNum = 1;
-
-static NSString *const kImageURLKey = @"imageURLKey";
-static NSString *const kImageSizeKey = @"imageSizeKey";
-
 
 //- (void)awakeFromNib
 //{
@@ -56,6 +54,7 @@ static NSString *const kImageSizeKey = @"imageSizeKey";
     [self setNavBarRightBarWithTitle:@"分享" action:@selector(shareAction)];
     [self requestDetailByItemID:_itemModel.id];
     [self buyViewBlock];
+    _isCollected = [HSDBManager selectedItemWithTableName:[HSDBManager tableNameWithUid] keyID:_itemModel.id] == nil ? NO : YES;
     
     [_detailTableView registerNib:[UINib nibWithNibName:NSStringFromClass([HSCommodityDetailTableViewCell class]) bundle:nil] forCellReuseIdentifier:NSStringFromClass([HSCommodityDetailTableViewCell class])];
     _detailTableView.separatorStyle = UITableViewCellSelectionStyleNone;
@@ -75,14 +74,23 @@ static NSString *const kImageSizeKey = @"imageSizeKey";
 
 - (void)buyViewBlock
 {
-   
-    
+    __weak typeof(self) wself = self;
     _buyNumView.buyBlock = ^(int num){
         
     };
     
-    _buyNumView.collectBlock = ^(void){
+    _buyNumView.collectBlock = ^(UIButton *collctBtn){
         
+        __strong typeof(wself) swself = wself;
+        if (![public isLoginInStatus]) {
+            [wself showHudWithText:@"请先登录"];
+            [swself pushViewControllerWithIdentifer:NSStringFromClass([HSLoginInViewController class])];
+            return ;
+        }
+        
+        HSUserInfoModel *infoModel = [[HSUserInfoModel alloc] initWithDictionary:[public userInfoFromPlist] error:nil];
+        
+        [wself collectItemRequestWithID:swself->_detailPicModel.id uid:infoModel.id sessionCode:infoModel.sessionCode];
     };
 }
 
@@ -102,7 +110,7 @@ static NSString *const kImageSizeKey = @"imageSizeKey";
 */
 
 #pragma mark -
-#pragma mark 获取
+#pragma mark 获取详细信息
 - (void)requestDetailByItemID:(NSString *)itemID
 {
     [self showNetLoadingView];
@@ -110,20 +118,13 @@ static NSString *const kImageSizeKey = @"imageSizeKey";
     AFHTTPRequestOperationManager *manager = _operationManager;//[AFHTTPRequestOperationManager manager];
     manager.responseSerializer = [AFJSONResponseSerializer serializer];
     //申明请求的数据是json类型
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]]         ,
+    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
                                     kPostJsonid:itemID};
     __weak typeof(self) wself = self;
-    [manager POST:kGetItemById parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+    [manager POST:kGetItemByIdURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSLog(@"JSON: %@", responseObject);
-        [wself hiddenMsg];
-//        NSString *str = (NSString *)responseObject;
-//        NSData *data =  [str dataUsingEncoding:NSUTF8StringEncoding];
-//        id json = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
-//        NSLog(@"!!!!%@",json);
-        
+        [wself showReqeustFailedMsg];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        
-        
         __strong typeof(wself) swself = wself;
         if (swself == nil) {
             return ;
@@ -140,6 +141,7 @@ static NSString *const kImageSizeKey = @"imageSizeKey";
             return ;
         }
 
+        [swself hiddenMsg];
         NSError *jsonError = nil;
         id json = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&jsonError];
         NSLog(@"!!!!%@",json);
@@ -147,11 +149,11 @@ static NSString *const kImageSizeKey = @"imageSizeKey";
             
             swself->_detailPicModel = [[HSCommodityItemDetailPicModel alloc] initWithDictionary:json error:&jsonError];
             
-            if (swself->_detailPicModel == nil || jsonError != nil) {
+            if (swself->_detailPicModel.id == nil || jsonError != nil) {
                 [swself showReqeustFailedMsg];
                 return;
             }
-            [swself hiddenMsg];
+            
             swself.buyNumView.hidden = NO;
             swself->_detailTableView.dataSource = swself;
            swself->_detailTableView.delegate = swself;
@@ -163,6 +165,55 @@ static NSString *const kImageSizeKey = @"imageSizeKey";
         }
     }];
 }
+
+#pragma mark -
+#pragma mark  底部添加收藏
+- (void)collectItemRequestWithID:(NSString *)itemID uid:(NSString *)uid sessionCode:(NSString *)sessionCode
+{
+   
+    NSDictionary *parametersDic = @{kPostJsonKey:[public getIPAddress:YES],
+                                    kPostJsonUid:uid,
+                                    kPostJsonItemid:itemID,
+                                    kPostJsonSessionCode:sessionCode
+                                    };
+    // 142346261  123456
+    
+    [self.httpRequestOperationManager POST:kAddFavoriteURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+        NSLog(@"success\n%@",operation.responseString);
+        [self showHudWithText:@"收藏失败"];
+        [self hiddenHudLoading];
+        
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"failed\n%@",operation.responseString);
+        [self hiddenHudLoading];
+        if (operation.responseData == nil) {
+            [self showHudWithText:@"收藏失败"];
+            return ;
+        }
+        NSError *jsonError = nil;
+        id json = [NSJSONSerialization JSONObjectWithData:operation.responseData options:NSJSONReadingMutableContainers error:&jsonError];
+        if (jsonError == nil && [json isKindOfClass:[NSDictionary class]]) {
+            NSDictionary *tmpDic = (NSDictionary *)json;
+            BOOL isSuccess = [tmpDic[kPostJsonStatus] boolValue];
+            _buyNumView.collectBtn.selected = YES;
+            if (isSuccess) {
+                [self showHudWithText:@"收藏成功"];
+            }
+            else
+            {
+                 [self showHudWithText:@"已收藏"];
+                
+            }
+
+        }
+        else
+        {
+            [self showHudWithText:@"收藏失败"];
+        }
+    }];
+
+}
+
 
 #pragma mark -
 #pragma mark  重新加载
@@ -200,6 +251,24 @@ static NSString *const kImageSizeKey = @"imageSizeKey";
 
         headView.infoView.titleLabel.text = [NSString stringWithFormat:@"%@ %@",_detailPicModel.title,_detailPicModel.standard];
         headView.infoView.priceLabel.text = [NSString stringWithFormat:@"%@元",_detailPicModel.price];
+        [headView.infoView collcetStatus:_isCollected];
+        __weak typeof(self) wself = self;
+        headView.infoView.colletActionBlock = ^(UIButton *btn){
+            __strong typeof(wself) swself = wself;
+            
+            if (![public isLoginInStatus]) {
+                [swself showHudInWindowWithText:@"请先登录"];
+                [swself pushViewControllerWithIdentifer:NSStringFromClass([HSLoginInViewController class])];
+                return ;
+            }
+            
+            BOOL isSuc = [HSDBManager saveCartListWithTableName:[HSDBManager tableNameWithUid] keyID:swself->_detailPicModel.id data:[swself->_detailPicModel toDictionary]];
+            if (isSuc) {
+                [swself showHudWithText:@"添加购物车成功"];
+                swself->_isCollected = isSuc;
+                [tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+            }
+        };
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         cell.selectionStyle = UITableViewCellSeparatorStyleNone;
         
@@ -209,7 +278,7 @@ static NSString *const kImageSizeKey = @"imageSizeKey";
     HSCommodityDetailTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([HSCommodityDetailTableViewCell class]) forIndexPath:indexPath];
     
     NSString *imgPath = _detailPicModel.tuwen[indexPath.row - kTopExistCellNum];
-    cell.detailImageView.image = nil;
+    cell.detailImageView.image = kPlaceholderImage;
     [[SDWebImageManager sharedManager] downloadImageWithURL:[NSURL URLWithString:[self p_introImgFullUrl:imgPath]]
                                                     options:0
                                                    progress:^(NSInteger receivedSize, NSInteger expectedSize) {
@@ -238,7 +307,10 @@ static NSString *const kImageSizeKey = @"imageSizeKey";
                                                           
                                                           
                                                           // NSLog(@"cell   %d  ob=%@",indexPath.row,_imageSizeDic[ind]);
-                                                          [tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic ];
+                                                          if (tableView.dataSource != nil) {
+                                                               [tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic ];
+                                                          }
+                                                         
                                                           
                                                          
                                                       }
@@ -250,13 +322,14 @@ static NSString *const kImageSizeKey = @"imageSizeKey";
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    CGFloat height = 100.0;
+    CGFloat height = 200.0;
 
     
     if (0 == indexPath.row) {
         
         HSCommodityItemTopBannerView *headView = [[HSCommodityItemTopBannerView alloc] init];
         headView.infoView.titleLabel.text = [NSString stringWithFormat:@"%@ %@",_detailPicModel.title,_detailPicModel.standard];
+        headView.infoView.titleLabel.preferredMaxLayoutWidth = CGRectGetWidth(tableView.frame) - 16;
         headView.infoView.priceLabel.text = [NSString stringWithFormat:@"%@元",_detailPicModel.price];
         headView.bounds = tableView.bounds;
         [headView updateConstraintsIfNeeded];
@@ -348,18 +421,20 @@ static NSString *const kImageSizeKey = @"imageSizeKey";
 
 - (void)viewDidDisappear:(BOOL)animated
 {
-    NSLog(@"%s",__func__);
-    _detailTableView = nil;
-    _detailTableView.dataSource = nil;
-    _detailTableView.delegate = nil;
-    [[_operationManager operationQueue] cancelAllOperations];
     [super viewDidDisappear:animated];
 }
 
 
 - (void)dealloc
 {
+    
+    [_detailTableView endUpdates];
+    _detailTableView.dataSource = nil;
+    _detailTableView.delegate = nil;
+    _detailTableView = nil;
     _operationManager = nil;
+    [[_operationManager operationQueue] cancelAllOperations];
+
     NSLog(@"%s",__func__);
    
 }

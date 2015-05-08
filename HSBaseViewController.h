@@ -8,7 +8,15 @@
 
 #import <UIKit/UIKit.h>
 
+#define kImageURLKey @"imageURLKey"
+
+#define kImageSizeKey  @"imageSizeKey"
+
+
 @interface HSBaseViewController : UIViewController
+
+/// 保存图片size的数组
+@property (strong, nonatomic) NSMutableDictionary *imageSizeDic;
 
 /// 请求的manger
 @property (strong, nonatomic) AFHTTPRequestOperationManager *httpRequestOperationManager;
@@ -46,7 +54,19 @@
 /// 返回按钮的响应
 - (void)backAction:(id)sender;
 
+/// 占位视图 当界面内容为空时
+- (void)placeViewWithImgName:(NSString *)imgName text:(NSString *)text;
+
+/// 移除占位视图
+- (void)removePlaceView;
+
 /// push stroyborad viewcontroller identifier 为类名
 - (void)pushViewControllerWithIdentifer:(NSString *)identifier;
+
+/// 返回imagesize的key
+- (NSString *)keyFromIndex:(NSIndexPath *)index;
+
+/// 商品item的完整路径
+- (NSString *)commodityIntroImgFullUrl:(NSString *)oriUrl;
 
 @end

@@ -17,9 +17,27 @@
 - (void)layoutSubviews
 {
     [super layoutSubviews];
-    
+    self.layer.masksToBounds = YES;
+    self.layer.cornerRadius = 2;
+    self.layer.borderColor = kAPPTintColor.CGColor;
+    self.layer.borderWidth = 0.5;
 //    NSLog(@"%s %@",__func__,NSStringFromCGSize(_imgView.frame.size));
 //    _imgView.image = [public drawInRectImage:_imgView.image size:_imgView.frame.size];
 }
+
+
+- (void)dataSetUpWithModel:(HSCommodtyItemModel *)itemModel
+{
+    _titlelabel.text = [NSString stringWithFormat:@"%@ %@",[public controlNullString:itemModel.title],[public controlNullString:itemModel.standard]];
+    
+    _priceLabel.text = [NSString stringWithFormat:@"%@元",[public controlNullString:itemModel.price]];
+    _priceLabel.textColor = [UIColor redColor];
+//    _oldPricelabel.text = [NSString stringWithFormat:@"原价%@元",[public controlNullString:itemModel.info]];
+    _oldPricelabel.text = [public controlNullString:nil];
+    _oldPricelabel.textColor = [UIColor grayColor];
+    _oldPricelabel.strikeThroughEnabled = YES;
+    _oldPricelabel.strikeThroughColor = _oldPricelabel.textColor;
+}
+
 
 @end

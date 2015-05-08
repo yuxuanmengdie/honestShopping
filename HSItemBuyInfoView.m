@@ -20,7 +20,15 @@
 
 - (void)awakeFromNib
 {
-   
+   [_collectButton setTitle:@"加入购物车" forState:UIControlStateNormal];
+}
+
+- (void)collcetStatus:(BOOL)isCollected
+{
+    NSString *str = isCollected ? @"已在购物车":@"加入购物车";
+    [_collectButton setTitle:str forState:UIControlStateNormal];
+    _collectButton.enabled = !isCollected;
+    
 }
 
 - (instancetype)initWithFrame:(CGRect)frame
@@ -79,14 +87,14 @@
 
 - (IBAction)collectBtnAction:(id)sender {
     if (self.colletActionBlock) {
-        self.colletActionBlock();
+        self.colletActionBlock(sender);
     }
 }
 
 
 - (void)layoutSubviews
 {
-    [_collectButton setTitle:@"加入购物车" forState:UIControlStateNormal];
+    
     _collectButton.contentEdgeInsets = UIEdgeInsetsMake(5, 16, 5, 16);
     _collectButton.layer.masksToBounds = YES;
     _collectButton.layer.cornerRadius = 5.0;

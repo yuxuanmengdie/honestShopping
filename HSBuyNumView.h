@@ -14,7 +14,7 @@
 typedef void(^BuyNumBuyBlock)(int);
 
 /// 收藏的block
-typedef void(^BuyNumCollectBlock)(void);
+typedef void(^BuyNumCollectBlock)(UIButton *sender);
 
 @interface HSBuyNumView : UIView
 

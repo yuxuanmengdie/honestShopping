@@ -145,6 +145,7 @@ static const float kTimerInterval = 5.0;
     if (selectionType != FFScrollViewSelecttionTypeTap) {
         return;
     }
+    
     if (pageViewDelegate && [pageViewDelegate respondsToSelector:@selector(scrollViewDidClickedAtPage:)]) {
         [pageViewDelegate scrollViewDidClickedAtPage:self.pageControl.currentPage];
     }

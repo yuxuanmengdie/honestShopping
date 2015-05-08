@@ -23,6 +23,7 @@
 {
     _stepper.stepInterval = 1.0;
     _stepper.minimum = 1.0;
+    _stepper.value = 1.0;
     __weak typeof(_stepper) weakStepper = _stepper;
     [_stepper setValueChangedCallback:^(PKYStepper *stepper, float newValue){
         weakStepper.countLabel.text = [NSString stringWithFormat:@"%d",(int)newValue];
@@ -77,7 +78,7 @@
 - (IBAction)collectBtnAction:(id)sender {
     
     if (self.collectBlock) {
-        self.collectBlock();
+        self.collectBlock(sender);
     }
 }
 

@@ -8,7 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-typedef void(^HSItemBuyInfoCollectActionBlock)(void);
+typedef void(^HSItemBuyInfoCollectActionBlock)(UIButton *sender);
+
+typedef void(^HSItemBuyInfoBuyBlock)(int buyNum);
 /// 单个商品标题 数量 价格和加入购买车
 @interface HSItemBuyInfoView : UIView
 
@@ -18,7 +20,9 @@ typedef void(^HSItemBuyInfoCollectActionBlock)(void);
 
 @property (weak, nonatomic) IBOutlet UIButton *collectButton;
 
-
 @property (nonatomic, copy) HSItemBuyInfoCollectActionBlock colletActionBlock;
+
+/// 是否收藏过 修改按钮状态
+- (void)collcetStatus:(BOOL)isCollected;
 
 @end

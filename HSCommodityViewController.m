@@ -7,20 +7,36 @@
 //
 
 #import "HSCommodityViewController.h"
+#import "HSCommodityDetailViewController.h"
+
 #import "HSCommodityCollectionViewCell.h"
 #import "CHTCollectionViewWaterfallLayout.h"
-#import "HSCommodtyItemModel.h"
 #import "UIImageView+WebCache.h"
 #import "MJRefresh.h"
 #import "FFScrollView.h"
 #import "HSBannerHeaderCollectionReusableView.h"
-#import "HSCommodityDetailViewController.h"
+#import "UIView+HSLayout.h"
+
+#import "HSCommodtyItemModel.h"
+#import "HSItemPageModel.h"
+#import "HSBannerModel.h"
+#import "HSAdItemModel.h"
 
 @interface HSCommodityViewController ()<CHTCollectionViewDelegateWaterfallLayout,
 UICollectionViewDataSource,
-UICollectionViewDelegate>
+UICollectionViewDelegate,
+FFScrollViewDelegate>
 {
-    NSArray *_itemsData;
+    /// 保存item所有数量
+    HSItemPageModel *_pageModel;
+    
+    NSArray *_bannerModelsArray;
+    
+    NSArray *_bannerImagesArray;
+    ///商品数据
+    NSArray <HSCommodtyItemModel>*_itemsData;
+    /// 广告位数据
+    NSArray *_adsData;
     
     NSMutableDictionary *_imageSizeDic;
     
@@ -30,7 +46,9 @@ UICollectionViewDelegate>
     /// 顶部滚动高度约束
     NSLayoutConstraint *_ffScrollViewHeightConstraint;
 
+    HSCommodityCollectionViewCell *_sizeCell;
     
+    BOOL _isAdsLoding;
 }
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *commodityTopConstraint;
 
@@ -44,12 +62,13 @@ static NSString *const kCommodityCellIndentifier = @"CommodityCellIndentifier";
 
 static NSString *const kHeaderIdentifier = @"bannerHeaderIdentifier";
 
-
-static NSString *const kImageURLKey = @"imageURLKey";
-static NSString *const kImageSizeKey = @"imageSizeKey";
-
+static NSString *const kAdsCellIdentifier = @"AdsCellIdentifier";
 
 static const float kFFScrollViewHeight = 200;
+
+static const NSUInteger kSizeNum = 10;
+
+static const int kAdsCellImageViewTag = 600;
 
 
 - (id)init
@@ -69,15 +88,14 @@ static const float kFFScrollViewHeight = 200;
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
+    
     [_commdityCollectionView registerNib:[UINib nibWithNibName:NSStringFromClass([HSCommodityCollectionViewCell class]) bundle:nil] forCellWithReuseIdentifier:kCommodityCellIndentifier];
+    [_commdityCollectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:kAdsCellIdentifier];
     if (_isShowBanner)
     {
         //注册headerView Nib的view需要继承UICollectionReusableView
-        [_commdityCollectionView registerNib:[UINib nibWithNibName:NSStringFromClass([HSBannerHeaderCollectionReusableView class]) bundle:nil] forSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:kHeaderIdentifier];
+        [_commdityCollectionView registerNib:[UINib nibWithNibName:NSStringFromClass([HSBannerHeaderCollectionReusableView class]) bundle:nil] forSupplementaryViewOfKind:CHTCollectionElementKindSectionHeader withReuseIdentifier:kHeaderIdentifier];
     }
-
-    
-    
     _commdityCollectionView.dataSource = self;
     _commdityCollectionView.delegate = self;
     
@@ -89,29 +107,31 @@ static const float kFFScrollViewHeight = 200;
     layout.minimumColumnSpacing = 5;
     layout.minimumInteritemSpacing = 5;
     layout.columnCount = 2;
+    if (_isShowBanner) {
+         layout.headerHeight = kFFScrollViewHeight;
+    }
+   
     _commdityCollectionView.collectionViewLayout = layout;
     
     
     _imageSizeDic = [[NSMutableDictionary alloc] init];
     
     
-    __weak typeof(self) weakSelf = self;
-    [_commdityCollectionView addLegendHeaderWithRefreshingBlock:^{
-        [weakSelf.commdityCollectionView.header endRefreshing];
-    }];
+    __weak typeof(self) wself = self;
     
     [_commdityCollectionView addLegendFooterWithRefreshingBlock:^{
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-//            [weakSelf.collectionView reloadData];
-//            
-//            // 结束刷新
-//            [weakSelf.collectionView.footer endRefreshing];
-            [weakSelf.commdityCollectionView.footer endRefreshing];
-        });
-
+        __strong typeof(wself) swself = wself;
         
+        /// 防止请求完了 防止多次请求最后一次
+        if ((swself->_itemsData.count > 0 && _itemsData.count%kSizeNum > 0) || (swself->_pageModel != nil && [swself->_pageModel.total intValue] <= swself->_itemsData.count)) {
+            [swself->_commdityCollectionView.footer noticeNoMoreData];
+            return ;
+        }
+        
+        
+        [wself dataRequestWithWithCid:_cateID size:kSizeNum key:[public getIPAddress:YES] page:_itemsData.count/kSizeNum + 1];
     }];
- //   [_commdityCollectionView.footer beginRefreshing];
+    _isAdsLoding = NO;
     
 
 }
@@ -122,21 +142,15 @@ static const float kFFScrollViewHeight = 200;
     [super viewDidAppear:animated];
     LogFunc;
     [_commdityCollectionView reloadData];
-//    [self updateLayoutForOrientation:[UIApplication sharedApplication].statusBarOrientation];
-}
+    if (_adsData.count == 0 && !_isAdsLoding) {
+        [self adsRequestWithCid:_cateID key:[public getIPAddress:YES]];
+    }
+    
+    if (_itemsData.count == 0 && !_commdityCollectionView.footer.isRefreshing) { /// 数据为空 并且 不在刷新
+        [_commdityCollectionView.footer beginRefreshing];
+    }
 
-//- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
-//    [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
-//    [self updateLayoutForOrientation:toInterfaceOrientation];
-//}
-//
-//
-//
-//- (void)updateLayoutForOrientation:(UIInterfaceOrientation)orientation {
-//    CHTCollectionViewWaterfallLayout *layout =
-//    (CHTCollectionViewWaterfallLayout *)_commdityCollectionView.collectionViewLayout;
-//    layout.columnCount = UIInterfaceOrientationIsPortrait(orientation) ? 2 : 3;
-//}
+}
 
 
 - (void)ffScrollViewInitWithSubView:(UIView *)spView
@@ -146,7 +160,8 @@ static const float kFFScrollViewHeight = 200;
     }
     
     _ffScrollView = [[FFScrollView alloc] initWithFrame:CGRectZero];
-    
+    _ffScrollView.pageViewDelegate = self;
+    _ffScrollView.pageControl.currentPageIndicatorTintColor = kAPPTintColor;
     [spView addSubview:_ffScrollView];
     _ffScrollView.translatesAutoresizingMaskIntoConstraints = NO;
     NSString *vfl1 = @"H:|[_ffScrollView]|";
@@ -160,17 +175,43 @@ static const float kFFScrollViewHeight = 200;
     [spView addConstraints:arr2];
     [spView addConstraint:_ffScrollViewHeightConstraint];
     
+    _ffScrollView.sourceArr = _bannerImagesArray;
+    [_ffScrollView iniSubviewsWithFrame:CGRectMake(0, 0,CGRectGetWidth(_commdityCollectionView.frame), kFFScrollViewHeight)];
+
+    
     
 }
 
-- (void)setBannerImages:(NSArray *)images
+- (void)setBannerModels:(NSArray *)images
 {
     if (!_isShowBanner) {
         return;
     }
-    _ffScrollView.sourceArr = images;
-   
-    [_ffScrollView iniSubviewsWithFrame:CGRectMake(0, 0,CGRectGetWidth(_ffScrollView.frame), kFFScrollViewHeight)];
+    _bannerModelsArray = images;
+    
+    NSMutableArray *tmp = [[NSMutableArray alloc] init];
+    [images enumerateObjectsUsingBlock:^(HSBannerModel *obj, NSUInteger idx, BOOL *stop) {
+        if (obj.content.length > 0 ) {
+            [tmp addObject:obj.content];
+        }
+    }];
+    _bannerImagesArray = tmp;
+    
+}
+
+
+#pragma mark -
+#pragma mark 轮播图 delegate
+- (void)scrollViewDidClickedAtPage:(NSInteger)pageNumber
+{
+    HSBannerModel *model = _bannerModelsArray[pageNumber];
+    HSCommodtyItemModel *itemModel = [[HSCommodtyItemModel alloc] init];
+    itemModel.id = model.desc;
+    /// 点击后委托父控制器push
+    if (self.cellSelectedBlock) {
+        self.cellSelectedBlock(itemModel);
+    }
+
 }
 
 
@@ -193,105 +234,346 @@ static const float kFFScrollViewHeight = 200;
 
 - (void)setItemsData:(NSArray *)itemsData
 {
-    _itemsData = itemsData;
+    _itemsData = (NSArray <HSCommodtyItemModel> *)itemsData;
     [_commdityCollectionView reloadData];
 }
 
+#pragma mark -
+#pragma mark  获取数据
 
-#pragma  mark collectionView dataSource and delegate
-- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+- (void)dataRequestWithWithCid:(NSString *)cid size:(NSUInteger)size key:(NSString *)key page:(NSUInteger)page
 {
-    return _itemsData.count;
+    NSDictionary *parametersDic = @{kPostJsonKey:key,
+                                    kPostJsonCid:[NSNumber numberWithLongLong:[cid longLongValue]],
+                                    kPostJsonSize:[NSNumber numberWithInteger:size],
+                                    kPostJsonPage:[NSNumber numberWithInteger:page]};
+    
+    [self.httpRequestOperationManager POST:kGetItemsByCateURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSLog(@"JSON: %@/n %@", responseObject,[public dictionaryToJson:parametersDic]);
+       [_commdityCollectionView.footer endRefreshing];
+        
+        
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"response=%@",operation.responseString);
+        
+        [_commdityCollectionView.footer endRefreshing];
+        NSString *str = (NSString *)operation.responseString;
+        
+        NSData *data =  [str dataUsingEncoding:NSUTF8StringEncoding];
+        if (data == nil) {
+            return ;
+        }
+        NSError *jsonError = nil;
+        id json = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&jsonError];
+        NSLog(@"!!!!%@",json);
+        
+        if ([json isKindOfClass:[NSDictionary class]] && jsonError == nil) {
+            
+            NSDictionary *jsonDic = (NSDictionary *)json;
+            HSItemPageModel *pageModel = [[HSItemPageModel alloc] initWithDictionary:jsonDic error:nil];
+            _pageModel = pageModel;
+            NSMutableArray *tmpArray = [[NSMutableArray alloc] init];
+            
+            if (_itemsData.count == 0) {
+                _itemsData = pageModel.item_list;
+            }
+            else
+            {
+                [tmpArray addObjectsFromArray:_itemsData];
+                if ([pageModel.item_list count] > 0) {
+                    [tmpArray addObjectsFromArray:pageModel.item_list];
+                     _itemsData = (NSArray <HSCommodtyItemModel>*)tmpArray;
+                }
+                
+            }
+           
+            [_commdityCollectionView reloadData];
+            }
+        
+    }];
+    
 }
 
+#pragma mark-
+#pragma mark 广告位数据
+- (void)adsRequestWithCid:(NSString *)cid key:(NSString *)key
+{
+    _isAdsLoding = YES;
+    NSDictionary *parametersDic = @{kPostJsonKey:key,
+                                    kPostJsonCid:[NSNumber numberWithLongLong:[cid longLongValue]],
+                                  };
+    
+    [self.httpRequestOperationManager POST:kGetAdsByCateURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSLog(@"JSON: %@/n %@", responseObject,[public dictionaryToJson:parametersDic]);
+        _isAdsLoding = NO;
+        
+        
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"response=%@",operation.responseString);
+        _isAdsLoding = NO;
+        NSString *str = (NSString *)operation.responseString;
+        if (str.length < 1) {
+            return ;
+        }
+        NSString *result = [str substringFromIndex:1];
+
+        
+        NSData *data =  [result dataUsingEncoding:NSUTF8StringEncoding];
+        if (data == nil) {
+            return ;
+        }
+       
+        NSError *jsonError = nil;
+        id json = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:&jsonError];
+        NSLog(@"!!!!%@",json);
+        
+        if ([json isKindOfClass:[NSArray class]] && jsonError == nil) {
+            NSArray *jsonArray = (NSArray *)json;
+            
+            NSMutableArray *tmp = [[NSMutableArray alloc] init];
+            [jsonArray enumerateObjectsUsingBlock:^(NSDictionary *obj, NSUInteger idx, BOOL *stop) {
+                
+                HSAdItemModel *itemModel = [[HSAdItemModel alloc] initWithDictionary:obj error:nil];
+                [tmp addObject:itemModel];
+            }];
+            _adsData = tmp;
+            [_commdityCollectionView reloadData];
+        }
+        
+    }];
+
+}
+
+
+
+
+#pragma mark -
+#pragma  mark collectionView dataSource and delegate
+
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
+{
+    return 4;
+}
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
+    NSInteger num = 0;
+    
+    if (section == 0) {
+        num = MIN(_adsData.count, 3);
+    }
+    else if (section == 1)
+    {
+        if (_adsData.count > 3) {
+            num = 1;
+        }
+        else
+        {
+            num = 0;
+        }
+    }
+    else if (section == 2)
+    {
+        if (_adsData.count > 4) {
+            num = _adsData.count - 4;
+        }
+        else
+        {
+            num = 0;
+        }
+    }
+    else
+    {
+        num = _itemsData.count;
+    }
+    
+    return num;
+}
+
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout columnCountForSection:(NSInteger)section
+{
+    NSInteger num = 2;
+    
+    if (section == 1) {
+        num = 1;
+    }
+    return num;
+}
 
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    HSCommodityCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:kCommodityCellIndentifier forIndexPath:indexPath];
-    HSCommodtyItemModel *itemModel = _itemsData[indexPath.row];
-//    [cell.imgView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]]];
-    [[SDWebImageManager sharedManager] downloadImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]]
-                                                    options:0
-                                                   progress:^(NSInteger receivedSize, NSInteger expectedSize) {
-                                                       // progression tracking code
-                                                   }
-                                                  completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
-                                                      if (image) {
-                                                          // do something with image
-                                                          cell.imgView.image = image;
-                                                          
-                                                          NSValue *imgSize =  [NSValue valueWithCGSize:image.size];
-                                                          NSDictionary *dic = [_imageSizeDic objectForKey:indexPath];
-                                                          if (dic != nil ) {
-                                                              NSURL *imgURL = dic[kImageURLKey];
-                                                              NSValue *sizeValue = dic[kImageSizeKey];
-                                                              if ([imgURL isEqual:imageURL] && [sizeValue isEqual:imgSize]) {
-                                                                  return ;
+    if (indexPath.section == 3) {
+        HSCommodityCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:kCommodityCellIndentifier forIndexPath:indexPath];
+        HSCommodtyItemModel *itemModel = _itemsData[indexPath.row];
+        //    [cell.imgView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]]];
+        cell.imgView.image = kPlaceholderImage;
+        [cell dataSetUpWithModel:itemModel];
+        
+        [[SDWebImageManager sharedManager] downloadImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]]
+                                                        options:0
+                                                       progress:^(NSInteger receivedSize, NSInteger expectedSize) {
+                                                           // progression tracking code
+                                                       }
+                                                      completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+                                                          if (image) {
+                                                              // do something with image
+                                                              cell.imgView.image = image;
+                                                              
+                                                              NSValue *imgSize =  [NSValue valueWithCGSize:image.size];
+                                                              NSDictionary *dic = [_imageSizeDic objectForKey:[self p_keyFromIndex:indexPath]];
+                                                              if (dic != nil ) {
+                                                                  NSURL *imgURL = dic[kImageURLKey];
+                                                                  NSValue *sizeValue = dic[kImageSizeKey];
+                                                                  if ([imgURL isEqual:imageURL] && [sizeValue isEqual:imgSize]) {
+                                                                      return ;
+                                                                  }
                                                               }
+                                                              
+                                                              NSDictionary *tmpDic = @{kImageSizeKey:imgSize,
+                                                                                       kImageURLKey:imageURL};
+                                                              
+                                                              [_imageSizeDic setObject:tmpDic forKey:[self p_keyFromIndex:indexPath]];
+                                                              if (collectionView.dataSource != nil) {
+                                                                  [collectionView reloadItemsAtIndexPaths:@[indexPath]];
+                                                              }
+                                                              
                                                           }
-                                                          
-                                                          NSDictionary *tmpDic = @{kImageSizeKey:imgSize,
-                                                                                   kImageURLKey:imageURL};
-                                                          
-                                                          [_imageSizeDic setObject:tmpDic forKey:indexPath];
-                                                          [collectionView reloadItemsAtIndexPaths:@[indexPath]];
-                                                      }
-                                                  }];
+                                                      }];
+        
+        
+        return cell;
+        
+    }
+    else /// 广告cell
+    {
+        
+        UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:kAdsCellIdentifier forIndexPath:indexPath];
+        
+        UIImageView *imgView = (UIImageView *)[cell viewWithTag:kAdsCellImageViewTag];
+        if (imgView == nil) {
+            imgView = [[UIImageView alloc] init];
+            imgView.translatesAutoresizingMaskIntoConstraints = NO;
+            imgView.tag = kAdsCellImageViewTag;
+            [cell addSubview:imgView];
+            [cell HS_edgeFillWithSubView:imgView];
+        }
+        
+        NSInteger idx;
+        if (indexPath.section == 0) {
+            idx = indexPath.row;
+        }
+        else if (indexPath.section == 1)
+        {
+            idx = indexPath.row + 3;
+        }
+        else
+        {
+            idx = indexPath.row + 4;
+        }
+        HSAdItemModel *adModel = _adsData[idx];
+        imgView.image = kPlaceholderImage;
+        [[SDWebImageManager sharedManager] downloadImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kBannerImageHeaderURL,adModel.content]]
+                                                        options:0
+                                                       progress:^(NSInteger receivedSize, NSInteger expectedSize) {
+                                                           // progression tracking code
+                                                       }
+                                                      completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+                                                          if (image) {
+                                                              // do something with image
+                                                              imgView.image = nil;
+                                                              imgView.image = image;
+                                                              
+                                                              NSValue *imgSize =  [NSValue valueWithCGSize:image.size];
+                                                              NSDictionary *dic = [_imageSizeDic objectForKey:[self p_keyFromIndex:indexPath]];
+                                                              if (dic != nil ) {
+                                                                  NSURL *imgURL = dic[kImageURLKey];
+                                                                  NSValue *sizeValue = dic[kImageSizeKey];
+                                                                  if ([imgURL isEqual:imageURL] && [sizeValue isEqual:imgSize]) {
+                                                                      return ;
+                                                                  }
+                                                              }
+                                                              
+                                                              NSDictionary *tmpDic = @{kImageSizeKey:imgSize,
+                                                                                       kImageURLKey:imageURL};
+                                                              
+                                                              [_imageSizeDic setObject:tmpDic forKey:[self p_keyFromIndex:indexPath]];
+                                                              if (collectionView.dataSource != nil) {
+                                                                  [collectionView reloadItemsAtIndexPaths:@[indexPath]];
+                                                              }
+                                                              
+                                                          }
+                                                      }];
 
-       
-    return cell;
+        
+        cell.layer.masksToBounds = YES;
+        cell.layer.cornerRadius = 2;
+        cell.layer.borderColor = kAPPTintColor.CGColor;
+        cell.layer.borderWidth = 0.5;
+        return cell;
+    }
 }
-
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-//    __block float hei =  20;//arc4random()%150+50;
-//    __block float wid = 20;//(CGRectGetWidth(collectionView.frame)-5*2-10)/2.0;//;
-//    HSCommodtyItemModel *itemModel = _itemsData[indexPath.row];
-////    [[SDWebImageManager sharedManager] downloadImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]] options:SDWebImageDownloaderUseNSURLCache progress:^(NSInteger receivedSize, NSInteger expectedSize) {
-////        
-////    } completed:^(UIImage *image, NSData *data, NSError *error, BOOL finished) {
-////        
-////        wid = image.size.width;
-////        hei = image.size.height;
-////    }];
-//    
-//    [[SDWebImageManager sharedManager] downloadImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]]
-//                          options:0
-//                         progress:^(NSInteger receivedSize, NSInteger expectedSize) {
-//                             // progression tracking code
-//                         }
-//                        completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
-//                            if (image) {
-//                                // do something with image
-//                                wid = image.size.width;
-//                                hei = image.size.height;
-//
-//                            }
-//                        }];
-////    [cell.imgView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]]];
-    
-    NSDictionary *dic = [_imageSizeDic objectForKey:indexPath];
-    if (dic != nil) {
-        NSValue *sizeValue = dic[kImageSizeKey];
-        return CGSizeMake(sizeValue.CGSizeValue.width, sizeValue.CGSizeValue.height);
+    if (indexPath.section == 3)
+    {
+        
+        HSCommodtyItemModel *itemModel = _itemsData[indexPath.row];
+        if (_sizeCell == nil) {
+            _sizeCell = [[[NSBundle mainBundle] loadNibNamed:NSStringFromClass([HSCommodityCollectionViewCell class]) owner:nil options:nil] firstObject];//;[[HSCommodityCollectionViewCell alloc] init];
+        }
+        
+        CHTCollectionViewWaterfallLayout *layout = (CHTCollectionViewWaterfallLayout *)collectionView.collectionViewLayout;
+        CGRect rect = collectionView.bounds;
+        rect.size.width -= layout.minimumColumnSpacing*(layout.columnCount-1) + layout.sectionInset.left + layout.sectionInset.right;
+        rect.size.width /= 2.0;
+        rect.size.height = INT16_MAX;
+        _sizeCell.contentView.bounds = rect;
+        _sizeCell.contentView.frame = rect;
+        //    [_sizeCell.imgView  sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]]];
+        _sizeCell.titlelabel.preferredMaxLayoutWidth = rect.size.width-16;
+        //    _sizeCell.priceLabel.preferredMaxLayoutWidth = 80;
+        //    _sizeCell.oldPricelabel.preferredMaxLayoutWidth = 40;
+        [_sizeCell dataSetUpWithModel:itemModel];
+        [_sizeCell.contentView updateConstraintsIfNeeded];
+        [_sizeCell.contentView layoutIfNeeded];
+        
+        CGSize size = [_sizeCell.contentView systemLayoutSizeFittingSize:UILayoutFittingCompressedSize];
+        size.width = rect.size.width;
+        NSDictionary *dic = [_imageSizeDic objectForKey:[self p_keyFromIndex:indexPath]];
+        if (dic != nil) {
+            NSValue *sizeValue = dic[kImageSizeKey];
+            CGSize imgSize = [sizeValue CGSizeValue];
+            CGFloat hei = imgSize.width == 0 ? 0 :(((float)imgSize.height/imgSize.width)*rect.size.width);
+            //        NSLog(@"imgsize = %@ hei=%f",NSStringFromCGSize(imgSize),hei);
+            size.height += hei;
+        }
+        else /// 占位高度 图片比例为1比1；
+        {
+            size.height += size.width;
+        }
+        return size;
     }
-    
-    return CGSizeMake(80, 80);
+    else
+    {
+        CGSize size = CGSizeMake(80, 60);
+        NSDictionary *dic = [_imageSizeDic objectForKey:[self p_keyFromIndex:indexPath]];
+        if (dic != nil) {
+            NSValue *sizeValue = dic[kImageSizeKey];
+            size = [sizeValue CGSizeValue];
+        }
 
-}
+        return size;
+    }
 
-- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
-{
-    return 1;
-    
 }
 
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
     NSString *reuseIdentifier;
-    if ([kind isEqualToString: UICollectionElementKindSectionHeader ] && _isShowBanner){
+    if ([kind isEqualToString: CHTCollectionElementKindSectionHeader ] && _isShowBanner && indexPath.section == 0){
         reuseIdentifier = kHeaderIdentifier;
         HSBannerHeaderCollectionReusableView *view =  [collectionView dequeueReusableSupplementaryViewOfKind :kind   withReuseIdentifier:reuseIdentifier   forIndexPath:indexPath];
         [self ffScrollViewInitWithSubView:view];
@@ -302,34 +584,25 @@ static const float kFFScrollViewHeight = 200;
         return nil;
     }
     
-//    UICollectionReusableView *view =  [collectionView dequeueReusableSupplementaryViewOfKind :kind   withReuseIdentifier:reuseIdentifier   forIndexPath:indexPath];
-//    
-//    UILabel *label = (UILabel *)[view viewWithTag:1];
-//    if ([kind isEqualToString:UICollectionElementKindSectionHeader]){
-//        label.text = [NSString stringWithFormat:@"这是header:%d",indexPath.section];
-//    }
-//    else if ([kind isEqualToString:UICollectionElementKindSectionFooter]){
-//        view.backgroundColor = [UIColor lightGrayColor];
-//        label.text = [NSString stringWithFormat:@"这是footer:%d",indexPath.section];
-//    }
-//    return view;
 }
 
-////返回头footerView的大小
-//- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section
-//{
-//    CGSize size={320,45};
-//    return size;
-//}
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout heightForHeaderInSection:(NSInteger)section;
+{
+    if (section == 0 && _isShowBanner) {
+        return kFFScrollViewHeight;
+    }
+    return 0.0;
+}
+
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section
 {
-    if (_isShowBanner) {
+    if (_isShowBanner && section == 0) {
         CGSize size = CGSizeMake(CGRectGetWidth(_commdityCollectionView.frame), kFFScrollViewHeight);
         return size;
     }
     
-    return  CGSizeMake(80, 80);// CGSizeZero;
+    return  CGSizeZero;
 }
 
  
@@ -337,14 +610,47 @@ static const float kFFScrollViewHeight = 200;
 {
     [collectionView deselectItemAtIndexPath:indexPath animated:YES];
     
-    HSCommodtyItemModel *itemModel = _itemsData[indexPath.row];
+    HSCommodtyItemModel *itemModel = nil;
     
+    NSInteger idx = 0;
+    if (indexPath.section == 0) {
+        idx = indexPath.row;
+    }
+    else if (indexPath.section == 1)
+    {
+        idx = indexPath.row + 3;
+    }
+    else if (indexPath.section == 2)
+    {
+        idx = indexPath.row + 4;
+    }
+    
+    if (indexPath.row == 3) {
+        itemModel = _itemsData[indexPath.row];
+    }
+    else
+    {
+        HSAdItemModel *adModel = _adsData[idx];
+        itemModel = [[HSCommodtyItemModel alloc] init];
+        itemModel.id = adModel.desc;
+    }
+
     /// 点击后委托父控制器push
     if (self.cellSelectedBlock) {
         self.cellSelectedBlock(itemModel);
     }
     
     
+}
+
+- (NSString *)p_keyFromIndex:(NSIndexPath *)index
+{
+    if (index == nil) {
+        return @"";
+    }
+    
+    NSString *result = [NSString stringWithFormat:@"indexsec%ldrow%ld",(long)index.section,(long)index.row];
+    return result;
 }
 
 

@@ -7,8 +7,19 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "LPLabel.h"
+#import "HSCommodtyItemModel.h"
 
 @interface HSCommodityCollectionViewCell : UICollectionViewCell
 
 @property (weak, nonatomic) IBOutlet UIImageView *imgView;
+
+@property (weak, nonatomic) IBOutlet UILabel *titlelabel;
+
+@property (weak, nonatomic) IBOutlet UILabel *priceLabel;
+
+@property (weak, nonatomic) IBOutlet LPLabel *oldPricelabel;
+
+/// 设置数据源
+- (void)dataSetUpWithModel:(HSCommodtyItemModel *)itemModel;
 @end

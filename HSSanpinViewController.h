@@ -8,6 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface HSSanpinViewController : UIViewController
+@interface HSSanpinViewController : HSBaseViewController
 
 @end

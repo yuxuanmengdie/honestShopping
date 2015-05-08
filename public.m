@@ -275,4 +275,80 @@
     NSDictionary *dic = [[NSDictionary alloc] initWithContentsOfFile:path];
     return dic;
 }
+
+#pragma mark  -
+#pragma mark 登录状态
+/// 是否登录状态
++ (BOOL)isLoginInStatus
+{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSNumber *isLogin = [userDefaults objectForKey:kUserIsLoginKey];
+    if (isLogin == nil) {
+        return NO;
+    }
+    return isLogin.boolValue;
+}
+
+/// 设置登录状态
++ (void)setLoginInStatus:(BOOL)isLogin
+{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setObject:[NSNumber numberWithBool:isLogin] forKey:kUserIsLoginKey];
+    [userDefaults synchronize];
+}
+
++ (NSString *)controlNullString:(NSString *)ori
+{
+    NSString *result = @"";
+    if (ori.length > 0) {
+        result = ori;
+    }
+    return result;
+}
+
+#pragma mark -
+#pragma mark 帐号信息
+
+static NSString *const kUserNameKey = @"lastUserNameKey";
+
+static NSString *const kPasswordKey = @"lastPasswordKey";
+/// 保存上次的用户名称
++ (void)saveLastUserName:(NSString *)userName
+{
+    NSString *result = [self controlNullString:userName];
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setObject:result forKey:kUserNameKey];
+    [userDefaults synchronize];
+}
+
+/// 取出上次登录的用户名
++ (NSString *)lastUserName
+{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSString *result = [userDefaults objectForKey:kUserNameKey];
+    result = [self controlNullString:result];
+    return result;
+}
+
+/// 保存上次的密码
++ (void)saveLastPassword:(NSString *)password
+{
+    NSString *result = [self controlNullString:password];
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setObject:result forKey:kPasswordKey];
+    [userDefaults synchronize];
+
+}
+
+/// 取出上次登录的密码
++ (NSString *)lastPassword
+{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSString *result = [userDefaults objectForKey:kPasswordKey];
+    result = [self controlNullString:result];
+    return result;
+
+}
+
+
 @end

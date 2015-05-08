@@ -193,6 +193,9 @@ static NSString *const kRemeberPWNormalImageName = @"icon_activity";
             if (_userInfoModel.id.length > 0) { /// 登录后返回有数据
                 [self showHudInWindowWithText:@"登录成功"];
                 [public saveUserInfoToPlist:[_userInfoModel toDictionary]];
+                [public setLoginInStatus:YES];
+                [public saveLastPassword:passWord];
+                [public saveLastUserName:userName];
                 [self backAction:nil];
             }
         }
@@ -206,7 +209,7 @@ static NSString *const kRemeberPWNormalImageName = @"icon_activity";
 - (void)backAction:(id)sender
 {
     [super backAction:sender];
-    self.navigationController.navigationBarHidden = YES;
+//    self.navigationController.navigationBarHidden = YES;
 }
 
 

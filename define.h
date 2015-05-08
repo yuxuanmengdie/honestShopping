@@ -59,7 +59,7 @@ static NSString *const kPostJsonOldPassword = @"oldPassword";
 
 static NSString *const kPostJsonNewPassword = @"newPassword";
 
-static NSString *const kPostJsonItemid =  @"itemid";
+static NSString *const kPostJsonItemid =  @"itemId";
 
 static NSString *const kPostJsonStatus = @"status";
 
@@ -71,6 +71,9 @@ static NSString *const kPostJsonSize = @"size";
 
 static NSString *const kPostJsonCode = @"code";
 
+static NSString *const kPostJsonKeyWord = @"keyWord";
+
+static NSString *const kPostJsonType = @"type";
 
 
 
@@ -96,7 +99,7 @@ static NSString *const kPostJsonCode = @"code";
 /// 收货地址更新
 #define kAddressUpdateURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=addressUpdate"]
 /// 签到
-#define kSignURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&asign"]
+#define kSignURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=sign"]
 /// 修改密码
 #define kChangePassWordURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&mUser&a=changePassWord"]
 /// 分类列表
@@ -104,14 +107,21 @@ static NSString *const kPostJsonCode = @"code";
 /// 搜索列表
 #define kGetSearchListURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Item&a=getSearchList"]
 /// 商品信息
-#define kGetItemById  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Item&a=getItemById"]
+#define kGetItemByIdURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Item&a=getItemById"]
 /// 用户优惠劵
 #define kGetCouponsByUidURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=getCouponsByUid"]
 /// 列表下的商品信息
-#define kGetItemsByCate  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Item&a=getItemsByCate"]
-
+#define kGetItemsByCateURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Item&a=getItemsByCate"]
+/// 列表下的广告商品信息
+#define kGetAdsByCateURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Item&a=getAdsByCate"]
+/// 收藏
+#define kAddFavoriteURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Item&a=addFavorite"]
+/// 发现
+#define kGetDiscoverURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Item&a=getDiscover"]
 /// 获取banner
 #define kGetBannerURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Item&a=getBanner"]
+/// 三品一标下面分类 获取三品一标(1.有机产品2.绿色产品3.无公害产品4.地理标志)
+#define kGetSpybByTypeURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Item&a=getSpybByType"]
 
 //#define kGetAddressURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?gapi&mUser&agetAddress"]
 //
@@ -130,5 +140,11 @@ static NSString *const kImageHeaderURL = @"http://203.192.7.23/data/upload/item/
 static NSString *const kUserIsLoginKey = @"HS_kUserIsLoginKey";
 /// 保存到用户信息保存到doc 的plist文件
 static NSString *const kUserInfoPlistName = @"HSuser";
+
+
+#pragma mark -
+#pragma mark 占位图片
+
+#define kPlaceholderImage  [UIImage imageNamed:@"bank_icon_failed"]
 
 #endif

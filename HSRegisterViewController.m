@@ -33,28 +33,6 @@ static NSString *const kUserImageName = @"icon_activity";
     // Dispose of any resources that can be recreated.
 }
 
-//#pragma mark -
-//#pragma mark textfiled 属性 样式
-//- (void)leftViewWithTextFiled:(UITextField *)textField imgName:(NSString *)imgName
-//{
-//    UIImageView *img = [[UIImageView alloc] initWithImage:[UIImage imageNamed:imgName]];
-//    [img sizeToFit];
-//    UIView *tmpView = [[UIView alloc] init];
-//    tmpView.backgroundColor = [UIColor clearColor];
-//    [tmpView addSubview:img];
-//    img.frame = CGRectMake(8, 0, img.image.size.width, img.image.size.height);
-//    tmpView.frame = CGRectMake(0, 0, img.image.size.width+8, img.image.size.height);
-//    tmpView.bounds = CGRectMake(0, 0, img.image.size.width+8, img.image.size.height);
-//    textField.leftView = tmpView;
-//    textField.leftViewMode = UITextFieldViewModeAlways;
-//    textField.layer.masksToBounds = YES;
-//    textField.layer.borderColor = kAPPTintColor.CGColor;
-//    textField.tintColor = kAPPTintColor;
-//    textField.layer.cornerRadius = 8.0;
-//    textField.layer.borderWidth = 1.0;
-//    textField.delegate = self;
-//    
-//}
 
 #pragma mark - Navigation
 
@@ -114,7 +92,6 @@ static NSString *const kUserImageName = @"icon_activity";
             [swself sendCaptchas:swself->_containterTableVC.phoneTextFiled.text];
 
         };
-        
         
         _containterTableVC.confirmBlock = ^{
             

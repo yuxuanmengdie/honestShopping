@@ -11,10 +11,13 @@
 
 typedef void(^HSCommodityCollectionCellSelectedBlock)(HSCommodtyItemModel *itemModel);
 
-@interface HSCommodityViewController : UIViewController
+@interface HSCommodityViewController : HSBaseViewController
 
 /// 是否显示banner
 @property (assign, nonatomic) BOOL isShowBanner;
+
+/// 类别的id
+@property (assign, nonatomic) NSString *cateID;
 
 
 /// 设置数据源
@@ -22,7 +25,7 @@ typedef void(^HSCommodityCollectionCellSelectedBlock)(HSCommodtyItemModel *itemM
 
 
 /// 设置banner数据源
-- (void)setBannerImages:(NSArray *)images;
+- (void)setBannerModels:(NSArray *)images;
 
 /// 点击单个cell的block
 @property (nonatomic, copy) HSCommodityCollectionCellSelectedBlock cellSelectedBlock;

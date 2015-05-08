@@ -49,4 +49,24 @@
 /// 取出用户信息
 + (NSDictionary *)userInfoFromPlist;
 
+/// 是否登录状态
++ (BOOL)isLoginInStatus;
+
+/// 设置登录状态
++ (void)setLoginInStatus:(BOOL)isLogin;
+
+/// 保存上次的用户名称
++ (void)saveLastUserName:(NSString *)userName;
+
+/// 取出上次登录的用户名
++ (NSString *)lastUserName;
+
+/// 保存上次的密码
++ (void)saveLastPassword:(NSString *)password;
+
+/// 取出上次登录的密码
++ (NSString *)lastPassword;
+
+/// 处理字符串 为nil 时返回""
++ (NSString *)controlNullString:(NSString *)ori;
 @end

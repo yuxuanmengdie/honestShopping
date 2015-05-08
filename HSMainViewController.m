@@ -45,17 +45,18 @@
     }
     
     
-    UITabBarItem *tabBarItem1 = [self.tabBar.items objectAtIndex:2];
-    UIImage *img =  [public ImageWithColor:[UIColor blueColor] frame:CGRectMake(0, 0, 50, 300)];
-    UIImage *oriImg = [public ImageWithColor:[UIColor yellowColor] frame:CGRectMake(0, 0, 50, 100)];
+//    UITabBarItem *tabBarItem1 = [self.tabBar.items objectAtIndex:2];
+//    UIImage *img =  [public ImageWithColor:[UIColor blueColor] frame:CGRectMake(0, 0, 50, 300)];
+//    UIImage *oriImg = [public ImageWithColor:[UIColor yellowColor] frame:CGRectMake(0, 0, 50, 100)];
     //    tabBarItem1.imageInsets = UIEdgeInsetsMake(-10, -10, -10, -10);
-    tabBarItem1.selectedImage = [img imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
-    
-    tabBarItem1.image = [oriImg imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
-    tabBarItem1.enabled = YES;
+//    tabBarItem1.selectedImage = [img imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+//    
+//    tabBarItem1.image = [oriImg imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+//    tabBarItem1.enabled = YES;
 
     [self.tabBar.items enumerateObjectsUsingBlock:^(UITabBarItem *barItem, NSUInteger idx, BOOL *stop) {
         [barItem setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIColor redColor],NSForegroundColorAttributeName, nil] forState:UIControlStateNormal];
+        [barItem setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:kAPPTintColor,NSForegroundColorAttributeName, nil] forState:UIControlStateSelected];
     }];
 
     
@@ -116,13 +117,13 @@
 - (void)tabBar:(UITabBar *)tabBar didSelectItem:(UITabBarItem *)item
 {
 
-    UITabBarItem *tabBarItem1 = [self.tabBar.items objectAtIndex:2];
-    if (item == tabBarItem1) {
-        UIStoryboard *story = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
-        HSLoginInViewController *loginVC = [story instantiateViewControllerWithIdentifier:NSStringFromClass([HSLoginInViewController class])];
-        [self.navigationController pushViewController:loginVC animated:YES];
-        return;
-    }
+//    UITabBarItem *tabBarItem1 = [self.tabBar.items objectAtIndex:2];
+//    if (item == tabBarItem1) {
+//        UIStoryboard *story = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+//        HSLoginInViewController *loginVC = [story instantiateViewControllerWithIdentifier:NSStringFromClass([HSLoginInViewController class])];
+//        [self.navigationController pushViewController:loginVC animated:YES];
+//        return;
+//    }
 }
 
 

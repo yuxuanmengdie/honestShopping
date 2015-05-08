@@ -7,13 +7,19 @@
 //
 
 #import "JSONModel.h"
+#import "HSCommodtyItemModel.h"
+
+@protocol HSCommodtyItemModel <NSObject>
+
+
+@end
 
 @interface HSItemPageModel : JSONModel
 
 @property (strong, nonatomic) NSNumber *currentPage;
 @property (strong, nonatomic) NSNumber *totalPage;
 @property (strong, nonatomic) NSNumber *total;
-@property (strong, nonatomic) NSArray *item_list;
+@property (strong, nonatomic) NSArray <HSCommodtyItemModel>*item_list;
 
 @end
 

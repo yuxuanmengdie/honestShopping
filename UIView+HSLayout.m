@@ -43,9 +43,6 @@
 
 - (void)HS_dispacingWithFisrtView:(UIView *)firstView fistatt:(NSLayoutAttribute)firstAtt secondView:(UIView *)secView secondAtt:(NSLayoutAttribute)secondAtt constant:(CGFloat)constant;
 {
-    secView.translatesAutoresizingMaskIntoConstraints = NO;
-    firstView.translatesAutoresizingMaskIntoConstraints = NO;
-    
     NSLayoutConstraint *con = [NSLayoutConstraint constraintWithItem:firstView attribute:firstAtt relatedBy:NSLayoutRelationEqual toItem:secView attribute:secondAtt multiplier:1.0 constant:constant];
     [self addConstraint:con];
 }
@@ -85,5 +82,22 @@
 
 }
 
+- (void)HS_equelWidthWithFirstView:(UIView *)firstView secondView:(UIView *)secondView
+{
+    NSLayoutConstraint *widCon = [NSLayoutConstraint constraintWithItem:firstView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:secondView attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0];
+    [self addConstraint:widCon];
+}
+
+- (void)HS_equelHeightWithFirstView:(UIView *)firstView secondView:(UIView *)secondView
+{
+    NSLayoutConstraint *HeiCon = [NSLayoutConstraint constraintWithItem:firstView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:secondView attribute:NSLayoutAttributeHeight multiplier:1.0 constant:0];
+    [self addConstraint:HeiCon];
+}
+
+- (void)HS_alignWithFirstView:(UIView *)firstView secondView:(UIView *)secondView layoutAttribute:(NSLayoutAttribute)att constat:(CGFloat)constant
+{
+    NSLayoutConstraint *align = [NSLayoutConstraint constraintWithItem:firstView attribute:att relatedBy:NSLayoutRelationEqual toItem:secondView attribute:att multiplier:1.0 constant:constant];
+    [self addConstraint:align];
+}
 
 @end
