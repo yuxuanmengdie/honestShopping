@@ -27,6 +27,8 @@ UITableViewDelegate>
     AFHTTPRequestOperationManager *_operationManager;
     /// 是否已经收藏
     BOOL _isCollected;
+    
+    HSCommodityItemTopBannerView *_placeheadView;
 }
 
 @property (weak, nonatomic) IBOutlet UITableView *detailTableView;
@@ -240,6 +242,7 @@ static const int kTopExistCellNum = 1;
             HSCommodityItemTopBannerView *headView = [[HSCommodityItemTopBannerView alloc] init];
             headView.translatesAutoresizingMaskIntoConstraints = NO;
             [cell.contentView addSubview:headView];
+            cell.contentView.bounds = tableView.bounds;
             headView.tag = 501;
             [self headViewAutoLayoutInCell:cell headView:headView];
             
@@ -327,16 +330,26 @@ static const int kTopExistCellNum = 1;
     
     if (0 == indexPath.row) {
         
-        HSCommodityItemTopBannerView *headView = [[HSCommodityItemTopBannerView alloc] init];
-        headView.infoView.titleLabel.text = [NSString stringWithFormat:@"%@ %@",_detailPicModel.title,_detailPicModel.standard];
-        headView.infoView.titleLabel.preferredMaxLayoutWidth = CGRectGetWidth(tableView.frame) - 16;
-        headView.infoView.priceLabel.text = [NSString stringWithFormat:@"%@元",_detailPicModel.price];
-        headView.bounds = tableView.bounds;
-        [headView updateConstraintsIfNeeded];
-        [headView layoutIfNeeded];
-        
-        height = [headView systemLayoutSizeFittingSize:UILayoutFittingCompressedSize].height;
+        if (_placeheadView == nil) {
+           _placeheadView = [[HSCommodityItemTopBannerView alloc] init];
+            _placeheadView.bounds = tableView.bounds;
+//            [self.view addSubview:_placeheadView];
+            _placeheadView.translatesAutoresizingMaskIntoConstraints = NO;
+//            _placeheadView.hidden = YES;
 
+        }
+
+//        _placeheadView.infoView.titleLabel.text = [NSString stringWithFormat:@"%@ %@",_detailPicModel.title,_detailPicModel.standard];
+//        _placeheadView.infoView.titleLabel.preferredMaxLayoutWidth = CGRectGetWidth(tableView.frame) - 16;
+//        _placeheadView.infoView.priceLabel.text = [NSString stringWithFormat:@"%@元",_detailPicModel.price];
+//        
+//       
+//        [_placeheadView updateConstraintsIfNeeded];
+//        [_placeheadView layoutIfNeeded];
+//        
+//        height = [_placeheadView systemLayoutSizeFittingSize:UILayoutFittingCompressedSize].height;
+        height = 317;
+        
     }
     
     //return height;

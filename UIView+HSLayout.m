@@ -51,7 +51,7 @@
 /// 宽度
 - (void)HS_widthWithConstant:(CGFloat)width;
 {
-    self.translatesAutoresizingMaskIntoConstraints = NO;
+//    self.translatesAutoresizingMaskIntoConstraints = NO;
     NSLayoutConstraint *widthCon = [NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:width];
     [self addConstraint:widthCon];
 }
@@ -59,8 +59,8 @@
 /// 高度
 - (void)HS_HeightWithConstant:(CGFloat)height
 {
-    self.translatesAutoresizingMaskIntoConstraints = NO;
-    NSLayoutConstraint *con = [NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:height];
+//    self.translatesAutoresizingMaskIntoConstraints = NO;
+    NSLayoutConstraint *con = [NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:height];
     [self addConstraint:con];
 
 }
@@ -76,7 +76,7 @@
 /// 竖直居中
 - (void)HS_centerYWithSubView:(UIView *)subView
 {
-    subView.translatesAutoresizingMaskIntoConstraints = NO;
+//    subView.translatesAutoresizingMaskIntoConstraints = NO;
     NSLayoutConstraint *con = [NSLayoutConstraint constraintWithItem:subView attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeCenterY multiplier:1.0 constant:0];
     [self addConstraint:con];
 

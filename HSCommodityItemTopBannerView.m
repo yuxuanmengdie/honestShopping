@@ -34,14 +34,15 @@
         
         _bannerHeight = 240;
         
-        _bannerView = [[FFScrollView alloc] init];
+        _bannerView = [[FFScrollView alloc] initWithFrame:CGRectZero];
         _bannerView.translatesAutoresizingMaskIntoConstraints = NO;
         //_bannerView.imageContentMode = UIViewContentModeScaleAspectFit;
         _bannerView.backgroundColor = [UIColor whiteColor];
         
         [self addSubview:_bannerView];
         
-        _infoView = [[HSItemBuyInfoView alloc] initWithFrame:CGRectZero];
+        _infoView = [[[NSBundle mainBundle] loadNibNamed:@"HSItemBuyInfoView" owner:nil
+                                                options:nil] firstObject];
         _infoView.translatesAutoresizingMaskIntoConstraints = NO;
         [self addSubview:_infoView];
         
@@ -77,5 +78,10 @@
     [self updateConstraintsIfNeeded];
     [self layoutIfNeeded];
 }
+
+//- (void)layoutSubviews {
+//    // Custom code which potentially messes with constraints
+//    [super layoutSubviews]; // No code after this and this is called last
+//}
 
 @end

@@ -156,6 +156,12 @@ static const int kAdsCellImageViewTag = 600;
 - (void)ffScrollViewInitWithSubView:(UIView *)spView
 {
     if (_ffScrollView != nil && [_ffScrollView superview] == spView) {
+        if (![_ffScrollView.sourceArr isEqualToArray:_bannerImagesArray]) {
+            _ffScrollView.sourceArr = _bannerImagesArray;
+            [_ffScrollView iniSubviewsWithFrame:CGRectMake(0, 0,CGRectGetWidth(_commdityCollectionView.frame), kFFScrollViewHeight)];
+        }
+       
+
         return;
     }
     
@@ -625,7 +631,7 @@ static const int kAdsCellImageViewTag = 600;
         idx = indexPath.row + 4;
     }
     
-    if (indexPath.row == 3) {
+    if (indexPath.section == 3) {
         itemModel = _itemsData[indexPath.row];
     }
     else

@@ -12,39 +12,65 @@
 #import "UIImageView+WebCache.h"
 #import "HSCommodtyItemModel.h"
 #import "HSCommodityDetailViewController.h"
+#import "UIView+HSLayout.h"
+#import "UIImageView+WebCache.h"
+#import "CHTCollectionViewWaterfallLayout.h"
 
-@interface HSDiscoverViewController ()<UITableViewDataSource,
-UITableViewDelegate>
+@interface HSDiscoverViewController ()<UICollectionViewDataSource,
+UICollectionViewDelegate,
+CHTCollectionViewDelegateWaterfallLayout>
 {
     NSArray *_discoverArray;
     
-    NSMutableDictionary *_imageSizeDic;
 }
 
-@property (weak, nonatomic) IBOutlet UITableView *discoverTableView;
+@property (weak, nonatomic) IBOutlet UICollectionView *discoverCollectionView;
+
 
 @end
 
 @implementation HSDiscoverViewController
 
+static NSString *const kHeaderIdentifier = @"headerCellIdentifier";
 
+static NSString *const kCellIdentifier = @"AdsCellIdentifier";
+
+static const int kFirstSectionNum = 3;
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     self.title = @"发现生活";
+    [_discoverCollectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:kCellIdentifier];
     
-    [_discoverTableView registerNib:[UINib nibWithNibName:NSStringFromClass([HSCommodityDetailTableViewCell class]) bundle:nil] forCellReuseIdentifier:NSStringFromClass([HSCommodityDetailTableViewCell class])];
-    _discoverTableView.separatorStyle = UITableViewCellSelectionStyleNone;
-    _discoverTableView.dataSource = self;
-    _discoverTableView.delegate = self;
+    [_discoverCollectionView registerClass:[UICollectionReusableView class] forSupplementaryViewOfKind:CHTCollectionElementKindSectionHeader withReuseIdentifier:kHeaderIdentifier];
     
-    _imageSizeDic = [[NSMutableDictionary alloc] init];
+    _discoverCollectionView.dataSource = self;
+    _discoverCollectionView.delegate = self;
+    [_discoverCollectionView setAlwaysBounceVertical:YES];
+    
+    CHTCollectionViewWaterfallLayout *layout = [[CHTCollectionViewWaterfallLayout alloc] init];
+    
+    layout.sectionInset = UIEdgeInsetsMake(5, 5, 5, 5);
+    layout.headerHeight = 0;
+    layout.footerHeight = 0;
+    layout.minimumColumnSpacing = 5;
+    layout.minimumInteritemSpacing = 5;
+    layout.columnCount = 2;
+    _discoverCollectionView.collectionViewLayout = layout;
+
+    
     [self discoverRequest];
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    [_discoverCollectionView reloadData];
 }
 
 /*
@@ -101,7 +127,7 @@ UITableViewDelegate>
             }];
             
             _discoverArray = tmp;
-            [_discoverTableView reloadData];
+            [_discoverCollectionView reloadData];
         }
     }];
 
@@ -112,13 +138,70 @@ UITableViewDelegate>
     [self discoverRequest];
 }
 #pragma mark -
-#pragma mark  tableView dataSource
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    HSCommodityDetailTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([HSCommodityDetailTableViewCell class]) forIndexPath:indexPath];
-    HSBannerModel *model = _discoverArray[indexPath.row];
+#pragma mark  collection dataSource
+
+-(NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView{
+    return 2;
+}
+
+-(NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
     
-    cell.detailImageView.image = kPlaceholderImage;
+    NSInteger count = 0;
+    if (section == 0) {
+        count = MIN(3, _discoverArray.count);
+    }
+    else
+    {
+        count = _discoverArray.count > 3 ? _discoverArray.count-3:0;
+    }
+    return count;
+}
+
+//-(CGSize) collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section{
+//    return CGSizeMake(CGRectGetWidth(collectionView.frame), 200);
+//}
+
+-(UICollectionReusableView *) collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath{
+    
+    if ([kind isEqualToString:CHTCollectionElementKindSectionHeader]) {
+        UICollectionReusableView *view = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:kHeaderIdentifier forIndexPath:indexPath];
+        
+        if(!view)
+        {
+            view = [[UICollectionReusableView alloc] init];
+        }
+        view.backgroundColor = [UIColor purpleColor];
+        
+        return view;
+
+    }
+    
+    return nil;
+}
+
+-(UICollectionViewCell *) collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
+    UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:kCellIdentifier forIndexPath:indexPath];
+    cell.backgroundColor = [UIColor whiteColor];
+    
+    UIImageView *imgView = (UIImageView *)[cell viewWithTag:499];
+    if (imgView == nil) {
+        imgView = [[UIImageView alloc] init];
+        imgView.translatesAutoresizingMaskIntoConstraints = NO;
+        imgView.tag = 499;
+        [cell addSubview:imgView];
+        [cell HS_edgeFillWithSubView:imgView];
+    }
+    
+    HSBannerModel *model;
+    if (indexPath.section == 0) {
+        model = _discoverArray[indexPath.row];
+    }
+    else
+    {
+        NSInteger count = _discoverArray.count > kFirstSectionNum ? _discoverArray.count-kFirstSectionNum:0;
+        model = _discoverArray[count + kFirstSectionNum-1];
+    }
+    imgView.image = kPlaceholderImage;
     [[SDWebImageManager sharedManager] downloadImageWithURL:[NSURL URLWithString:model.content]
                                                     options:0
                                                    progress:^(NSInteger receivedSize, NSInteger expectedSize) {
@@ -127,10 +210,10 @@ UITableViewDelegate>
                                                   completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
                                                       if (image) {
                                                           // do something with image
-                                                          cell.detailImageView.image = image;
+                                                          imgView.image = image;
                                                           
                                                           NSValue *imgSize =  [NSValue valueWithCGSize:image.size];
-                                                          NSDictionary *dic = [_imageSizeDic objectForKey:[self p_keyFromIndex:indexPath]];
+                                                          NSDictionary *dic = [self.imageSizeDic objectForKey:[self p_keyFromIndex:indexPath]];
                                                           if (dic != nil ) {
                                                               NSURL *imgURL = dic[kImageURLKey];
                                                               NSValue *sizeValue = dic[kImageSizeKey];
@@ -142,13 +225,11 @@ UITableViewDelegate>
                                                           NSDictionary *tmpDic = @{kImageSizeKey:imgSize,
                                                                                    kImageURLKey:imageURL};
                                                           
-                                                          [_imageSizeDic setObject:tmpDic forKey:[self p_keyFromIndex:indexPath]];
-                                                          
-                                                          
+                                                          [self.imageSizeDic setObject:tmpDic forKey:[self p_keyFromIndex:indexPath]];
                                                           
                                                           // NSLog(@"cell   %d  ob=%@",indexPath.row,_imageSizeDic[ind]);
-                                                          if (tableView.dataSource != nil) {
-                                                              [tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic ];
+                                                          if (_discoverCollectionView.dataSource != nil) {
+                                                              [_discoverCollectionView reloadItemsAtIndexPaths:@[indexPath]];
                                                           }
                                                           
                                                           
@@ -156,35 +237,39 @@ UITableViewDelegate>
                                                       }
                                                   }];
     
-
     
     return cell;
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
-{
-    return _discoverArray.count;
-}
-
-- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    CGFloat height = 200.0;
-    NSDictionary *dic = [_imageSizeDic objectForKey:[self p_keyFromIndex:indexPath]];
-   
+-(CGSize) collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath{
+    
+    CGSize rstSize = CGSizeZero;// CGSizeMake(50, 60);
+    NSDictionary *dic = [self.imageSizeDic objectForKey:[self p_keyFromIndex:indexPath]];
+    
     if (dic != nil) {
+        
         NSValue *sizeValue = dic[kImageSizeKey];
-        if (sizeValue.CGSizeValue.width != 0.0) { /// 宽度为0时 防止除0错误
-            float per = (float)sizeValue.CGSizeValue.height / sizeValue.CGSizeValue.width;
-            height = per * CGRectGetWidth(tableView.frame);
+        if (sizeValue.CGSizeValue.width != 0) {
+            
         }
+        rstSize = sizeValue.CGSizeValue;
     }
-
-    return height;
+    NSLog(@"size=%@",NSStringFromCGSize(rstSize));
+    return rstSize;
 }
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout columnCountForSection:(NSInteger)section
 {
-    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    if (section == 0) {
+        return 3;
+    }
+    
+    return 1;
+}
+
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
+{
     HSBannerModel *model = _discoverArray[indexPath.row];
     HSCommodtyItemModel *itemModel = [[HSCommodtyItemModel alloc] init];
     itemModel.id = model.desc;
@@ -196,6 +281,14 @@ UITableViewDelegate>
 
 }
 
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout heightForHeaderInSection:(NSInteger)section
+{
+    if (section == 0) {
+        return 200;
+    }
+    return 0;
+}
 
 - (NSString *)p_keyFromIndex:(NSIndexPath *)index
 {

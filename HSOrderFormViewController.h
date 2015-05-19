@@ -8,6 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface HSOrderFormViewController : UIViewController
+@interface HSOrderFormViewController : HSBaseViewController
 
 @end

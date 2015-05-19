@@ -17,6 +17,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    self.title = @"更多";
+    [self placeViewWithImgName:@"search_no_content" text:@"暂无内容"];
 }
 
 - (void)didReceiveMemoryWarning {

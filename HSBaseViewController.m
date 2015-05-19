@@ -12,6 +12,7 @@
 #import "SVProgressHUD.h"
 #import "MBProgressHUD.h"
 
+
 @interface HSBaseViewController ()
 {
      //AFHTTPRequestOperationManager *_httpRequestOperationManager;
@@ -232,12 +233,38 @@ static const int kPlaceViewTag = 5003;
     if (count >= 2)
     {
         self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"btn_back"] style:UIBarButtonItemStyleBordered target:self action:@selector(backAction:)];
+        [self hiddenTabBar:YES];
     }
+
 }
 
 - (void)backAction:(id)sender
 {
     [self.navigationController popViewControllerAnimated:YES];
+    
+     UIViewController *main = self.navigationController.parentViewController;
+    if ([main isKindOfClass:[UITabBarController class]] && [self.navigationController.viewControllers count] < 2) {
+        UIView *tabView = [main.view viewWithTag:kTabBarViewTag];
+        UITabBarController *tabVC = (UITabBarController *)main;
+        tabVC.tabBar.hidden = YES;
+        tabView.hidden = NO;
+    }
+
+}
+
+- (void)hiddenTabBar:(BOOL)isHidd
+{
+    NSInteger count = [self.navigationController.viewControllers count];
+    if (count >= 2)
+    {
+        UIViewController *main = self.navigationController.parentViewController;
+        
+        if ([main isKindOfClass:[UITabBarController class]]) {
+            UIView *tabView = [main.view viewWithTag:kTabBarViewTag];
+            tabView.hidden = isHidd;
+        }
+    }
+
 }
 
 #pragma mark -
@@ -259,6 +286,7 @@ static const int kPlaceViewTag = 5003;
     UILabel *lbl = [[UILabel alloc] init];
     lbl.textColor = [UIColor grayColor];
     lbl.backgroundColor = [UIColor whiteColor];
+    lbl.textAlignment = NSTextAlignmentCenter;
     lbl.font = [UIFont systemFontOfSize:14];
     lbl.text = text;
     [placeView addSubview:lbl];

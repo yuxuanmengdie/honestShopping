@@ -93,6 +93,10 @@ static const float kTimerInterval = 5.0;
     [self addSubview:self.pageControl];
     
     [self.scrollView scrollRectToVisible:CGRectMake(width, 0, width, height) animated:NO];
+    if ([timer isValid]) {
+        [timer invalidate];
+    }
+    
     timer = [NSTimer scheduledTimerWithTimeInterval:kTimerInterval target:self selector:@selector(nextPage:) userInfo:nil repeats:YES];
     
     UITapGestureRecognizer *singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(singleTap:)];

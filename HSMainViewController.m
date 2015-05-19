@@ -10,6 +10,8 @@
 #import "define.h"
 #import "HSIntroViewController.h"
 #import "HSLoginInViewController.h"
+#import "HSTabBarView.h"
+#import "UIView+HSLayout.h"
 
 @interface HSMainViewController ()
 {
@@ -59,7 +61,7 @@
         [barItem setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:kAPPTintColor,NSForegroundColorAttributeName, nil] forState:UIControlStateSelected];
     }];
 
-    
+    [self tabBarViewInit];
 //    UIView *customView = [[UIView alloc] init];
 //    customView.backgroundColor = [UIColor blueColor];
 //    customView.frame = CGRectMake(80, CGRectGetMaxY(self.view.frame)-60, CGRectGetWidth(self.view.frame)/self.tabBar.items.count, 60);
@@ -126,5 +128,42 @@
 //    }
 }
 
+
+#pragma mark -
+#pragma mark 自定义tabbarView 代替tabbar
+- (void)tabBarViewInit
+{
+    HSTabBarView *tabView = [[HSTabBarView alloc] initWithFrame:CGRectZero];
+    tabView.backgroundColor = [UIColor clearColor];
+    tabView.translatesAutoresizingMaskIntoConstraints = NO;
+    tabView.tag = kTabBarViewTag;
+    UIView *pView = self.view;
+    [pView addSubview:tabView];
+    //self.tabBar.hidden = YES;
+    
+    [self.view HS_dispacingWithFisrtView:pView fistatt:NSLayoutAttributeLeading secondView:tabView secondAtt:NSLayoutAttributeLeading constant:0 ];
+    [self.view HS_dispacingWithFisrtView:pView fistatt:NSLayoutAttributeBottom secondView:tabView secondAtt:NSLayoutAttributeBottom constant:0 ];
+    [self.view HS_dispacingWithFisrtView:pView fistatt:NSLayoutAttributeTrailing secondView:tabView secondAtt:NSLayoutAttributeTrailing constant:0 ];
+    
+    __weak typeof(self) wself = self;
+    tabView.actionBlock = ^(int idx){
+        __strong typeof(wself) swself = wself;
+        
+        [swself setSelectedIndex:idx];
+    };
+}
+
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    self.tabBar.hidden = YES;
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [self.tabBar setHidden:NO];
+}
 
 @end

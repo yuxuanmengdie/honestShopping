@@ -134,17 +134,23 @@ static const int kContentViewTag = 1000;
 #pragma mark 导航栏
 - (void)setUpNavBar
 {
-    UISearchBar *searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.view.frame) - 160, 30)]; //
+    UIImageView *imgView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 100, 30)];
+    imgView.image = [UIImage imageNamed:@"icon_navLeft70x30"];
+    [imgView sizeToFit];
+    UIBarButtonItem *leftItem = [[UIBarButtonItem alloc] initWithCustomView:imgView];
+    self.navigationItem.leftBarButtonItem = leftItem;
+
+    
+    UISearchBar *searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.view.frame)-imgView.image.size.width-60, 30)]; //
     searchBar.showsCancelButton = NO;
     searchBar.delegate = self;
     searchBar.tintColor = kAPPTintColor;
+    searchBar.placeholder = @"输入心仪的商品";
     UIBarButtonItem *barItem = [[UIBarButtonItem alloc] initWithCustomView:searchBar];
     self.navigationItem.rightBarButtonItem = barItem;
     
-    UIImageView *imgView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 100, 30)];
-    imgView.backgroundColor = [UIColor redColor];
-    UIBarButtonItem *leftItem = [[UIBarButtonItem alloc] initWithCustomView:imgView];
-    self.navigationItem.leftBarButtonItem = leftItem;
+    
+//    self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
     
 }
 

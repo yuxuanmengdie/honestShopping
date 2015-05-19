@@ -37,13 +37,13 @@
 @implementation HSLoginInViewController
 
 ///用户textfield表示图片
-static NSString *const kUserImageName = @"icon_activity";
+static NSString *const kUserImageName = @"icon_userName";
 /// 密码表示图片
-static NSString *const kPassWordImageName = @"icon_activity";
+static NSString *const kPassWordImageName = @"icon_findPW";
 /// 记住密码选中图片
-static NSString *const kRemeberPWSeletedImageName = @"icon_activity";
+static NSString *const kRemeberPWSeletedImageName = @"icon_remeberPW";
 ///
-static NSString *const kRemeberPWNormalImageName = @"icon_activity";
+static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -52,6 +52,7 @@ static NSString *const kRemeberPWNormalImageName = @"icon_activity";
     [self setNavBarRightBarWithTitle:@"注册" action:@selector(accoutRegister)];
     self.navigationController.navigationBarHidden = NO;
     [self buttonStyle];
+    _iconImageView.image = [UIImage imageNamed:@"icon_logo"];
     [self leftViewWithTextFiled:_userNameTextField imgName:kUserImageName];
     [self leftViewWithTextFiled:_passWordTextFiled imgName:kPassWordImageName];
     NSDictionary *userInfo = [public userInfoFromPlist];
@@ -117,6 +118,7 @@ static NSString *const kRemeberPWNormalImageName = @"icon_activity";
     [_remeberPWButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     [_remeberPWButton setImage:[UIImage imageNamed:kRemeberPWNormalImageName] forState:UIControlStateNormal];
     [_remeberPWButton setImage:[UIImage imageNamed:kRemeberPWSeletedImageName] forState:UIControlStateSelected];
+    _remeberPWButton.selected = YES;
     
     [_findPWButton setTitle:@"找回密码" forState:UIControlStateNormal];
     [_findPWButton setBackgroundColor:[UIColor clearColor]];
@@ -144,6 +146,7 @@ static NSString *const kRemeberPWNormalImageName = @"icon_activity";
 #pragma mark 按钮响应
 
 - (IBAction)remeberPWAction:(id)sender {
+    _remeberPWButton.selected = !_remeberPWButton.selected;
 }
 
 - (IBAction)findPWAction:(id)sender {
@@ -194,8 +197,11 @@ static NSString *const kRemeberPWNormalImageName = @"icon_activity";
                 [self showHudInWindowWithText:@"登录成功"];
                 [public saveUserInfoToPlist:[_userInfoModel toDictionary]];
                 [public setLoginInStatus:YES];
-                [public saveLastPassword:passWord];
+                
                 [public saveLastUserName:userName];
+                if (_remeberPWButton.selected) {
+                    [public saveLastPassword:passWord];
+                }
                 [self backAction:nil];
             }
         }

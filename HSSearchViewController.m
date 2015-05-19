@@ -51,8 +51,14 @@ static const int kSizeNum = 10;
     // Do any additional setup after loading the view.
     [self searchBarSetUp];
     [self searchCollectViewLayout];
-    [_searchBar becomeFirstResponder];
     [self setNavBarRightBarWithTitle:@"    " action:nil];
+}
+
+
+- (void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    [_searchBar becomeFirstResponder];
 }
 
 
@@ -97,7 +103,7 @@ static const int kSizeNum = 10;
     searchBar.tintColor = kAPPTintColor;
     searchBar.frame = CGRectMake(0, 0,1000, 30);
     searchBar.delegate = self;
-    searchBar.returnKeyType = UIReturnKeySearch;
+//    searchBar.returnKeyType = UIReturnKeySearch;
     searchBar.placeholder = @"输入关键字";
     _searchBar = searchBar;
     self.navigationItem.titleView = searchBar;
@@ -183,6 +189,14 @@ static const int kSizeNum = 10;
 #pragma  mark collectionView dataSource and delegate
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
+    if (_searchArray.count == 0) {
+        [self placeViewWithImgName:@"search_no_content" text:@"没有搜索内容"];
+    }
+    else
+    {
+        [self removePlaceView];
+    }
+    
     return _searchArray.count;
 }
 
