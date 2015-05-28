@@ -57,6 +57,7 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
     [self leftViewWithTextFiled:_passWordTextFiled imgName:kPassWordImageName];
     NSDictionary *userInfo = [public userInfoFromPlist];
     NSLog(@"userInfo=%@",userInfo);
+    
 }
 
 - (void)didReceiveMemoryWarning {
@@ -170,7 +171,7 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
 - (void)loginRequest:(NSString *)userName password:(NSString *)passWord
 {
     [self showhudLoadingWithText:@"正在登录..." isDimBackground:YES];
-    NSDictionary *parametersDic = @{kPostJsonKey:[public getIPAddress:YES],
+    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
                                     kPostJsonUserName:userName,
                                     kPostJsonPassWord:passWord
                                     };
@@ -199,8 +200,9 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
                 [public setLoginInStatus:YES];
                 
                 [public saveLastUserName:userName];
+                [public saveLastPassword:passWord];
                 if (_remeberPWButton.selected) {
-                    [public saveLastPassword:passWord];
+                    
                 }
                 [self backAction:nil];
             }
@@ -226,4 +228,84 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
     [textField resignFirstResponder];
     return YES;
 }
+
+#pragma mark -
+#pragma mark 微信登录
+
+/*
+- (void)getAccess_token
+ {
+ //https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code
+ 
+ NSString *url =[NSString stringWithFormat:@"https://api.weixin.qq.com/sns/oauth2/access_token?appid=%@&secret=%@&code=%@&grant_type=authorization_code",kWXAPP_ID,kWXAPP_SECRET,self.wxCode.text];
+ 
+ dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+ NSURL *zoneUrl = [NSURL URLWithString:url];
+ NSString *zoneStr = [NSString stringWithContentsOfURL:zoneUrl encoding:NSUTF8StringEncoding error:nil];
+ NSData *data = [zoneStr dataUsingEncoding:NSUTF8StringEncoding];
+ dispatch_async(dispatch_get_main_queue(), ^{
+ if (data) {
+ NSDictionary *dic = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+ 
+// {
+// "access_token" = "OezXcEiiBSKSxW0eoylIeJDUKD6z6dmr42JANLPjNN7Kaf3e4GZ2OncrCfiKnGWiusJMZwzQU8kXcnT1hNs_ykAFDfDEuNp6waj-bDdepEzooL_k1vb7EQzhP8plTbD0AgR8zCRi1It3eNS7yRyd5A";
+// "expires_in" = 7200;
+// openid = oyAaTjsDx7pl4Q42O3sDzDtA7gZs;
+// "refresh_token" = "OezXcEiiBSKSxW0eoylIeJDUKD6z6dmr42JANLPjNN7Kaf3e4GZ2OncrCfiKnGWi2ZzH_XfVVxZbmha9oSFnKAhFsS0iyARkXCa7zPu4MqVRdwyb8J16V8cWw7oNIff0l-5F-4-GJwD8MopmjHXKiA";
+// scope = "snsapi_userinfo,snsapi_base";
+// }
+ 
+
+self.access_token.text = [dic objectForKey:@"access_token"];
+self.openid.text = [dic objectForKey:@"openid"];
+
+}
+});
+});
+ }
+
+ 利用GCD来获取对应的token和openID.
+
+第三步：userinfo
+-(void)getUserInfo
+{
+    // https://api.weixin.qq.com/sns/userinfo?access_token=ACCESS_TOKEN&openid=OPENID
+    
+    NSString *url =[NSString stringWithFormat:@"https://api.weixin.qq.com/sns/userinfo?access_token=%@&openid=%@",self.access_token.text,self.openid.text];
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        NSURL *zoneUrl = [NSURL URLWithString:url];
+        NSString *zoneStr = [NSString stringWithContentsOfURL:zoneUrl encoding:NSUTF8StringEncoding error:nil];
+        NSData *data = [zoneStr dataUsingEncoding:NSUTF8StringEncoding];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (data) {
+                NSDictionary *dic = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+ 
+//                 {
+//                 city = Haidian;
+//                 country = CN;
+//                 headimgurl = "http://wx.qlogo.cn/mmopen/FrdAUicrPIibcpGzxuD0kjfnvc2klwzQ62a1brlWq1sjNfWREia6W8Cf8kNCbErowsSUcGSIltXTqrhQgPEibYakpl5EokGMibMPU/0";
+//                 language = "zh_CN";
+//                 nickname = "xxx";
+//                 openid = oyAaTjsDx7pl4xxxxxxx;
+//                 privilege =     (
+//                 );
+//                 province = Beijing;
+//                 sex = 1;
+//                 unionid = oyAaTjsxxxxxxQ42O3xxxxxxs;
+//                 }
+ 
+                
+                self.nickname.text = [dic objectForKey:@"nickname"];
+                self.wxHeadImg.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[dic objectForKey:@"headimgurl"]]]];
+                
+            }
+        });
+        
+    });
+}
+
+*/
+
+
 @end

@@ -129,7 +129,7 @@ static const int kAdsCellImageViewTag = 600;
         }
         
         
-        [wself dataRequestWithWithCid:_cateID size:kSizeNum key:[public getIPAddress:YES] page:_itemsData.count/kSizeNum + 1];
+        [wself dataRequestWithWithCid:_cateID size:kSizeNum key:[public md5Str:[public getIPAddress:YES]] page:_itemsData.count/kSizeNum + 1];
     }];
     _isAdsLoding = NO;
     
@@ -143,7 +143,7 @@ static const int kAdsCellImageViewTag = 600;
     LogFunc;
     [_commdityCollectionView reloadData];
     if (_adsData.count == 0 && !_isAdsLoding) {
-        [self adsRequestWithCid:_cateID key:[public getIPAddress:YES]];
+        [self adsRequestWithCid:_cateID key:[public md5Str:[public getIPAddress:YES]]];
     }
     
     if (_itemsData.count == 0 && !_commdityCollectionView.footer.isRefreshing) { /// 数据为空 并且 不在刷新
@@ -159,15 +159,13 @@ static const int kAdsCellImageViewTag = 600;
         if (![_ffScrollView.sourceArr isEqualToArray:_bannerImagesArray]) {
             _ffScrollView.sourceArr = _bannerImagesArray;
             [_ffScrollView iniSubviewsWithFrame:CGRectMake(0, 0,CGRectGetWidth(_commdityCollectionView.frame), kFFScrollViewHeight)];
+            _ffScrollView.pageControl.currentPageIndicatorTintColor = kAPPTintColor;
         }
-       
-
         return;
     }
     
     _ffScrollView = [[FFScrollView alloc] initWithFrame:CGRectZero];
     _ffScrollView.pageViewDelegate = self;
-    _ffScrollView.pageControl.currentPageIndicatorTintColor = kAPPTintColor;
     [spView addSubview:_ffScrollView];
     _ffScrollView.translatesAutoresizingMaskIntoConstraints = NO;
     NSString *vfl1 = @"H:|[_ffScrollView]|";
@@ -183,9 +181,7 @@ static const int kAdsCellImageViewTag = 600;
     
     _ffScrollView.sourceArr = _bannerImagesArray;
     [_ffScrollView iniSubviewsWithFrame:CGRectMake(0, 0,CGRectGetWidth(_commdityCollectionView.frame), kFFScrollViewHeight)];
-
-    
-    
+    _ffScrollView.pageControl.currentPageIndicatorTintColor = kAPPTintColor;
 }
 
 - (void)setBannerModels:(NSArray *)images
@@ -564,6 +560,17 @@ static const int kAdsCellImageViewTag = 600;
     }
     else
     {
+        if (indexPath.section == 0) {
+            CHTCollectionViewWaterfallLayout *layout = (CHTCollectionViewWaterfallLayout *)_commdityCollectionView.collectionViewLayout;
+            CGFloat totalWitdh = CGRectGetWidth(collectionView.frame)-layout.sectionInset.left-layout.sectionInset.right-layout.minimumColumnSpacing;
+            CGSize first = CGSizeMake(totalWitdh*0.4, totalWitdh*0.5);
+             CGSize second = CGSizeMake(totalWitdh*0.6, (totalWitdh*0.5-5)/2.0);
+            NSArray *arr = @[[NSValue valueWithCGSize:first],[NSValue valueWithCGSize:second],[NSValue valueWithCGSize:second]];
+            CGSize retSize = [arr[indexPath.row] CGSizeValue];
+            return retSize;
+            
+        }
+        
         CGSize size = CGSizeMake(80, 60);
         NSDictionary *dic = [_imageSizeDic objectForKey:[self p_keyFromIndex:indexPath]];
         if (dic != nil) {
@@ -645,9 +652,27 @@ static const int kAdsCellImageViewTag = 600;
     if (self.cellSelectedBlock) {
         self.cellSelectedBlock(itemModel);
     }
-    
-    
+
 }
+
+- (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section
+{
+    if ([_commdityCollectionView numberOfItemsInSection:section] == 1) {
+         return UIEdgeInsetsMake(0, 5, 0, 5);
+    }
+    return UIEdgeInsetsMake(5, 5, 5, 5);
+}
+
+- (BOOL)collectionView:(UICollectionView *)collectionView columnEqualWithForSectionAtIndex:(NSInteger)section
+{
+    BOOL isWidthEqual = YES;
+    if (section == 0) {
+        isWidthEqual = NO;
+    }
+    
+    return isWidthEqual;
+}
+
 
 - (NSString *)p_keyFromIndex:(NSIndexPath *)index
 {

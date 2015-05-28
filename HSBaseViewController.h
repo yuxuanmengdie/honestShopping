@@ -30,7 +30,7 @@
 /// 定义加载失败的文字
 - (void)showReqeustFailedMsgWithText:(NSString *)text;
 
-/// 隐藏并从父视图移除
+/// 隐藏并从父视图移除等待视图
 - (void)hiddenMsg;
 
 /// 点击重新加载后的响应  子类可重写

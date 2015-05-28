@@ -130,7 +130,7 @@ static const int kSizeNum = 10;
 - (void)searchRequest:(NSString *)keyWord page:(int)page size:(int)size isMore:(BOOL)isMore
 {
     [self showhudLoadingWithText:nil isDimBackground:YES];
-    NSDictionary *parametersDic = @{kPostJsonKey:[public getIPAddress:YES],
+    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
                                     kPostJsonPage:[NSNumber numberWithInt:page],
                                     kPostJsonSize:[NSNumber numberWithInt:size],
                                     kPostJsonKeyWord:keyWord

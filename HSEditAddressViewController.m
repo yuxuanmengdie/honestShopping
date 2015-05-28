@@ -1,0 +1,203 @@
+//
+//  HSEditAddressViewController.m
+//  honestShopping
+//
+//  Created by 张国俗 on 15-5-27.
+//  Copyright (c) 2015年 张国俗. All rights reserved.
+//
+
+#import "HSEditAddressViewController.h"
+#import "HSEditAddressContainerTableViewController.h"
+
+@interface HSEditAddressViewController ()
+{
+    HSEditAddressContainerTableViewController *_containerVC;
+}
+
+@end
+
+@implementation HSEditAddressViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    [self setNavBarRightBarWithTitle:@"保存" action:@selector(saveAction)];
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+    if ([segue.identifier isEqualToString:@"editAddressContanter"]) {
+        _containerVC = segue.destinationViewController;
+        
+        if (_addressChangeType == HSeditaddressByUpdateType) { /// 更新的
+            _containerVC.userNameTextFiled.text = [public controlNullString:_addressModel.consignee];
+            _containerVC.phoneTextFiled.text = [public controlNullString:_addressModel.mobile];
+            _containerVC.addressLabel.text = [NSString stringWithFormat:@"%@%@%@",[public controlNullString:_addressModel.sheng],[public controlNullString:_addressModel.shi],[public controlNullString:_addressModel.qu]];
+            _containerVC.detailAddressTextView.text = [public controlNullString:_addressModel.address];
+        }
+    }
+}
+
+#pragma mark - 
+#pragma mark 保存item的响应
+- (void)saveAction
+{
+    if (![self addressInfoIsMacth]) {
+        return;
+    }
+
+    if (_addressChangeType == HSeditaddressByAddType) { // 新增地址
+        
+        [self addAddressRequestWithUid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode] consignee:[public controlNullString:_containerVC.userNameTextFiled.text] address:[public controlNullString:_containerVC.detailAddressTextView.text] mobile:[public controlNullString:_containerVC.phoneTextFiled.text] sheng:[public controlNullString:_containerVC.sheng] shi:[public controlNullString:_containerVC.shi] qu:[public controlNullString:_containerVC.qu]];
+    }
+    else /// 修改地址
+    {
+        [self updateAddressRequestWithUid:[public controlNullString:_addressModel.uid] add_id:[public controlNullString:_addressModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode] consignee:[public controlNullString:_containerVC.userNameTextFiled.text] address:[public controlNullString:_containerVC.detailAddressTextView.text] mobile:[public controlNullString:_containerVC.phoneTextFiled.text] sheng:[public controlNullString:_containerVC.sheng] shi:[public controlNullString:_containerVC.shi] qu:[public controlNullString:_containerVC.qu]];
+    }
+}
+
+#pragma mark -
+#pragma mark 保存新增地址
+- (void)addAddressRequestWithUid:(NSString *)uid sessionCode:(NSString *)sessionCode consignee:(NSString *)consignee address:(NSString *)address mobile:(NSString *)mobile sheng:(NSString *)sheng shi:(NSString *)shi qu:(NSString *)qu
+{
+    [self showhudLoadingWithText:@"保存中..." isDimBackground:YES];
+    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+                                    kPostJsonUid:uid,
+                                    kPostJsonSessionCode:sessionCode,
+                                    kPostJsonConsignee:consignee,
+                                    kPostJsonAddress:address,
+                                    kPostJsonMobile:mobile,
+                                    kPostJsonSheng:sheng,
+                                    kPostJsonShi:shi,
+                                    kPostJsonQu:qu
+                                    };
+    [self.httpRequestOperationManager POST:kAddressAddURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+        [self hiddenHudLoading];
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"failed\n%@",operation.responseString);
+        [self hiddenHudLoading];
+        if (operation.responseData == nil) {
+            [self showHudWithText:@"保存失败"];
+            return ;
+        }
+        NSError *jsonError = nil;
+        id json = [NSJSONSerialization JSONObjectWithData:operation.responseData options:NSJSONReadingMutableContainers error:&jsonError];
+        if (jsonError == nil && [json isKindOfClass:[NSDictionary class]]) {
+            NSDictionary *tmp = (NSDictionary *)json;
+            
+            BOOL status = [tmp[kPostJsonStatus] boolValue];
+            
+            if (status) {
+                [self showHudWithText:@"保存成功"];
+            }
+            else
+            {
+                [self showHudWithText:@"保存失败"];
+            }
+        }
+        else
+        {
+            
+        }
+    }];
+
+}
+
+
+#pragma mark -
+#pragma mark 更新地址
+- (void)updateAddressRequestWithUid:(NSString *)uid add_id:(NSString *)add_id sessionCode:(NSString *)sessionCode consignee:(NSString *)consignee address:(NSString *)address mobile:(NSString *)mobile sheng:(NSString *)sheng shi:(NSString *)shi qu:(NSString *)qu
+{
+    [self showhudLoadingWithText:@"保存中..." isDimBackground:YES];
+    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+                                    kPostJsonUid:uid,
+                                    kPostJsonid:add_id,
+                                    kPostJsonSessionCode:sessionCode,
+                                    kPostJsonConsignee:consignee,
+                                    kPostJsonAddress:address,
+                                    kPostJsonMobile:mobile,
+                                    kPostJsonSheng:sheng,
+                                    kPostJsonShi:shi,
+                                    kPostJsonQu:qu
+                                    };
+    [self.httpRequestOperationManager POST:kAddressUpdateURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+        [self hiddenHudLoading];
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"failed\n%@",operation.responseString);
+        [self hiddenMsg];
+        if (operation.responseData == nil) {
+            [self showHudWithText:@"保存失败"];
+            return ;
+        }
+        NSError *jsonError = nil;
+        id json = [NSJSONSerialization JSONObjectWithData:operation.responseData options:NSJSONReadingMutableContainers error:&jsonError];
+        if (jsonError == nil && [json isKindOfClass:[NSDictionary class]]) {
+            NSDictionary *tmp = (NSDictionary *)json;
+            
+            BOOL status = [tmp[kPostJsonStatus] boolValue];
+            
+            if (status) {
+                [self showHudWithText:@"保存成功"];
+            }
+            else
+            {
+                [self showHudWithText:@"保存失败"];
+            }
+
+        }
+        else
+        {
+            
+        }
+    }];
+
+}
+
+
+- (BOOL)addressInfoIsMacth
+{
+    if (_containerVC.userNameTextFiled.text.length == 0) {
+        [self showHudWithText:@"用户名为空"];
+        return NO;
+    }
+    
+    if (_containerVC.userNameTextFiled.text.length > 20) {
+        [self showHudWithText:@"用户名过长"];
+        return NO;
+    }
+    
+    if (![public isPhoneNumberRegex:_containerVC.phoneTextFiled.text ]) {
+        [self showHudWithText:@"手机号码格式不符"];
+        return NO;
+    }
+    
+    if ([_containerVC.addressLabel.text isEqualToString:_containerVC.addressPlaceHolder]) {
+        [self showHudWithText:@"请选择地区"];
+        return NO;
+    }
+    
+    if ([_containerVC.detailAddressTextView.text isEqualToString:_containerVC.detailPlaceHolder])
+    {
+        [self showHudWithText:@"详细地址不能为空"];
+        return NO;
+    }
+    
+    if (_containerVC.detailAddressTextView.text.length < 5 || _containerVC.detailAddressTextView.text.length > 60) {
+        [self showHudWithText:@"详细地址字数应在5-60之间"];
+        return NO;
+    }
+    
+    return YES;
+}
+
+@end

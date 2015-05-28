@@ -173,7 +173,7 @@ static const int kTopExistCellNum = 1;
 - (void)collectItemRequestWithID:(NSString *)itemID uid:(NSString *)uid sessionCode:(NSString *)sessionCode
 {
    
-    NSDictionary *parametersDic = @{kPostJsonKey:[public getIPAddress:YES],
+    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
                                     kPostJsonUid:uid,
                                     kPostJsonItemid:itemID,
                                     kPostJsonSessionCode:sessionCode

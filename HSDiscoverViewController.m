@@ -285,7 +285,7 @@ static const int kFirstSectionNum = 3;
 - (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout heightForHeaderInSection:(NSInteger)section
 {
     if (section == 0) {
-        return 200;
+        return 200;		
     }
     return 0;
 }

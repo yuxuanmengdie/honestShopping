@@ -98,6 +98,12 @@ static NSString *const kPostJsonType = @"type";
 #define kGetAddressURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=getAddress"]
 /// 收货地址更新
 #define kAddressUpdateURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=addressUpdate"]
+/// 新增收货地址
+#define kAddressAddURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=addressAdd"]
+/// 获取默认收货地址
+#define kGetDefaultAddressURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=getDefaultAddress"]
+/// 设置默认收货地址
+#define kSetDefaultAddressURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=setDefaultAddress"]
 /// 签到
 #define kSignURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=sign"]
 /// 修改密码
@@ -122,11 +128,29 @@ static NSString *const kPostJsonType = @"type";
 #define kGetBannerURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Item&a=getBanner"]
 /// 三品一标下面分类 获取三品一标(1.有机产品2.绿色产品3.无公害产品4.地理标志)
 #define kGetSpybByTypeURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Item&a=getSpybByType"]
+/// 获取用户订单列表(传status值则会根据status筛选) 1.代付款 2.待发货 3.待收获 4.完成 5。关闭
+#define kGetOrderListURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Order&a=getOrderList"]
+/// 获取订单详情
+#define kGetOrderDetailURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Order&a=getOrderDetail"]
+/// 获取收藏商品列表
+#define kGetFavoriteURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Item&a=getFavorite"]
+/// 生成订单（调取下个订单状态）
+#define kAddOrderURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Order&a=addOrder"]
+/// 修改订单状态
+#define kUpdateOrderNextURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Order&a=updateOrderNext"]
+/// 领取优惠劵
+#define kBlindCouponWithUserURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=blindCouponWithUser"]
+/// 判断是否是会员
+#define kIsVIPURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=isVIP"]
+/// 获取首页优惠劵列表
+#define kGetCouponListURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Item&a=getCouponList"]
+/// 获取用户优惠劵
+#define kGetCouponsByUidURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=getCouponsByUid"]
+/// 获取微信支付perpayid
+#define kGetWxPerpayidURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Order&a=getWxPerpayid"]
+/// 分享
+#define kShareURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Item&a=share"]
 
-//#define kGetAddressURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?gapi&mUser&agetAddress"]
-//
-//#define kGetAddressURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?gapi&mUser&agetAddress"]
-//*/
 
 /// banner 图片前缀路径
 static NSString *const kBannerImageHeaderURL = @"http://203.192.7.23/data/upload/advert/";
@@ -146,5 +170,7 @@ static NSString *const kUserInfoPlistName = @"HSuser";
 #pragma mark 占位图片
 
 #define kPlaceholderImage  [UIImage imageNamed:@"bank_icon_failed"]
+
+#define kAppYellowColor [UIColor yellowColor]
 
 #endif

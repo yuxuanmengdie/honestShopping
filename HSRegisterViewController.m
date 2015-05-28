@@ -148,7 +148,7 @@ static NSString *const kUserImageName = @"icon_activity";
 - (void)registerRequest:(NSString *)phone password:(NSString *)passWord
 {
     [self showhudLoadingWithText:nil isDimBackground:YES];
-    NSDictionary *parametersDic = @{kPostJsonKey:[public getIPAddress:YES],
+    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
                                     kPostJsonPhone:phone,
                                     kPostJsonUserName:phone,
                                     kPostJsonPassWord:passWord
@@ -198,7 +198,7 @@ static NSString *const kUserImageName = @"icon_activity";
 - (void)FindPWRequest:(NSString *)phone password:(NSString *)passWord
 {
     [self showhudLoadingWithText:nil isDimBackground:YES];
-    NSDictionary *parametersDic = @{kPostJsonKey:[public getIPAddress:YES],
+    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
                                     kPostJsonPhone:phone,
                                     kPostJsonUserName:phone,
                                     kPostJsonPassWord:passWord
@@ -257,7 +257,7 @@ static NSString *const kUserImageName = @"icon_activity";
 #pragma mark  发送验证码
 - (void)sendCaptchas:(NSString *)phone
 {
-    NSDictionary *parametersDic = @{kPostJsonKey:[public getIPAddress:YES],
+    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
                                     kPostJsonPhone:phone
                                     };
     // 142346261  123456
@@ -304,7 +304,7 @@ static NSString *const kUserImageName = @"icon_activity";
 {
     
     [self showhudLoadingWithText:nil isDimBackground:YES];
-    NSDictionary *parametersDic = @{kPostJsonKey:[public getIPAddress:YES],
+    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
                                     kPostJsonPhone:phone,
                                     kPostJsonCode:code
                                     };

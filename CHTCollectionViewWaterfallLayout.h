@@ -186,6 +186,11 @@ extern NSString *const CHTCollectionElementKindSectionFooter;
  */
 - (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section;
 
+#pragma mark -
+#pragma mark 返回section 中列是否相等 // 张
+
+- (BOOL)collectionView:(UICollectionView *)collectionView columnEqualWithForSectionAtIndex:(NSInteger)section;
+
 @end
 
 #pragma mark - CHTCollectionViewWaterfallLayout
@@ -293,5 +298,10 @@ extern NSString *const CHTCollectionElementKindSectionFooter;
  *    The width of an item is calculated based on number of columns, the collection view width, and the horizontal insets for that section.
  */
 - (CGFloat)itemWidthInSectionAtIndex:(NSInteger)section;
+
+
+#pragma mark -
+#pragma mark 是否每列均等 默认相等 // 张
+@property (nonatomic, assign) BOOL isColumnEqualWidth;
 
 @end

@@ -74,7 +74,7 @@ static const int kCellImgViewTag = 500;
         NSNumber *isLoading = _typeLoadingDic[[self p_keyFromType:type]];
         NSArray *typeArr = _sanpinDataDic[[self p_keyFromType:type]];
         if ((isLoading == nil || ![isLoading boolValue]) && typeArr.count == 0) {
-            [swself sanpinTypeRequest:type key:[public getIPAddress:YES]];
+            [swself sanpinTypeRequest:type key:[public md5Str:[public getIPAddress:YES]]];
         }
         [_sanpinCollectionView reloadData];
         
