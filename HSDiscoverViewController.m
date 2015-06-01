@@ -16,12 +16,17 @@
 #import "UIImageView+WebCache.h"
 #import "CHTCollectionViewWaterfallLayout.h"
 
+#import "HSUserInfoModel.h"
+
 @interface HSDiscoverViewController ()<UICollectionViewDataSource,
 UICollectionViewDelegate,
 CHTCollectionViewDelegateWaterfallLayout>
 {
     NSArray *_discoverArray;
     
+    HSUserInfoModel *_userInfoModel;
+    
+    BOOL _isVIP;
 }
 
 @property (weak, nonatomic) IBOutlet UICollectionView *discoverCollectionView;
@@ -51,15 +56,15 @@ static const int kFirstSectionNum = 3;
     CHTCollectionViewWaterfallLayout *layout = [[CHTCollectionViewWaterfallLayout alloc] init];
     
     layout.sectionInset = UIEdgeInsetsMake(5, 5, 5, 5);
-    layout.headerHeight = 0;
+    layout.headerInset = UIEdgeInsetsZero;
     layout.footerHeight = 0;
     layout.minimumColumnSpacing = 5;
     layout.minimumInteritemSpacing = 5;
     layout.columnCount = 2;
     _discoverCollectionView.collectionViewLayout = layout;
 
-    
     [self discoverRequest];
+    _isVIP = NO;
 }
 
 - (void)didReceiveMemoryWarning {
@@ -70,6 +75,16 @@ static const int kFirstSectionNum = 3;
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
+    if ([public isLoginInStatus]) {
+       _userInfoModel =[[HSUserInfoModel alloc] initWithDictionary:[public userInfoFromPlist] error:nil];
+        _isVIP = [_userInfoModel.is_vip isEqualToString:@"1"];
+    }
+    else
+    {
+        _userInfoModel = nil;
+        _isVIP = NO;
+    }
+    
     [_discoverCollectionView reloadData];
 }
 
@@ -137,6 +152,48 @@ static const int kFirstSectionNum = 3;
 {
     [self discoverRequest];
 }
+
+#pragma mark - 
+#pragma mark 判断是否会员
+- (void)isVIPWithUid:(NSString *)uid sessionCode:(NSString *)sessionCode
+{
+    [self showhudLoadingInWindowWithText:nil isDimBackground:YES];
+    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+                                    kPostJsonUid:uid,
+                                    kPostJsonSessionCode:sessionCode
+                                    };
+    [self.httpRequestOperationManager POST:kIsVIPURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+        [self hiddenHudLoading];
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"%s failed\n%@",__func__,operation.responseString);
+        [self hiddenHudLoading];
+        if (operation.responseData == nil) {
+            return ;
+        }
+        NSError *jsonError = nil;
+        id json = [NSJSONSerialization JSONObjectWithData:operation.responseData options:NSJSONReadingMutableContainers error:&jsonError];
+        if (jsonError == nil && [json isKindOfClass:[NSDictionary class]]) {
+            NSDictionary *jsonDic = (NSDictionary *)json;
+            
+            BOOL status = [jsonDic[kPostJsonStatus] boolValue];
+            if (jsonDic.allKeys.count == 1 ) {
+                _isVIP = status;
+                if (_isVIP) {
+                    [_discoverCollectionView selectItemAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:1] animated:YES scrollPosition:UICollectionViewScrollPositionBottom];
+                }
+                else
+                {
+                    [self showHudWithText:@"您还不是会员"];
+                }
+            }
+        }
+        else
+        {
+            
+        }
+    }];
+
+}
 #pragma mark -
 #pragma mark  collection dataSource
 
@@ -166,12 +223,14 @@ static const int kFirstSectionNum = 3;
     if ([kind isEqualToString:CHTCollectionElementKindSectionHeader]) {
         UICollectionReusableView *view = [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:kHeaderIdentifier forIndexPath:indexPath];
         
-        if(!view)
-        {
-            view = [[UICollectionReusableView alloc] init];
+        UIImageView *imgView = (UIImageView *)[view viewWithTag:701];
+        if (imgView == nil) {
+            imgView = [[UIImageView alloc] init];
+            imgView.translatesAutoresizingMaskIntoConstraints = NO;
+            [view addSubview:imgView];
+            [view HS_edgeFillWithSubView:imgView];
         }
-        view.backgroundColor = [UIColor purpleColor];
-        
+        imgView.image = [UIImage imageNamed:@"icon_discover_head"];
         return view;
 
     }
@@ -270,6 +329,21 @@ static const int kFirstSectionNum = 3;
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
+    if (indexPath.section == 1) { // 会员区
+        
+        if (![public isLoginInStatus]) {
+            [self showHudWithText:@"请先登录"];
+            return ;
+        }
+        
+        if (!_isVIP) {
+            [self isVIPWithUid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
+            return;
+        }
+        
+    }
+    
+    
     HSBannerModel *model = _discoverArray[indexPath.row];
     HSCommodtyItemModel *itemModel = [[HSCommodtyItemModel alloc] init];
     itemModel.id = model.desc;
@@ -284,10 +358,12 @@ static const int kFirstSectionNum = 3;
 
 - (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout heightForHeaderInSection:(NSInteger)section
 {
+    CGFloat hei = 0;
     if (section == 0) {
-        return 200;		
+        UIImage *image = [UIImage imageNamed:@"icon_discover_head"];
+        hei = (CGFloat)image.size.height / image.size.width * collectionView.frame.size.width;
     }
-    return 0;
+    return hei;
 }
 
 - (NSString *)p_keyFromIndex:(NSIndexPath *)index

@@ -20,6 +20,8 @@
 
 /// 请求的manger
 @property (strong, nonatomic) AFHTTPRequestOperationManager *httpRequestOperationManager;
+/// 是否在请求中
+@property (assign, nonatomic, readonly) BOOL isRequestLoading;
 
 /// 导航栏rightitem
 - (void)setNavBarRightBarWithTitle:(NSString *)rightTitle action:(SEL)seletor;
@@ -44,6 +46,9 @@
 
 /// hud 等待视图
 - (void)showhudLoadingWithText:(NSString *)text isDimBackground:(BOOL)isDim;
+
+/// hud 显示在window上
+- (void)showhudLoadingInWindowWithText:(NSString *)text isDimBackground:(BOOL)isDim;
 
 /// 在window层 hud 2秒后hidden
 - (void)showHudInWindowWithText:(NSString *)text;

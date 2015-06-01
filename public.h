@@ -69,4 +69,11 @@
 
 /// 处理字符串 为nil 时返回""
 + (NSString *)controlNullString:(NSString *)ori;
+
+/// 登录 防止sessioncode 过期
++ (void)loginIn;
+
+/// 定时登录 默认间隔1小时
++ (void)timedLoginIn;
+
 @end

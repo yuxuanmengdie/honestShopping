@@ -7,7 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "HSCommodtyItemModel.h"
+
+typedef void(^HSSanpinCollectionCellSelectedBlock)(HSCommodtyItemModel *itemModel);
 
 @interface HSSanpinViewController : HSBaseViewController
+
+/// 点击单个cell的block
+@property (nonatomic, copy) HSSanpinCollectionCellSelectedBlock cellSelectedBlock;
 
 @end

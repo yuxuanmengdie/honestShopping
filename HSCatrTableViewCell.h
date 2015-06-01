@@ -9,6 +9,8 @@
 #import <UIKit/UIKit.h>
 #import "PKYStepper.h"
 
+typedef void(^HSCartSelectBlock)(void);
+
 @interface HSCatrTableViewCell : UITableViewCell
 
 @property (weak, nonatomic) IBOutlet UIImageView *itemImageView;
@@ -18,4 +20,9 @@
 @property (weak, nonatomic) IBOutlet UILabel *priceLabel;
 
 @property (weak, nonatomic) IBOutlet PKYStepper *stepper;
+
+@property (weak, nonatomic) IBOutlet UIButton *selectButton;
+
+@property (copy, nonatomic) HSCartSelectBlock selectBlock;
+
 @end

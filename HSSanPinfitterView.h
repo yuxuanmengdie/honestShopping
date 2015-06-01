@@ -18,6 +18,9 @@ typedef void(^HSSanPinfitterViewActionBlock)(int idx);
 /// 按钮之间的间距， 默认为8
 @property (assign, nonatomic) CGFloat itemSpacing;
 
+/// 分割视图 默认高度0.5
+@property (strong, nonatomic) UIView *sepView;
+
 @property (copy, nonatomic) HSSanPinfitterViewActionBlock actionBlock;
 
 /// 根据数据赋值 动态增加button数量

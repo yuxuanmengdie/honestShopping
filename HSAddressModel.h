@@ -27,6 +27,8 @@
 
 @property (copy, nonatomic) NSString *qu;
 
+@property (copy, nonatomic) NSString *is_default;
+
 @end
 
 /*

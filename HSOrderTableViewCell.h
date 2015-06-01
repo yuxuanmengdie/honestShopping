@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "HSOrderModel.h"
 
 /// 订单的cell
 @interface HSOrderTableViewCell : UITableViewCell
@@ -20,5 +21,7 @@
 @property (weak, nonatomic) IBOutlet UILabel *priceLabel;
 
 @property (weak, nonatomic) IBOutlet UILabel *stateLabel;
+
+- (void)setupWithModel:(HSOrderModel *)orderModel;
 
 @end

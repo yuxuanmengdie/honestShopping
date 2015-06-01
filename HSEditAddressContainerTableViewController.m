@@ -45,12 +45,29 @@ UITextFieldDelegate>
     _userNameTextFiled.clearButtonMode = UITextFieldViewModeNever;
     _phoneTextFiled.clearButtonMode = UITextFieldViewModeNever;
     
-//    _addressLabel.userInteractionEnabled = YES;
-//    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(selectAddress)];
-//    [_addressLabel addGestureRecognizer:tap];
+    if (_addressModel != nil) { /// 不为nil 认为是更新的
+        [self updateAddressWithOrigeModel:_addressModel];
+    }
+    
 }
 
 
+
+- (void)updateAddressWithOrigeModel:(HSAddressModel *)addressModel
+{
+    if (addressModel == nil) {
+        return;
+    }
+    
+    _userNameTextFiled.text = [public controlNullString:addressModel.consignee];
+    _phoneTextFiled.text = [public controlNullString:addressModel.mobile];
+    _addressLabel.text = [NSString stringWithFormat:@"%@%@%@",[public controlNullString:addressModel.sheng],[public controlNullString:addressModel.shi],[public controlNullString:addressModel.qu]];
+    _detailAddressTextView.text = [public controlNullString:addressModel.address];
+    
+    _sheng = [public controlNullString:addressModel.sheng];
+    _shi = [public controlNullString:addressModel.shi];
+    _qu = [public controlNullString:addressModel.qu];
+}
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];

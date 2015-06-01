@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "HSCouponModel.h"
 
 @interface HSCouponTableViewCell : UITableViewCell
 
@@ -19,6 +20,8 @@
 @property (weak, nonatomic) IBOutlet UILabel *introLabel;
 
 @property (weak, nonatomic) IBOutlet UILabel *explainLabel;
+
+- (void)setUpWithModel:(HSCouponModel *)couponModle;
 
 
 @end

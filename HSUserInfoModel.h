@@ -25,5 +25,6 @@
 @property (nonatomic, copy) NSString *score_level;
 @property (nonatomic, copy) NSString *sessionCode;
 @property (nonatomic, assign) BOOL sign;
+@property (nonatomic, copy) NSString *is_vip;
 
 @end

@@ -142,7 +142,7 @@ static const int kSizeNum = 10;
         [self hiddenHudLoading];
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"failed\n%@",operation.responseString);
+         NSLog(@"%s failed\n%@",__func__,operation.responseString);
         [self hiddenHudLoading];
         if (operation.responseData == nil) {
             [self showHudWithText:@"搜索失败"];

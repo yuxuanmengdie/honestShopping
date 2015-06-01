@@ -161,7 +161,7 @@ static NSString *const kUserImageName = @"icon_activity";
         [self hiddenHudLoading];
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"failed\n%@",operation.responseString);
+        NSLog(@"%s failed\n%@",__func__,operation.responseString);
         [self hiddenHudLoading];
         if (operation.responseData == nil) {
             [self showHudWithText:@"注册失败"];
@@ -211,7 +211,7 @@ static NSString *const kUserImageName = @"icon_activity";
         [self hiddenHudLoading];
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"failed\n%@",operation.responseString);
+        NSLog(@"%s failed\n%@",__func__,operation.responseString);
         [self hiddenHudLoading];
         if (operation.responseData == nil) {
             [self showHudWithText:@"设置失败"];
@@ -268,7 +268,7 @@ static NSString *const kUserImageName = @"icon_activity";
         [self hiddenHudLoading];
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"failed\n%@",operation.responseString);
+        NSLog(@"%s failed\n%@",__func__,operation.responseString);
         [self hiddenHudLoading];
         if (operation.responseData == nil) {
             [self showHudWithText:@"发送失败"];
@@ -316,7 +316,7 @@ static NSString *const kUserImageName = @"icon_activity";
         [self hiddenHudLoading];
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"failed\n%@",operation.responseString);
+        NSLog(@"%s failed\n%@",__func__,operation.responseString);
         [self hiddenHudLoading];
         if (operation.responseData == nil) {
             [self showHudWithText:@"验证失败"];

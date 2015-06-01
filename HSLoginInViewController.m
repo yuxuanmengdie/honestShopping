@@ -183,7 +183,7 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
         [self hiddenHudLoading];
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"failed\n%@",operation.responseString);
+        NSLog(@"%s failed\n%@",__func__,operation.responseString);
         [self hiddenHudLoading];
         if (operation.responseData == nil) {
             [self showHudWithText:@"登录失败"];

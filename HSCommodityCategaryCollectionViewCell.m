@@ -22,12 +22,12 @@
         
         if (isSelected) {//选中状态
             _categaryTitleLabel.font = [UIFont systemFontOfSize:16];
-            _categaryTitleLabel.textColor = [UIColor blackColor];
+            _categaryTitleLabel.textColor = kAPPTintColor;
         }
         else // 没选择
         {
             _categaryTitleLabel.font = [UIFont systemFontOfSize:14];
-            _categaryTitleLabel.textColor = [UIColor grayColor];
+            _categaryTitleLabel.textColor = kAppYellowColor;
         }
 
 //    }];

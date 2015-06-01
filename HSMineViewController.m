@@ -32,6 +32,8 @@ UIAlertViewDelegate>
     HSMineTopTableViewCell *_topCell;
     
     HSUserInfoModel *_userInfoModel;
+    
+    NSArray *_iconArray;
 }
 @property (weak, nonatomic) IBOutlet UICollectionView *mineCollectionView;
 
@@ -56,6 +58,7 @@ static NSString *const kCellIdentifier = @"HSMineViewControllerCellIdentifier";
     self.title = @"我的";
     [self setUpDataArray];
     [self getLastetUserInfoModel];
+    _iconArray = @[@"icon_mine_1",@"icon_mine_2",@"icon_mine_3",@"icon_mine_4",@"icon_mine_5",@"icon_mine_6"];
     
     [_mineCollectionView registerNib:[UINib nibWithNibName:NSStringFromClass([HSMineCollectionViewCell class]) bundle:nil] forCellWithReuseIdentifier:NSStringFromClass([HSMineCollectionViewCell class])];
     [_mineCollectionView registerNib:[UINib nibWithNibName:NSStringFromClass([HSMineTopCollectionReusableView class]) bundle:nil] forSupplementaryViewOfKind:CHTCollectionElementKindSectionHeader withReuseIdentifier:NSStringFromClass([HSMineTopCollectionReusableView class])];
@@ -72,7 +75,6 @@ static NSString *const kCellIdentifier = @"HSMineViewControllerCellIdentifier";
     layout.minimumInteritemSpacing = 1;
     layout.columnCount = 3;
     _mineCollectionView.collectionViewLayout = layout;
-
     
 }
 
@@ -142,7 +144,8 @@ static NSString *const kCellIdentifier = @"HSMineViewControllerCellIdentifier";
         NSLog(@"success\n%@",operation.responseString);
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"failed\n%@",operation.responseString);
+        NSLog(@"%s failed\n%@",__func__,operation.responseString);
+       
         if (operation.responseData == nil) {
             [self loginRequest:userName password:passWord];
             return ;
@@ -180,7 +183,7 @@ static NSString *const kCellIdentifier = @"HSMineViewControllerCellIdentifier";
         //[self showHudWithText:@"用户信息获取失败"];
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"failed\n%@",operation.responseString);
+         NSLog(@"%s failed\n%@",__func__,operation.responseString);
         if (operation.responseData == nil) {
             //[self showHudWithText:@"用户信息获取失败"];
             return ;
@@ -220,7 +223,7 @@ static NSString *const kCellIdentifier = @"HSMineViewControllerCellIdentifier";
         [self showHudWithText:@"签到失败"];
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"failed\n%@",operation.responseString);
+        NSLog(@"%s failed\n%@",__func__,operation.responseString);
         if (operation.responseData == nil) {
             [self showHudWithText:@"签到失败"];
             return ;
@@ -228,17 +231,21 @@ static NSString *const kCellIdentifier = @"HSMineViewControllerCellIdentifier";
         NSError *jsonError = nil;
         id json = [NSJSONSerialization JSONObjectWithData:operation.responseData options:NSJSONReadingMutableContainers error:&jsonError];
         if (jsonError == nil && [json isKindOfClass:[NSDictionary class]]) {
-                        NSDictionary *tmp = (NSDictionary *)json;
+            NSDictionary *tmp = (NSDictionary *)json;
             BOOL isSign = [tmp[kPostJsonStatus] boolValue];
             if (isSign) {
                 [self showHudInWindowWithText:@"签到成功"];
                 _userInfoModel.sign = isSign;
                 [_mineCollectionView reloadData];
             }
-            else
+            else if(tmp.allKeys.count == 1)
             {
                 [self showHudInWindowWithText:@"已签到"];
 
+            }
+            else
+            {
+                [self showHudInWindowWithText:@"签到失败"];
             }
         }
         else
@@ -269,6 +276,7 @@ static NSString *const kCellIdentifier = @"HSMineViewControllerCellIdentifier";
 {
     HSMineCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:NSStringFromClass([HSMineCollectionViewCell class]) forIndexPath:indexPath];
     cell.titleLabel.text = _mineDataArray[indexPath.row];
+    cell.titleImageView.image = [UIImage imageNamed:_iconArray[indexPath.row]];
     return cell;
 }
 
@@ -298,7 +306,7 @@ static NSString *const kCellIdentifier = @"HSMineViewControllerCellIdentifier";
             [view signStatus:NO];
             [view welcomeText:nil isLogin:NO];
         }
-        
+        view.bgImageView.image = [UIImage imageNamed:@"icon_mine_headBg.jpg"];
         __weak typeof(self) wself = self;
         view.signBlock = ^{ /// 如果没登录  进入登录界面
             __strong typeof(wself) swself = wself;
@@ -387,6 +395,7 @@ static NSString *const kCellIdentifier = @"HSMineViewControllerCellIdentifier";
         UIStoryboard *stroyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
         HSMineAddressViewController *vc = [stroyBoard instantiateViewControllerWithIdentifier:NSStringFromClass([HSMineAddressViewController class])];
         vc.userInfoModel = _userInfoModel;
+        vc.addressType = HSMineAddressReadType;
         vc.hidesBottomBarWhenPushed = YES;
         vc.title = _mineDataArray[indexPath.row];
         [self.navigationController pushViewController:vc animated:YES];
@@ -400,7 +409,7 @@ static NSString *const kCellIdentifier = @"HSMineViewControllerCellIdentifier";
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
     if (buttonIndex == 1) { // 拨打电话
-         [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"tel://18655061482"]];
+         [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"tel://02525326589"]];
     }
 }
 

@@ -15,6 +15,8 @@ typedef NS_ENUM(NSUInteger,  HSEditAddressType) {
     HSeditaddressByUpdateType = 2
 };
 
+typedef void(^HSEditAddressUpdateSuccessBlock)(HSAddressModel *addModel);
+
 @interface HSEditAddressViewController : HSBaseViewController
 
 @property (strong, nonatomic) HSUserInfoModel *userInfoModel;
@@ -22,5 +24,8 @@ typedef NS_ENUM(NSUInteger,  HSEditAddressType) {
 @property (strong, nonatomic) HSAddressModel *addressModel;
 /// 修改类型
 @property (assign, nonatomic) HSEditAddressType addressChangeType;
+
+/// 更新地址信息成功后回调
+@property (copy, nonatomic) HSEditAddressUpdateSuccessBlock updateBlcok;
 
 @end

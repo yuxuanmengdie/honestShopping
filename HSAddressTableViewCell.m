@@ -27,7 +27,8 @@
         _phoneLabel.textColor = [UIColor whiteColor];
         _detailLabel.textColor = [UIColor whiteColor];
         _defaultImageView.hidden = NO;
-        self.contentView.backgroundColor = [UIColor groupTableViewBackgroundColor];
+        self.contentView.backgroundColor = kAPPTintColor;
+        _detailLabel.text = [NSString stringWithFormat:@"[默认]%@", [public controlNullString:_detailLabel.text]];
     }
     else
     {
@@ -38,6 +39,33 @@
         self.contentView.backgroundColor = [UIColor whiteColor];
 
     }
+}
+
+- (void)setupWithModel:(HSAddressModel *)addressModel
+{
+    _nickNameLabel.text = [public controlNullString:addressModel.consignee];
+    _phoneLabel.text = [public controlNullString:addressModel.mobile];
+    _detailLabel.text = [NSString stringWithFormat:@"%@%@%@%@",[public controlNullString:addressModel.sheng],[public controlNullString:addressModel.shi],[public controlNullString:addressModel.qu],[public controlNullString:addressModel.address]];
+    BOOL isDefault = [addressModel.is_default isEqualToString:@"1"];
+    [self addressIsDefault:isDefault];
+    
+}
+
+- (void)dataWithModel:(HSAddressModel *)addressModel selectAddressID:(NSString *)addressID
+{
+    BOOL isEqual = [addressModel.id isEqualToString:addressID];
+    [self setupWithModel:addressModel];
+    
+    _nickNameLabel.textColor = [UIColor blackColor];
+    _phoneLabel.textColor = [UIColor blackColor];
+    _detailLabel.textColor = [UIColor blackColor];
+    _defaultImageView.hidden = YES;
+    self.contentView.backgroundColor = [UIColor whiteColor];
+    
+    if (isEqual) {
+        _defaultImageView.hidden = NO;
+    }
+    
 }
 
 @end

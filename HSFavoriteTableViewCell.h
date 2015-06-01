@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "HSCommodtyItemModel.h"
 
 typedef void(^HSFavoriteTableViewCellCancelBlcok)(void);
 
@@ -23,5 +24,7 @@ typedef void(^HSFavoriteTableViewCellCancelBlcok)(void);
 @property (weak, nonatomic) IBOutlet UIButton *cancelButton;
 
 @property (copy, nonatomic) HSFavoriteTableViewCellCancelBlcok cancelBlock;
+
+- (void)setupWirhModel:(HSCommodtyItemModel *)itemModel;
 
 @end

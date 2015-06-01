@@ -49,6 +49,9 @@ FFScrollViewDelegate>
     HSCommodityCollectionViewCell *_sizeCell;
     
     BOOL _isAdsLoding;
+    
+    /// 列宽度不相等section的size 数组
+    NSArray *_firstSectionArr;
 }
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *commodityTopConstraint;
 
@@ -314,7 +317,7 @@ static const int kAdsCellImageViewTag = 600;
         NSLog(@"response=%@",operation.responseString);
         _isAdsLoding = NO;
         NSString *str = (NSString *)operation.responseString;
-        if (str.length < 1) {
+        if (str.length <= 1) {
             return ;
         }
         NSString *result = [str substringFromIndex:1];
@@ -561,12 +564,15 @@ static const int kAdsCellImageViewTag = 600;
     else
     {
         if (indexPath.section == 0) {
-            CHTCollectionViewWaterfallLayout *layout = (CHTCollectionViewWaterfallLayout *)_commdityCollectionView.collectionViewLayout;
-            CGFloat totalWitdh = CGRectGetWidth(collectionView.frame)-layout.sectionInset.left-layout.sectionInset.right-layout.minimumColumnSpacing;
-            CGSize first = CGSizeMake(totalWitdh*0.4, totalWitdh*0.5);
-             CGSize second = CGSizeMake(totalWitdh*0.6, (totalWitdh*0.5-5)/2.0);
-            NSArray *arr = @[[NSValue valueWithCGSize:first],[NSValue valueWithCGSize:second],[NSValue valueWithCGSize:second]];
-            CGSize retSize = [arr[indexPath.row] CGSizeValue];
+            if (_firstSectionArr == nil) {
+                
+                CHTCollectionViewWaterfallLayout *layout = (CHTCollectionViewWaterfallLayout *)_commdityCollectionView.collectionViewLayout;
+                CGFloat totalWitdh = CGRectGetWidth(collectionView.frame)-layout.sectionInset.left-layout.sectionInset.right-layout.minimumColumnSpacing;
+                CGSize first = CGSizeMake(totalWitdh*0.4, totalWitdh*0.5);
+                CGSize second = CGSizeMake(totalWitdh*0.6, (totalWitdh*0.5-5)/2.0);
+                _firstSectionArr = @[[NSValue valueWithCGSize:first],[NSValue valueWithCGSize:second],[NSValue valueWithCGSize:second]];
+            }
+            CGSize retSize = [_firstSectionArr[indexPath.row] CGSizeValue];
             return retSize;
             
         }

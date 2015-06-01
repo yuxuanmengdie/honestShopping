@@ -7,21 +7,21 @@
 //
 
 #import "HSMainPageViewController.h"
-#import "HSCommodityCategaryCollectionViewCell.h"
+#import "HSHomeViewController.h"
 #import "HSCommodityViewController.h"
+#import "HSCommodityDetailViewController.h"
 #import "HSSanpinViewController.h"
+#import "HSSearchViewController.h"
+
+#import "HSCommodityCategaryCollectionViewCell.h"
 #import "CHTCollectionViewWaterfallLayout.h"
-#import "define.h"
 #import "FFScrollView.h"
-#import "JSONModel.h"
+#import "HSContentCollectionViewCell.h"
+
 #import "HSCategariesModel.h"
 #import "HSBannerModel.h"
 #import "HSItemPageModel.h"
 #import "HSCommodtyItemModel.h"
-#import "HSContentCollectionViewCell.h"
-#import "HSCommodityDetailViewController.h"
-#import "HSSearchViewController.h"
-
 
 @interface HSMainPageViewController ()<
 UICollectionViewDataSource,
@@ -44,14 +44,11 @@ UISearchBarDelegate>
     /// 选中的类别
     NSIndexPath *_selectedCategary;
     
-    /// 单独商品的vc
-    HSCommodityViewController *_commodityViewController;
-    
     /// 三品一标
     HSSanpinViewController *_sanpinViewController;
     
-    /// 热销顶部的滚动试图
-    FFScrollView *_ffScrollView;
+    /// 首页 热销
+    HSHomeViewController *_homeViewController;
     
     /// 顶部滚动高度约束
     NSLayoutConstraint *_ffScrollViewHeightConstraint;
@@ -104,17 +101,14 @@ static const int kContentViewTag = 1000;
     _contentCollectionView.showsVerticalScrollIndicator = NO;
    
     _cateItemsDataDic = [[NSMutableDictionary alloc] init];
-    
     _selectedCategary = [NSIndexPath indexPathForRow:0 inSection:0];
     
     UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
-    _commodityViewController = [storyboard instantiateViewControllerWithIdentifier:@"commodityViewController"];
     _sanpinViewController = [storyboard instantiateViewControllerWithIdentifier:NSStringFromClass([HSSanpinViewController class])];
-//    [self addChildViewController:_sanpinViewController];
-//    [_sanpinViewController didMoveToParentViewController:self];
+    _homeViewController = [storyboard instantiateViewControllerWithIdentifier:NSStringFromClass([HSHomeViewController class])];
     
     [self getCommofityCategaries:nil];
-    [self getBannerImages];
+//    [self getBannerImages];
     
 }
 
@@ -124,11 +118,23 @@ static const int kContentViewTag = 1000;
     [super viewWillAppear:animated];
     [self.view updateConstraintsIfNeeded];
     [self.view layoutIfNeeded];
-    float wid = [_ffScrollView systemLayoutSizeFittingSize:UILayoutFittingCompressedSize].width;
-    NSLog(@"!!!!!wid=%f，sss=%f",wid,CGRectGetWidth(_ffScrollView.frame));
-
+    self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
+    [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleDefault;
+    
 }
 
+- (void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+   
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    self.navigationController.navigationBar.barTintColor = kAPPTintColor;
+    [UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
+}
 
 #pragma mark -
 #pragma mark 导航栏
@@ -149,9 +155,6 @@ static const int kContentViewTag = 1000;
     UIBarButtonItem *barItem = [[UIBarButtonItem alloc] initWithCustomView:searchBar];
     self.navigationItem.rightBarButtonItem = barItem;
     
-    
-//    self.navigationController.navigationBar.barTintColor = [UIColor whiteColor];
-    
 }
 
 
@@ -162,13 +165,11 @@ static const int kContentViewTag = 1000;
             [obj.view removeFromSuperview];
         }
 
-        
         if ([obj parentViewController] == self) {
             [obj willMoveToParentViewController:nil];
             [obj removeFromParentViewController];
 
         }
-        
         
     }];
     
@@ -178,8 +179,6 @@ static const int kContentViewTag = 1000;
         
             [self addChildViewController:obj];
             [obj didMoveToParentViewController:self];
-        
-        
     }];
 
 }
@@ -188,76 +187,17 @@ static const int kContentViewTag = 1000;
 {
     NSMutableArray *tmp = [[NSMutableArray alloc] init];
     
-    
     for (int j= 0; j<num; j++) {
         UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
         HSCommodityViewController *commodityViewController = [storyboard instantiateViewControllerWithIdentifier:@"commodityViewController"];
         
-        if (j == 0) {
-            commodityViewController.isShowBanner = YES;
-        }
         HSCategariesModel *cateModel = _categariesArray[j];
         commodityViewController.cateID = cateModel.id;
         [tmp addObject:commodityViewController];
 
     }
      [self setViewControllers:tmp];
-    
-//    dispatch_queue_t queue=dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-//    dispatch_async(queue, ^{
-//        dispatch_apply(num, queue, ^(size_t index) {
-//            UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
-//            HSCommodityViewController *commodityViewController = [storyboard instantiateViewControllerWithIdentifier:@"commodityViewController"];
-//
-//            if (num == 0) {
-//                commodityViewController.isShowBanner = YES;
-//            }
-//            [tmp addObject:commodityViewController];
-//            
-//            dispatch_sync(dispatch_get_main_queue(), ^{
-//                [self setViewControllers:tmp];
-//            });
-//        });
-//    });
 }
-
-
-
-- (void)ffScrollViewInit
-{
-    _ffScrollView = [[FFScrollView alloc] initWithFrame:CGRectZero];
-    
-    [self.view addSubview:_ffScrollView];
-    _ffScrollView.translatesAutoresizingMaskIntoConstraints = NO;
-    NSString *vfl1 = @"H:|[_ffScrollView]|";
-    NSString *vfl2 = @"V:[_topCategariesCollectionView][_ffScrollView]";
-    NSDictionary *dic = NSDictionaryOfVariableBindings(_topCategariesCollectionView,_ffScrollView,self.view);
-    NSArray *arr1 = [NSLayoutConstraint constraintsWithVisualFormat:vfl1 options:0 metrics:nil views:dic];
-    NSArray *arr2 = [NSLayoutConstraint constraintsWithVisualFormat:vfl2 options:0 metrics:nil views:dic];
-    
-    _ffScrollViewHeightConstraint  = [NSLayoutConstraint constraintWithItem:_ffScrollView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:kFFScrollViewHeight];
-    [self.view addConstraints:arr1];
-    [self.view addConstraints:arr2];
-    [self.view addConstraint:_ffScrollViewHeightConstraint];
-}
-
-
-
-- (void)commodityLatout
-{
-    
-    UIView *commodityView = _commodityViewController.view;
-    [self.view addSubview:commodityView];
-    commodityView.translatesAutoresizingMaskIntoConstraints = NO;
-    NSString *vfl1 = @"H:|[commodityView]|";
-    NSString *vfl2 = @"V:[_ffScrollView][commodityView]|";
-    NSDictionary *dic = NSDictionaryOfVariableBindings(_ffScrollView,commodityView,self.view);
-    NSArray *arr1 = [NSLayoutConstraint constraintsWithVisualFormat:vfl1 options:0 metrics:nil views:dic];
-    NSArray *arr2 = [NSLayoutConstraint constraintsWithVisualFormat:vfl2 options:0 metrics:nil views:dic];
-    [self.view addConstraints:arr1];
-    [self.view addConstraints:arr2];
-}
-
 
 - (void)sanpinLayout
 {
@@ -297,7 +237,7 @@ static const int kContentViewTag = 1000;
 #pragma  mark collectionView dataSource and delegate
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-    NSInteger count =_categariesArray.count == 0 ? _categariesArray.count : _categariesArray.count + 1;
+    NSInteger count =_categariesArray.count == 0 ? _categariesArray.count : _categariesArray.count + 2;
     return count;
 }
 
@@ -307,15 +247,36 @@ static const int kContentViewTag = 1000;
 {
     
     HSCategariesModel *model = nil;
-    if (indexPath.row < _categariesArray.count) {
-        model = _categariesArray[indexPath.row];
+    if (indexPath.row < _categariesArray.count + 1 && indexPath.row > 0) {
+        model = _categariesArray[indexPath.row-1];
     }
     
     if (collectionView == _contentCollectionView) {
         
         HSContentCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:kContentCollectionViewIdentifier forIndexPath:indexPath];
         
-        if (indexPath.row == _categariesArray.count) { /// 三品一标
+        if (indexPath.row == 0) { // 热销
+            UIView *subView = [cell.contentView viewWithTag:kContentViewTag];
+            if (subView != nil ) {
+                [subView removeFromSuperview];
+            }
+            UIView *sView = _homeViewController.view;
+            sView.tag = kContentViewTag;
+            sView.frame =cell.contentView.bounds;
+            [cell.contentView addSubview:sView];
+            
+            ///push 到商品详情
+            __weak typeof(self) wself = self;
+            _homeViewController.cellSelectedBlock = ^(HSCommodtyItemModel *itemModel){
+                UIStoryboard *storyBorad = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+                HSCommodityDetailViewController *detailVC = [storyBorad instantiateViewControllerWithIdentifier:NSStringFromClass([HSCommodityDetailViewController class])];
+                //detailVC.hidesBottomBarWhenPushed = YES;
+                detailVC.itemModel = itemModel;
+                [wself.navigationController pushViewController:detailVC animated:YES];
+            };
+
+        }
+        else if (indexPath.row == _categariesArray.count + 1) { /// 三品一标
             
             UIView *subView = [cell.contentView viewWithTag:kContentViewTag];
             if (subView != nil ) {
@@ -325,13 +286,21 @@ static const int kContentViewTag = 1000;
             sView.tag = kContentViewTag;
             sView.frame =cell.contentView.bounds;
             [cell.contentView addSubview:sView];
+            ///push 到商品详情
+            __weak typeof(self) wself = self;
+            _sanpinViewController.cellSelectedBlock = ^(HSCommodtyItemModel *itemModel){
+                UIStoryboard *storyBorad = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+                HSCommodityDetailViewController *detailVC = [storyBorad instantiateViewControllerWithIdentifier:NSStringFromClass([HSCommodityDetailViewController class])];
+                //detailVC.hidesBottomBarWhenPushed = YES;
+                detailVC.itemModel = itemModel;
+                [wself.navigationController pushViewController:detailVC animated:YES];
+            };
 
         }
         else
         {
             
-            HSCommodityViewController *commodityVC = _viewControllers[indexPath.row];
-            
+            HSCommodityViewController *commodityVC = _viewControllers[indexPath.row-1];
             UIView *subView = [cell.contentView viewWithTag:kContentViewTag];
             if (subView != nil ) {
                 [subView removeFromSuperview];
@@ -341,10 +310,6 @@ static const int kContentViewTag = 1000;
             sView.frame =cell.contentView.bounds;
             [cell.contentView addSubview:sView];
             
-            if (indexPath.row == 0) {
-                commodityVC.isShowBanner = YES;
-                [commodityVC setBannerModels:_bannerArray];
-            }
             ///push 到商品详情
             __weak typeof(self) wself = self;
             commodityVC.cellSelectedBlock = ^(HSCommodtyItemModel *itemModel){
@@ -364,10 +329,6 @@ static const int kContentViewTag = 1000;
         
         HSCommodityCategaryCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:kCategariesCollectionViewCellIdentifier forIndexPath:indexPath];
         
-        if (indexPath.row == _categariesArray.count) {// 三品
-            
-        }
-        
         if ([indexPath isEqual:_selectedCategary]) {
             [cell changeTitleColorAndFont:YES];
         }
@@ -376,7 +337,11 @@ static const int kContentViewTag = 1000;
             [cell changeTitleColorAndFont:NO];
         }
         
-        if (indexPath.row == _categariesArray.count) {
+        if (indexPath.row == 0) {
+            cell.categaryTitleLabel.text = @"热销";
+
+        }
+        else if (indexPath.row == _categariesArray.count + 1) {
             cell.categaryTitleLabel.text = @"三品一标";
         }
         else
@@ -411,15 +376,6 @@ static const int kContentViewTag = 1000;
     // 是否相邻
     BOOL isNear = fabs(tmp.row - indexPath.row) == 1 ? YES : NO;
     [_contentCollectionView scrollToItemAtIndexPath:_selectedCategary atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:isNear];
-    
-    
-//    BOOL isShow = indexPath.row == 1 ? YES : NO;
-//    [self sanpinViewShow:isShow];
-//    
-    
-    
-//    HSCategariesModel *cateModel = _categariesArray[indexPath.row];
-//    [self GetItemsWithCid:cateModel.id size:kItemSize key:[public md5Str:[public getIPAddress:YES]] page:1 index:_selectedCategary];
     
 }
 
@@ -459,50 +415,12 @@ static const int kContentViewTag = 1000;
         }
 }
 
-//-(UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section
-//{
-//    if (collectionView == _contentCollectionView) {
-//        UIEdgeInsetsMake(0, 0, 0, 0);
-//    }
-//    return UIEdgeInsetsMake(0, 0, 0, 0);
-//}
-//- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section
-//{
-//    if (collectionView == _contentCollectionView) {
-//        return 0;
-//    }
-//
-//    return 0;
-//}
-
-
-
-
-
-
-////
-- (void)sanpinViewShow:(BOOL)isShow
-{
-    if (isShow) {
-        /// 点到三品一标 时切换试图
-        _sanpinViewController.view.hidden = NO;
-        _commodityViewController.view.hidden = YES;
-    }
-    else
-    {
-        
-        _sanpinViewController.view.hidden = YES;
-        _commodityViewController.view.hidden = NO;
-    }
-}
-#pragma mark - 
+#pragma mark -
 #pragma mark
 - (void)reloadRequestData
 {
     [self getCommofityCategaries:nil];
 }
-
-
 
 #pragma mark -
 #pragma mark 获取数据
@@ -510,8 +428,8 @@ static const int kContentViewTag = 1000;
 - (void)getCommofityCategaries:(NSString *)key
 {
     [self showNetLoadingView];
-    AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
-    manager.responseSerializer = [AFJSONResponseSerializer serializer];
+//    AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
+//    manager.responseSerializer = [AFJSONResponseSerializer serializer];
     //申明请求的数据是json类型
     //    manager.requestSerializer=[AFJSONRequestSerializer serializer];
     //    //如果报接受类型不一致请替换一致text/html或别的
@@ -521,12 +439,11 @@ static const int kContentViewTag = 1000;
 //    NSLog(@";;;;;%@",[self dictionaryToJson:dic]);
     //@"{\"key\":\"f528764d624db129b32c21fbca0cb8d6\"}"
     NSDictionary *parametersDic = @{@"key":[public md5Str:[public getIPAddress:YES]]};
-    [manager POST:kGetCateURL parameters:@{@"JsonArray":[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+    [self.httpRequestOperationManager POST:kGetCateURL parameters:@{@"JsonArray":[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSLog(@"JSON: %@", responseObject);
         [self showReqeustFailedMsg];
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-//        NSLog(@"response=%@",operation.responseString);
         NSString *str = (NSString *)operation.responseString;
         if (str.length <= 1) {
             return ;
@@ -550,8 +467,10 @@ static const int kContentViewTag = 1000;
             [jsonArray enumerateObjectsUsingBlock:^(NSDictionary *obj, NSUInteger idx, BOOL *stop) {
                 
                 HSCategariesModel *model = [[HSCategariesModel alloc] initWithDictionary:obj error:nil];
-                [tmpArray addObject:model];
-            
+                if (![model.name isEqualToString:@"热销"]) { ///去除热销
+                    [tmpArray addObject:model];
+                }
+    
             }];
             _categariesArray = tmpArray;
             [self commodityViewControllersAddChild:tmpArray.count];
@@ -566,8 +485,8 @@ static const int kContentViewTag = 1000;
 #pragma mark 获取banner 图片
 - (void)getBannerImages
 {
-    AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
-    manager.responseSerializer = [AFJSONResponseSerializer serializer];
+//    AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
+//    manager.responseSerializer = [AFJSONResponseSerializer serializer];
     //申明请求的数据是json类型
     //    manager.requestSerializer=[AFJSONRequestSerializer serializer];
     //    //如果报接受类型不一致请替换一致text/html或别的
@@ -577,7 +496,7 @@ static const int kContentViewTag = 1000;
     //    NSLog(@";;;;;%@",[self dictionaryToJson:dic]);
     //@"{\"key\":\"f528764d624db129b32c21fbca0cb8d6\"}"
     NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]]};
-    [manager GET:kGetBannerURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+    [self.httpRequestOperationManager GET:kGetBannerURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSLog(@"JSON: %@", responseObject);
         [self getBannerImages];
         
@@ -587,6 +506,9 @@ static const int kContentViewTag = 1000;
         
         
         NSString *str = (NSString *)operation.responseString;
+        if (str.length <= 1) {
+            return ;
+        }
         NSString *result = [str substringFromIndex:1];
         
         NSData *data =  [result dataUsingEncoding:NSUTF8StringEncoding];
@@ -630,16 +552,14 @@ static const int kContentViewTag = 1000;
 
 - (void)GetItemsWithCid:(NSString *)cid size:(NSUInteger)size key:(NSString *)key page:(NSUInteger)page index:(NSIndexPath *)index
 {
-    AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
-    
-    
+
      //{"id":155,"key":"f528764d624db129b32c21fbca0cb8d6"}
     NSDictionary *parametersDic = @{kPostJsonKey:key,
                                     kPostJsonCid:[NSNumber numberWithLongLong:[cid longLongValue]],
                                     kPostJsonSize:[NSNumber numberWithInteger:size],
                                     kPostJsonPage:[NSNumber numberWithInteger:page]};
     
-    [manager POST:kGetItemsByCateURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+    [self.httpRequestOperationManager POST:kGetItemsByCateURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSLog(@"JSON: %@/n %@", responseObject,[public dictionaryToJson:parametersDic]);
         
         NSString *str = (NSString *)responseObject;

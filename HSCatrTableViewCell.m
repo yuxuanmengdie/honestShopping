@@ -23,6 +23,9 @@
     [_stepper setLabelTextColor:kAPPTintColor];
     [_stepper setButtonTextColor:kAPPTintColor forState:UIControlStateNormal];
     [_stepper setup];
+    
+    [_selectButton setImage:[UIImage imageNamed:@"icon_unselected"] forState:UIControlStateNormal];
+    [_selectButton setImage:[UIImage imageNamed:@"icon_selected"] forState:UIControlStateSelected];
 
 }
 
@@ -32,4 +35,10 @@
     // Configure the view for the selected state
 }
 
+- (IBAction)selectAction:(id)sender {
+    
+    if (self.selectBlock) {
+        self.selectBlock();
+    }
+}
 @end

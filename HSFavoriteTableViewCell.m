@@ -7,6 +7,7 @@
 //
 
 #import "HSFavoriteTableViewCell.h"
+#import "UIImageView+WebCache.h"
 
 @implementation HSFavoriteTableViewCell
 
@@ -27,4 +28,14 @@
         self.cancelBlock();
     }
 }
+
+- (void)setupWirhModel:(HSCommodtyItemModel *)itemModel
+{
+    _titleLabel.text = [public controlNullString:itemModel.title];
+    _introLabel.text = [public controlNullString:itemModel.intro];
+    _timeLabel.text = [public controlNullString:itemModel.add_time];
+    
+    [_commodityImageView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]] placeholderImage:kPlaceholderImage];
+}
+
 @end

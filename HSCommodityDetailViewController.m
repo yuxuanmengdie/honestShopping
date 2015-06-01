@@ -8,14 +8,18 @@
 
 #import "HSCommodityDetailViewController.h"
 #import "HSLoginInViewController.h"
+#import "HSSubmitOrderViewController.h"
+
 #import "HSBuyNumView.h"
-#import "HSCommodityItemDetailPicModel.h"
 #import "HSCommodityDetailTableViewCell.h"
 #import "HSCommodityItemTopBannerView.h"
-#import "UIImageView+WebCache.h"
-#import "AFHTTPRequestOperationManager.h"
+
+#import "HSCommodityItemDetailPicModel.h"
 #import "HSUserInfoModel.h"
+#import "AFHTTPRequestOperationManager.h"
 #import "HSDBManager.h"
+#import "UIImageView+WebCache.h"
+
 
 @interface HSCommodityDetailViewController ()<UITableViewDataSource,
 UITableViewDelegate>
@@ -77,11 +81,28 @@ static const int kTopExistCellNum = 1;
 - (void)buyViewBlock
 {
     __weak typeof(self) wself = self;
-    _buyNumView.buyBlock = ^(int num){
+    _buyNumView.buyBlock = ^(int num){ /// 购买
+        __strong typeof(wself) swself = wself;
+        if (![public isLoginInStatus]) {
+            [wself showHudWithText:@"请先登录"];
+            [swself pushViewControllerWithIdentifer:NSStringFromClass([HSLoginInViewController class])];
+            return ;
+        }
+
+        NSDictionary *dic = @{[public controlNullString:_detailPicModel.id]:[NSNumber numberWithInt:num]};
+        NSArray *arr = @[_detailPicModel];
+        
+        UIStoryboard *storyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+        HSSubmitOrderViewController *submitVC = [storyBoard instantiateViewControllerWithIdentifier:NSStringFromClass([HSSubmitOrderViewController class])];
+        submitVC.itemNumDic = dic;
+        submitVC.itemsDataArray = arr;
+        submitVC.title = @"确认订单";
+        submitVC.userInfoModel = [[HSUserInfoModel alloc] initWithDictionary:[public userInfoFromPlist] error:nil];
+        [wself.navigationController pushViewController:submitVC animated:YES];
         
     };
     
-    _buyNumView.collectBlock = ^(UIButton *collctBtn){
+    _buyNumView.collectBlock = ^(UIButton *collctBtn){ /// 收藏
         
         __strong typeof(wself) swself = wself;
         if (![public isLoginInStatus]) {
@@ -186,7 +207,7 @@ static const int kTopExistCellNum = 1;
         [self hiddenHudLoading];
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"failed\n%@",operation.responseString);
+        NSLog(@"%s failed\n%@",__func__,operation.responseString);
         [self hiddenHudLoading];
         if (operation.responseData == nil) {
             [self showHudWithText:@"收藏失败"];
@@ -201,10 +222,14 @@ static const int kTopExistCellNum = 1;
             if (isSuccess) {
                 [self showHudWithText:@"收藏成功"];
             }
-            else
+            else if (tmpDic.allKeys.count == 1)
             {
                  [self showHudWithText:@"已收藏"];
                 
+            }
+            else
+            {
+                 [self showHudWithText:@"收藏失败"];
             }
 
         }

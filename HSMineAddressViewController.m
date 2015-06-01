@@ -30,18 +30,26 @@ UITableViewDelegate>
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    [self setNavBarRightBarWithTitle:@"新增地址" action:@selector(addNewAddress)];
+    if (_addressType == HSMineAddressReadType) {
+        [self setNavBarRightBarWithTitle:@"新增地址" action:@selector(addNewAddress)];
+    }
+    else
+    {
+        [self setNavBarRightBarWithTitle:@"管理" action:@selector(controlAddress)];
+    }
+    
     
     [_addressTableView registerNib:[UINib nibWithNibName:NSStringFromClass([HSAddressTableViewCell class]) bundle:nil] forCellReuseIdentifier:NSStringFromClass([HSAddressTableViewCell class])];
     
     _addressTableView.tableFooterView = [[UIView alloc] init];
-    [self addressRequestWithUid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
+   
     
 }
 
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
+     [self addressRequestWithUid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
 }
 
 
@@ -71,7 +79,7 @@ UITableViewDelegate>
     [self.httpRequestOperationManager POST:kGetAddressURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         [self hiddenMsg];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"failed\n%@",operation.responseString);
+         NSLog(@"%s failed\n%@",__func__,operation.responseString);
         [self hiddenMsg];
         if (operation.responseData == nil) {
             [self showReqeustFailedMsg];
@@ -79,6 +87,7 @@ UITableViewDelegate>
         }
         NSError *jsonError = nil;
         id json = [NSJSONSerialization JSONObjectWithData:operation.responseData options:NSJSONReadingMutableContainers error:&jsonError];
+        _addressDataArray = nil; /// 重置地址信息
         if (jsonError == nil && [json isKindOfClass:[NSArray class]]) {
             NSArray *jsonArr = (NSArray *)json;
             NSMutableArray *tmpArr = [[NSMutableArray alloc] initWithCapacity:jsonArr.count];
@@ -91,6 +100,8 @@ UITableViewDelegate>
             }];
             
             _addressDataArray = tmpArr;
+            _addressTableView.dataSource = self;
+            _addressTableView.delegate = self;
             [_addressTableView reloadData];
         }
         else
@@ -99,6 +110,11 @@ UITableViewDelegate>
         }
     }];
     
+}
+
+- (void)reloadRequestData
+{
+    [self addressRequestWithUid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
 }
 
 #pragma mark -
@@ -114,13 +130,25 @@ UITableViewDelegate>
 }
 
 #pragma mark -
+#pragma mark 管理地址
+- (void)controlAddress
+{
+    UIStoryboard *stroyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    HSMineAddressViewController *vc = [stroyBoard instantiateViewControllerWithIdentifier:NSStringFromClass([HSMineAddressViewController class])];
+    vc.userInfoModel = _userInfoModel;
+    vc.addressType = HSMineAddressReadType;
+    vc.title = @"我的地址";
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+#pragma mark -
 #pragma mark tableView dataSource and delegate
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     NSInteger num = _addressDataArray.count;
     
     if (num == 0) {
-        [self placeViewWithImgName:@"search_no_content" text:@"还没有地址信息，请添加。"];
+        [self placeViewWithImgName:@"search_no_content" text:@"还没有地址信息，请新增"];
     }
     else
     {
@@ -132,8 +160,15 @@ UITableViewDelegate>
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     HSAddressTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([HSAddressTableViewCell class]) forIndexPath:indexPath];
-    cell.separatorInset = UIEdgeInsetsZero;
+    HSAddressModel *model = _addressDataArray[indexPath.row];
     
+    if (_addressType == HSMineAddressReadType) {
+       [cell setupWithModel:model];
+    }
+    else
+    {
+        [cell dataWithModel:model selectAddressID:_addressID];
+    }
     return cell;
 }
 
@@ -141,8 +176,11 @@ UITableViewDelegate>
 {
     if (_palaceCell == nil) {
         _palaceCell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([HSAddressTableViewCell class])];
-        _palaceCell.contentView.bounds = tableView.frame;
+        _palaceCell.contentView.bounds = tableView.bounds;
     }
+    HSAddressModel *model = _addressDataArray[indexPath.row];
+    [_palaceCell setupWithModel:model];
+    _palaceCell.detailLabel.preferredMaxLayoutWidth = _palaceCell.detailLabel.frame.size.width;
     [_palaceCell.contentView updateConstraintsIfNeeded];
      [_palaceCell.contentView layoutIfNeeded];
     CGFloat height = [_palaceCell.contentView systemLayoutSizeFittingSize:UILayoutFittingCompressedSize].height;
@@ -152,15 +190,48 @@ UITableViewDelegate>
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    if (_addressType == HSMineAddressReadType) {
+        HSAddressModel *model = _addressDataArray[indexPath.row];
+        UIStoryboard *stroyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+        HSAddressDetailViewController *detailVC = [stroyboard instantiateViewControllerWithIdentifier:NSStringFromClass([HSAddressDetailViewController class])];
+        detailVC.addressModel = model;
+        detailVC.userInfoModel = _userInfoModel;
+        detailVC.title = @"收货地址";
+        [self.navigationController pushViewController:detailVC animated:YES];
+    }
+    else
+    {
+        HSAddressModel *model = _addressDataArray[indexPath.row];
+        
+        if (self.selectBlock) {
+            self.selectBlock(model);
+        }
+        [self.navigationController popViewControllerAnimated:YES];
+    }
     
-    HSAddressModel *model = _addressDataArray[indexPath.row];
-    UIStoryboard *stroyboard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
-    HSEditAddressViewController *editVC = [stroyboard instantiateViewControllerWithIdentifier:NSStringFromClass([HSEditAddressViewController class])];
-    editVC.addressModel = model;
-    editVC.userInfoModel = _userInfoModel;
-    editVC.title = @"修改地址信息";
-    editVC.addressChangeType = HSeditaddressByUpdateType;
-    [self.navigationController pushViewController:editVC animated:YES];
+   
+}
+
+-(void)viewDidLayoutSubviews
+{
+    if ([self.addressTableView respondsToSelector:@selector(setSeparatorInset:)]) {
+        [self.addressTableView setSeparatorInset:UIEdgeInsetsMake(0,0,0,0)];
+    }
+    
+    if ([self.addressTableView respondsToSelector:@selector(setLayoutMargins:)]) {
+        [self.addressTableView setLayoutMargins:UIEdgeInsetsMake(0,0,0,0)];
+    }
+}
+
+-(void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if ([cell respondsToSelector:@selector(setSeparatorInset:)]) {
+        [cell setSeparatorInset:UIEdgeInsetsZero];
+    }
+    
+    if ([cell respondsToSelector:@selector(setLayoutMargins:)]) {
+        [cell setLayoutMargins:UIEdgeInsetsZero];
+    }
 }
 
 

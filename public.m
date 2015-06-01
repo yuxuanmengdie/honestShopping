@@ -7,6 +7,7 @@
 //
 
 #import "public.h"
+#import "HSUserInfoModel.h"
 #import <CommonCrypto/CommonDigest.h>
 #include <ifaddrs.h>
 #include <arpa/inet.h>
@@ -353,5 +354,58 @@ static NSString *const kPasswordKey = @"lastPasswordKey";
 
 }
 
+#pragma mark -
+#pragma mark 帐号登录
 
++ (void)loginIn
+{
+    if (![public isLoginInStatus]) { /// 不在登录状态 
+        return;
+    }
+    NSString *userName = [public lastUserName];
+    NSString *passWord = [public lastPassword];
+    
+    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+                                    kPostJsonUserName:userName,
+                                    kPostJsonPassWord:passWord
+                                    };
+    // 142346261  123456
+    AFHTTPRequestOperationManager *manager = [[AFHTTPRequestOperationManager alloc] init];
+    [manager POST:kLoginURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+        NSLog(@"success\n%@",operation.responseString);
+        
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+         NSLog(@"%s failed\n%@",__func__,operation.responseString);
+        if (operation.responseData == nil) {
+            [self loginIn];
+            return ;
+        }
+        NSError *jsonError = nil;
+        id json = [NSJSONSerialization JSONObjectWithData:operation.responseData options:NSJSONReadingMutableContainers error:&jsonError];
+        if (jsonError == nil && [json isKindOfClass:[NSDictionary class]]) {
+            
+            HSUserInfoModel *userInfoModel = [[HSUserInfoModel alloc] initWithDictionary:json error:nil];
+            if (userInfoModel.id.length > 0) { /// 登录后返回有数据
+                [public saveUserInfoToPlist:[userInfoModel toDictionary]];
+            }
+        }
+        else
+        {
+            
+        }
+    }];
+
+}
+
+static const double kTimedLoginInterval = 60*60;
+
++ (void)timedLoginIn
+{
+    NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:kTimedLoginInterval target:self selector:@selector(timerAction) userInfo:nil repeats:YES];
+}
+
++ (void)timerAction
+{
+    [public loginIn];
+}
 @end

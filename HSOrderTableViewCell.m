@@ -7,6 +7,7 @@
 //
 
 #import "HSOrderTableViewCell.h"
+#import "UIImageView+WebCache.h"
 
 @implementation HSOrderTableViewCell
 
@@ -22,4 +23,14 @@
     // Configure the view for the selected state
 }
 
+- (void)setupWithModel:(HSOrderModel *)orderModel
+{
+    [_commodityImageView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,[public controlNullString:orderModel.img]]] placeholderImage:kPlaceholderImage];
+    
+    _orderIDLabel.text = [public controlNullString:orderModel.orderId];
+    _timeLabel.text = [public controlNullString:orderModel.add_time];
+    _priceLabel.text = [public controlNullString:orderModel.order_sumPrice];
+    _stateLabel.text = [public controlNullString:orderModel.status];
+
+}
 @end

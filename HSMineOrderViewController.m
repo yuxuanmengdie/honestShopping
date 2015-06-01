@@ -9,6 +9,8 @@
 #import "HSMineOrderViewController.h"
 #import "HSOrderTableViewCell.h"
 
+#import "HSOrderModel.h"
+
 typedef NS_ENUM(NSUInteger, MineOrderStatus) {
     MineOrderAwaitPayStatus = 1,
     MineOrderAwaitShippedStatus = 2,
@@ -105,15 +107,42 @@ UITableViewDelegate>
     [self.httpRequestOperationManager POST:kGetOrderListURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"failed\n%@",operation.responseString);
+        NSLog(@"%s failed\n%@",__func__,operation.responseString);
         if (operation.responseData == nil) {
             return ;
         }
         NSError *jsonError = nil;
         id json = [NSJSONSerialization JSONObjectWithData:operation.responseData options:NSJSONReadingMutableContainers error:&jsonError];
-        if (jsonError == nil && [json isKindOfClass:[NSDictionary class]]) {
-            NSDictionary *tmp = (NSDictionary *)json;
+        if (jsonError == nil && [json isKindOfClass:[NSArray class]]) {
+            NSArray *jsonArr = (NSArray *)json;
+            NSMutableArray *tmp = [[NSMutableArray alloc] initWithCapacity:jsonArr.count];
+            
+            [jsonArr enumerateObjectsUsingBlock:^(NSDictionary *obj, NSUInteger idx, BOOL *stop) {
+                
+                HSOrderModel *model = [[HSOrderModel alloc] initWithDictionary:obj error:nil];
+                [tmp addObject:model];
+            }];
+            
+            if (status == MineOrderSuccessStatus) { //完成的
+             
+                _finishedDataArray = tmp;
+                [_finishedTableView reloadData];
+            }
+            else
+            {
+                if (_unfinishedDataArray == nil) {
+                    _unfinishedDataArray = tmp;
                 }
+                else
+                {
+                    NSMutableArray *mArr = [[NSMutableArray alloc] initWithArray:_unfinishedDataArray];
+                    [mArr addObjectsFromArray:tmp];
+                    _unfinishedDataArray = mArr;
+
+                }
+                [_unfinishedTableView reloadData];
+            }
+        }
         else
         {
             
@@ -164,13 +193,16 @@ UITableViewDelegate>
     if (tableView == _unfinishedTableView) {
         
         HSOrderTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([HSOrderTableViewCell class]) forIndexPath:indexPath];
-        
+        HSOrderModel *model = _unfinishedDataArray[indexPath.row];
+        [cell setupWithModel:model];
         return cell;
         
     }
     else
     {
         HSOrderTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([HSOrderTableViewCell class]) forIndexPath:indexPath];
+        HSOrderModel *model = _finishedDataArray[indexPath.row];
+        [cell setupWithModel:model];
         return cell;
     }
 }

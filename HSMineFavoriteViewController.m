@@ -9,7 +9,10 @@
 #import "HSMineFavoriteViewController.h"
 #import "HSFavoriteTableViewCell.h"
 
-@interface HSMineFavoriteViewController ()
+#import "HSCommodtyItemModel.h"
+
+@interface HSMineFavoriteViewController ()<UITableViewDataSource,
+UITableViewDelegate>
 {
     NSArray *_favoriteDataArray;
 }
@@ -57,7 +60,7 @@
     [self.httpRequestOperationManager POST:kGetFavoriteURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         [self hiddenMsg];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"failed\n%@",operation.responseString);
+        NSLog(@"%s failed\n%@",__func__,operation.responseString);
         [self hiddenMsg];
         if (operation.responseData == nil) {
             [self showReqeustFailedMsg];
@@ -65,8 +68,22 @@
         }
         NSError *jsonError = nil;
         id json = [NSJSONSerialization JSONObjectWithData:operation.responseData options:NSJSONReadingMutableContainers error:&jsonError];
-        if (jsonError == nil && [json isKindOfClass:[NSDictionary class]]) {
-            NSDictionary *tmp = (NSDictionary *)json;
+        if (jsonError == nil && [json isKindOfClass:[NSArray class]]) {
+            NSArray *jsonArr = (NSArray *)json;
+            NSMutableArray *tmp = [[NSMutableArray alloc] initWithCapacity:jsonArr.count];
+            
+            [jsonArr enumerateObjectsUsingBlock:^(NSDictionary *obj, NSUInteger idx, BOOL *stop) {
+                @autoreleasepool {
+                    HSCommodtyItemModel *itemModel = [[HSCommodtyItemModel alloc] initWithDictionary:obj error:nil];
+                    [tmp addObject:itemModel];
+                }
+            }];
+            
+            _favoriteDataArray = tmp;
+            _favoriteTableView.dataSource = self;
+            _favoriteTableView.delegate = self;
+            [_favoriteTableView reloadData];
+            
         }
         else
         {
@@ -74,6 +91,12 @@
         }
     }];
     
+}
+
+- (void)reloadRequestData
+{
+    [self favoriteRequestWithUid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
+
 }
 
 #pragma mark -
@@ -90,6 +113,8 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     HSFavoriteTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([HSFavoriteTableViewCell class]) forIndexPath:indexPath];
+    HSCommodtyItemModel *model = _favoriteDataArray[indexPath.row];
+    [cell setupWirhModel:model];
     
     return cell;
 }

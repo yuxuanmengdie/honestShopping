@@ -219,6 +219,16 @@ static const int kCellImgViewTag = 500;
     return imgSize;
 }
 
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    NSArray *typeArr = _sanpinDataDic[[self p_keyFromType:_sanpintype]];
+    HSCommodtyItemModel *itemModel = typeArr[indexPath.row];
+    
+    if (self.cellSelectedBlock) {
+        self.cellSelectedBlock(itemModel);
+    }
+}
+
 #pragma mark -
 #pragma mark 根据选择的按钮顺序和index
 - (NSString *)p_keyFromIndex:(NSIndexPath *)index selectedIdx:(int)idx

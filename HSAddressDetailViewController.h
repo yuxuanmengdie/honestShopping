@@ -8,9 +8,12 @@
 
 #import "HSBaseViewController.h"
 #import "HSAddressModel.h"
+#import "HSUserInfoModel.h"
 
 @interface HSAddressDetailViewController : HSBaseViewController
 
 @property (strong, nonatomic) HSAddressModel *addressModel;
+
+@property (strong, nonatomic) HSUserInfoModel *userInfoModel;
 
 @end

@@ -98,6 +98,16 @@ static const int kFitterBtnTagOri = 500;
     [self HS_dispacingWithFisrtView:self fistatt:NSLayoutAttributeLeading secondView:first secondAtt:NSLayoutAttributeLeading constant:-_edgeInsets.left];
     [self HS_dispacingWithFisrtView:self fistatt:NSLayoutAttributeTop secondView:first secondAtt:NSLayoutAttributeTop constant:-_edgeInsets.top];
     [self HS_dispacingWithFisrtView:self fistatt:NSLayoutAttributeBottom secondView:first secondAtt:NSLayoutAttributeBottom constant:_edgeInsets.bottom];
+    
+    /// sepView
+    _sepView = [[UIView alloc] init];
+    _sepView.translatesAutoresizingMaskIntoConstraints = NO;
+    _sepView.backgroundColor = [UIColor lightGrayColor];
+    [self addSubview:_sepView];
+    [self HS_dispacingWithFisrtView:_sepView fistatt:NSLayoutAttributeLeading secondView:self secondAtt:NSLayoutAttributeLeading constant:0];
+    [self HS_dispacingWithFisrtView:_sepView fistatt:NSLayoutAttributeBottom secondView:self secondAtt:NSLayoutAttributeBottom constant:0];
+    [self HS_centerXWithSubView:_sepView];
+    [_sepView HS_HeightWithConstant:0.5];
 
 }
 

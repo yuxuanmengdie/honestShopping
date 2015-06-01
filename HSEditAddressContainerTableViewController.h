@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "HSAddressModel.h"
 
 @interface HSEditAddressContainerTableViewController : UITableViewController
 
@@ -27,5 +28,9 @@
 @property (copy, nonatomic) NSString *shi;
 
 @property (copy, nonatomic) NSString *qu;
+
+////不为nil 认为是更新的 （更新的时候传，新增不传）
+@property (strong, nonatomic) HSAddressModel *addressModel;
+
 
 @end

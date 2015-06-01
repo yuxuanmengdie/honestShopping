@@ -7,6 +7,8 @@
 //
 
 #import "HSShoppingCartViewController.h"
+#import "HSSubmitOrderViewController.h"
+
 #import "PKYStepper.h"
 #import "HSCatrTableViewCell.h"
 #import "HSDBManager.h"
@@ -28,6 +30,8 @@ UITableViewDelegate>
     NSArray *_cartArray;
     
     UIView *_editBottomView;
+    
+    BOOL _isEditing;
     
 }
 
@@ -60,6 +64,7 @@ UITableViewDelegate>
     _seletedDic = [[NSMutableDictionary alloc] init];
     _itemNumDic = [[NSMutableDictionary alloc] init];
     _editBottomView.hidden = YES;
+    _isEditing = NO;
     
     
    
@@ -69,6 +74,7 @@ UITableViewDelegate>
 {
     [super viewDidAppear:animated];
      _cartArray = [HSDBManager selectAllWithTableName:[HSDBManager tableNameWithUid]];
+    [self initSelectDic];
     [_cartTableView reloadData];
     
 }
@@ -124,6 +130,7 @@ UITableViewDelegate>
     [deleteBtn setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
     [deleteBtn setTitle:@"删除" forState:UIControlStateNormal];
     [_editBottomView addSubview:deleteBtn];
+    deleteBtn.translatesAutoresizingMaskIntoConstraints = NO;
     
     NSString *vfl1 = @"H:|[_editBottomView]|";
     NSString *vfl2 = @"V:[_editBottomView(49)]|";
@@ -152,7 +159,18 @@ UITableViewDelegate>
 }
 
 
+
 - (IBAction)buyAction:(id)sender {
+    
+    UIStoryboard *storyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    HSSubmitOrderViewController *submitVC = [storyBoard instantiateViewControllerWithIdentifier:NSStringFromClass([HSSubmitOrderViewController class])];
+    submitVC.itemNumDic = [self selectedItemNum];
+    submitVC.itemsDataArray = [self selectedItems];
+    submitVC.title = @"确认订单";
+    submitVC.hidesBottomBarWhenPushed = YES;
+    submitVC.userInfoModel = [[HSUserInfoModel alloc] initWithDictionary:[public userInfoFromPlist] error:nil];
+    [self.navigationController pushViewController:submitVC animated:YES];
+
     
 }
 #pragma mark -
@@ -162,12 +180,26 @@ UITableViewDelegate>
     
 }
 
+#pragma mark -
+#pragma mark 初始化全选择
+- (void)initSelectDic
+{
+    if (_seletedDic.allKeys.count > 0) {
+        return;
+    }
+    [_cartArray enumerateObjectsUsingBlock:^(NSDictionary *obj, NSUInteger idx, BOOL *stop) {
+        [_seletedDic setObject:[NSNumber numberWithBool:YES] forKey:[self keyFromItemID:obj[kPostJsonid]]];
+    }];
+   
+    
+}
+
 
 #pragma mark -
 #pragma mark 编辑action
 - (void)editAction
 {
-    BOOL isEditing = _cartTableView.isEditing;
+    BOOL isEditing = _isEditing;
     
     if (!isEditing && _cartArray.count == 0) { // 不在编辑状态 且内容为空了
         [self showHudWithText:@"没有内容可以编辑"];
@@ -187,7 +219,8 @@ UITableViewDelegate>
         _isAllSelected = NO;
     }
     self.navigationItem.rightBarButtonItem.title = title;
-    [_cartTableView setEditing:!isEditing animated:YES];
+//    [_cartTableView setEditing:!isEditing animated:YES];
+    _isEditing = !isEditing;
     _editBottomView.hidden = isEditing;
     
     if (_cartArray.count == 0) { /// 编辑完成时 若数组为空了 就直接隐藏
@@ -215,17 +248,18 @@ UITableViewDelegate>
     }
     
     [_cartArray enumerateObjectsUsingBlock:^(NSDictionary *obj, NSUInteger idx, BOOL *stop) {
-        
-        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:idx inSection:0];
-        if (_isAllSelected) {
-            [_cartTableView selectRowAtIndexPath:indexPath animated:NO scrollPosition:UITableViewScrollPositionNone];
-        }
-        else
-        {
-             [_cartTableView deselectRowAtIndexPath:indexPath animated:NO];
-        }
+//        
+//        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:idx inSection:0];
+//        if (_isAllSelected) {
+//            [_cartTableView selectRowAtIndexPath:indexPath animated:NO scrollPosition:UITableViewScrollPositionNone];
+//        }
+//        else
+//        {
+//             [_cartTableView deselectRowAtIndexPath:indexPath animated:NO];
+//        }
         [_seletedDic setObject:[NSNumber numberWithBool:_isAllSelected] forKey:[self keyFromItemID:obj[kPostJsonid]]];
     }];
+    [_cartTableView reloadData];
     
 
 }
@@ -260,7 +294,12 @@ UITableViewDelegate>
         NSNumber *num = [_itemNumDic objectForKey:[self keyFromItemID:model.id]];
         int count = num == nil ? 1 : [num intValue];
         float price = [model.price floatValue];
-        totle += (float)price * count;
+        NSNumber *suc = [_seletedDic objectForKey:[self keyFromItemID:obj[kPostJsonid]]];
+        BOOL isSuc = suc == nil ? NO :[suc boolValue];
+        if (isSuc) {
+             totle += (float)price * count;
+        }
+       
         
     }];
     
@@ -268,10 +307,45 @@ UITableViewDelegate>
     
 }
 
-- (void)timerAction
+#pragma mark - 
+#pragma mark 拼接用于提交订单的数据
+- (NSArray *)selectedItems
 {
-    [self totalPrice];
+    NSMutableArray *tmp = [[NSMutableArray alloc] init];
+    
+    [_cartArray enumerateObjectsUsingBlock:^(NSDictionary *obj, NSUInteger idx, BOOL *stop) {
+        HSCommodityItemDetailPicModel *model = [[HSCommodityItemDetailPicModel alloc] initWithDictionary:obj error:nil];
+        NSNumber *suc = [_seletedDic objectForKey:[self keyFromItemID:obj[kPostJsonid]]];
+        BOOL isSuc = suc == nil ? NO :[suc boolValue];
+        if (isSuc) {
+            [tmp addObject:model];
+        }
+        
+    }];
+    
+    return tmp;
 }
+
+- (NSDictionary *)selectedItemNum
+{
+    NSMutableDictionary *tmp = [[NSMutableDictionary alloc] init];
+    [_cartArray enumerateObjectsUsingBlock:^(NSDictionary *obj, NSUInteger idx, BOOL *stop) {
+        HSCommodityItemDetailPicModel *model = [[HSCommodityItemDetailPicModel alloc] initWithDictionary:obj error:nil];
+        NSNumber *num = [_itemNumDic objectForKey:[self keyFromItemID:model.id]];
+        int count = num == nil ? 1 : [num intValue];
+        NSNumber *suc = [_seletedDic objectForKey:[self keyFromItemID:obj[kPostJsonid]]];
+        BOOL isSuc = suc == nil ? NO :[suc boolValue];
+        if (isSuc) {
+            [tmp setObject:[NSNumber numberWithInt:count] forKey:[public controlNullString:model.id]];
+        }
+        
+        
+    }];
+    
+    return tmp;
+
+}
+
 
 #pragma mark -
 #pragma mark tableview dataSource
@@ -285,7 +359,7 @@ UITableViewDelegate>
     {
         [self removePlaceView];
     }
-    if (![tableView isEditing]) {
+    if (!_isEditing) {
         _bottomView.hidden = _cartArray.count == 0 ? YES : NO;
     }
     else if ( _cartArray.count == 0)
@@ -324,6 +398,26 @@ UITableViewDelegate>
         
     }];
     cell.stepper.value = buyCount;
+    
+    __weak typeof(cell) wcell = cell;
+    cell.selectBlock = ^{
+        __strong typeof(wself) swself = wself;
+        NSDictionary *obj = swself->_cartArray[indexPath.row];
+        NSNumber *suc = [swself->_seletedDic objectForKey:[swself keyFromItemID:obj[kPostJsonid]]];
+        BOOL isSuc = suc == nil ? NO :[suc boolValue];
+        
+        [swself->_seletedDic setObject:[NSNumber numberWithBool:!isSuc] forKey:[swself keyFromItemID:obj[kPostJsonid]]];
+        
+        wcell.selectButton.selected = !isSuc;
+        [swself totalPrice];
+    };
+    
+    NSDictionary *obj = _cartArray[indexPath.row];
+    NSNumber *suc = [_seletedDic objectForKey:[self keyFromItemID:obj[kPostJsonid]]];
+    BOOL isSuc = suc == nil ? NO :[suc boolValue];
+    cell.selectButton.selected = isSuc;
+
+    
     return cell;
 }
 

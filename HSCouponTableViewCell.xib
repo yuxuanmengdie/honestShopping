@@ -65,7 +65,7 @@
             <connections>
                 <outlet property="couponImageView" destination="caF-My-TDt" id="k1i-uT-JEM"/>
                 <outlet property="dateLabel" destination="D1r-cF-1LS" id="DYO-GU-Xjy"/>
-                <outlet property="explainLabel" destination="D1r-cF-1LS" id="MQN-tr-2MW"/>
+                <outlet property="explainLabel" destination="luL-zS-6bJ" id="kAw-sP-xI2"/>
                 <outlet property="introLabel" destination="ZCv-dV-ND8" id="R3q-7t-hTd"/>
                 <outlet property="validDateLabel" destination="oOX-aT-C00" id="cw0-pY-alc"/>
             </connections>

@@ -43,6 +43,7 @@ static const int kPlaceViewTag = 5003;
     [self initOperationManager];
     [self addBackButton];
     
+    _isRequestLoading = NO;
     self.imageSizeDic = [[NSMutableDictionary alloc] init];
     
 }
@@ -155,6 +156,8 @@ static const int kPlaceViewTag = 5003;
     HSRotateAnimationView *ratateView = (HSRotateAnimationView *)[_showMsgView viewWithTag:kShowMsgLoadingTag];
     ratateView.hidden = NO;
     [ratateView startRotating];
+    
+    _isRequestLoading = YES;
 }
 
 
@@ -162,6 +165,8 @@ static const int kPlaceViewTag = 5003;
 {
     [_showMsgView removeFromSuperview];
     _showMsgView = nil;
+    
+    _isRequestLoading = NO;
 }
 
 #pragma mark -
@@ -194,6 +199,22 @@ static const int kPlaceViewTag = 5003;
     [hud show:YES];
     
 }
+
+- (void)showhudLoadingInWindowWithText:(NSString *)text isDimBackground:(BOOL)isDim
+{
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:[UIApplication sharedApplication].keyWindow animated:YES];
+    _loadingHud = hud;
+    hud.mode = MBProgressHUDModeIndeterminate;
+    hud.dimBackground = isDim;
+    hud.alpha = 0.8;
+    hud.labelText = text;
+    hud.margin = 5.f;
+    //hud.animationType = MBProgressHUDAnimationZoomOut;// | MBProgressHUDAnimationZoomIn;
+    hud.removeFromSuperViewOnHide = YES;
+    [hud show:YES];
+    
+}
+
 
 - (void)showHudInWindowWithText:(NSString *)text
 {
@@ -346,6 +367,12 @@ static const int kPlaceViewTag = 5003;
     return result;
 }
 
+#pragma mark -
+#pragma mark 状态栏
+- (UIStatusBarStyle)preferredStatusBarStyle
+{
+    return UIStatusBarStyleLightContent;
+}
 
 
 #pragma mark -

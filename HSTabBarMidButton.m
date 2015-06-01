@@ -96,6 +96,8 @@ static const float kArcRadiusSpacing = 3;
         _heightCon = [NSLayoutConstraint constraintWithItem:self attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:topHei+kTabBarHeight];
         [self addConstraint:_heightCon];
         
+        self.imageEdgeInsets = UIEdgeInsetsMake(topHei/2.0, -2, -topHei/2.0, 2);
+        
     }
     
     self.backgroundColor = [UIColor clearColor];

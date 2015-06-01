@@ -40,10 +40,7 @@
         _containerVC = segue.destinationViewController;
         
         if (_addressChangeType == HSeditaddressByUpdateType) { /// 更新的
-            _containerVC.userNameTextFiled.text = [public controlNullString:_addressModel.consignee];
-            _containerVC.phoneTextFiled.text = [public controlNullString:_addressModel.mobile];
-            _containerVC.addressLabel.text = [NSString stringWithFormat:@"%@%@%@",[public controlNullString:_addressModel.sheng],[public controlNullString:_addressModel.shi],[public controlNullString:_addressModel.qu]];
-            _containerVC.detailAddressTextView.text = [public controlNullString:_addressModel.address];
+            _containerVC.addressModel = _addressModel;
         }
     }
 }
@@ -81,10 +78,10 @@
                                     kPostJsonShi:shi,
                                     kPostJsonQu:qu
                                     };
-    [self.httpRequestOperationManager POST:kAddressAddURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [self.httpRequestOperationManager POST:kAddressUpdateURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         [self hiddenHudLoading];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"failed\n%@",operation.responseString);
+        NSLog(@"%s failed\n%@",__func__,operation.responseString);
         [self hiddenHudLoading];
         if (operation.responseData == nil) {
             [self showHudWithText:@"保存失败"];
@@ -118,7 +115,7 @@
 #pragma mark 更新地址
 - (void)updateAddressRequestWithUid:(NSString *)uid add_id:(NSString *)add_id sessionCode:(NSString *)sessionCode consignee:(NSString *)consignee address:(NSString *)address mobile:(NSString *)mobile sheng:(NSString *)sheng shi:(NSString *)shi qu:(NSString *)qu
 {
-    [self showhudLoadingWithText:@"保存中..." isDimBackground:YES];
+    [self showhudLoadingInWindowWithText:@"保存中..." isDimBackground:YES];
     NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
                                     kPostJsonUid:uid,
                                     kPostJsonid:add_id,
@@ -133,8 +130,8 @@
     [self.httpRequestOperationManager POST:kAddressUpdateURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         [self hiddenHudLoading];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"failed\n%@",operation.responseString);
-        [self hiddenMsg];
+        NSLog(@"%s failed\n%@",__func__,operation.responseString);
+        [self hiddenHudLoading];
         if (operation.responseData == nil) {
             [self showHudWithText:@"保存失败"];
             return ;
@@ -148,6 +145,22 @@
             
             if (status) {
                 [self showHudWithText:@"保存成功"];
+                
+                HSAddressModel *model = [_addressModel copy];//[[HSAddressModel alloc] init];
+                model.uid = uid;
+                model.id = add_id;
+                model.consignee = consignee;
+                model.mobile = mobile;
+                model.sheng = sheng;
+                model.shi = shi;
+                model.qu = qu;
+                model.address = address;
+               
+                if (self.updateBlcok) {
+                    self.updateBlcok(model);
+                }
+                
+                [self.navigationController popViewControllerAnimated:YES];
             }
             else
             {
