@@ -101,11 +101,11 @@ UITableViewDelegate>
     _priceTitleLabel.text = @"应付总额:";
     _priceLabel.textColor = [UIColor redColor];
     
-    _priceLabel.text = @"0.0元";
+    _priceLabel.text = @"0.00元";
     
     [_buyButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [_buyButton setBackgroundImage:[public ImageWithColor:kAPPTintColor] forState:UIControlStateNormal];
-    [_buyButton setTitle:@"购买" forState:UIControlStateNormal];
+    [_buyButton setBackgroundImage:[public ImageWithColor:kAppYellowColor] forState:UIControlStateNormal];
+    [_buyButton setTitle:@"立即购买" forState:UIControlStateNormal];
     _buyButton.layer.masksToBounds = YES;
     _buyButton.layer.cornerRadius = 5.0;
     
@@ -377,6 +377,7 @@ UITableViewDelegate>
     HSCommodityItemDetailPicModel *itemModel = [[HSCommodityItemDetailPicModel alloc] initWithDictionary:dic error:nil];
     cell.titlelabel.text = itemModel.title;
     cell.priceLabel.text = itemModel.price;
+    cell.stepper.maximum = [itemModel.maxbuy floatValue];
     [cell.itemImageView sd_setImageWithURL:[NSURL URLWithString:[self commodityIntroImgFullUrl:itemModel.img]] placeholderImage:kPlaceholderImage];
     
     NSNumber *num = [_itemNumDic objectForKey:[self keyFromItemID:dic[kPostJsonid]]];

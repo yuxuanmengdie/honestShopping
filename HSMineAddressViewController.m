@@ -42,13 +42,15 @@ UITableViewDelegate>
     [_addressTableView registerNib:[UINib nibWithNibName:NSStringFromClass([HSAddressTableViewCell class]) bundle:nil] forCellReuseIdentifier:NSStringFromClass([HSAddressTableViewCell class])];
     
     _addressTableView.tableFooterView = [[UIView alloc] init];
-   
+    _addressTableView.dataSource = self;
+    _addressTableView.delegate = self;
+
     
 }
 
-- (void)viewDidAppear:(BOOL)animated
+- (void)viewWillAppear:(BOOL)animated
 {
-    [super viewDidAppear:animated];
+    [super viewWillAppear:animated];
      [self addressRequestWithUid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
 }
 
@@ -100,9 +102,7 @@ UITableViewDelegate>
             }];
             
             _addressDataArray = tmpArr;
-            _addressTableView.dataSource = self;
-            _addressTableView.delegate = self;
-            [_addressTableView reloadData];
+                       [_addressTableView reloadData];
         }
         else
         {
@@ -147,7 +147,7 @@ UITableViewDelegate>
 {
     NSInteger num = _addressDataArray.count;
     
-    if (num == 0) {
+    if (num == 0 && !self.isRequestLoading) {
         [self placeViewWithImgName:@"search_no_content" text:@"还没有地址信息，请新增"];
     }
     else

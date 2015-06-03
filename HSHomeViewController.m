@@ -143,14 +143,10 @@ static const float kFFScrollViewHeight = 200;
             }];
             _bannerModelsArray = tmpArray;
             _bannerImagesArray = tmpBannner;
-           // [_homeCollectionView reloadSections:[[NSIndexSet alloc]initWithIndex:0]];
-            [_homeCollectionView reloadData];
+            [_homeCollectionView reloadSections:[[NSIndexSet alloc]initWithIndex:0]];
+            //[_homeCollectionView reloadData];
         }
-        
-        
     }];
-    
-    
 }
 
 
@@ -222,7 +218,8 @@ static const float kFFScrollViewHeight = 200;
             }];
             
             _couponDataArray = tmpArr;
-            [_homeCollectionView reloadData];
+             [_homeCollectionView reloadSections:[[NSIndexSet alloc]initWithIndex:0]];
+            //[_homeCollectionView reloadData];
         }
         else
         {
@@ -372,6 +369,7 @@ static const float kFFScrollViewHeight = 200;
         imgUrl = [NSString stringWithFormat:@"%@%@",kBannerImageHeaderURL,bannerModel.content];
     }
     
+    
    
     [[SDWebImageManager sharedManager] downloadImageWithURL:[NSURL URLWithString:imgUrl]
                                                     options:0
@@ -382,6 +380,7 @@ static const float kFFScrollViewHeight = 200;
                                                       if (image) {
                                                           // do something with image
                                                           cell.contentImageView.image = image;
+                                                          [cell setNeedsLayout];
                                                            NSLog(@"sec=%ld,row=%ld",(long)indexPath.section,(long)indexPath.row);
                                                           NSValue *imgSize =  [NSValue valueWithCGSize:image.size];
                                                           NSDictionary *dic = [self.imageSizeDic objectForKey:[self p_keyFromIndex:indexPath]];
@@ -403,8 +402,10 @@ static const float kFFScrollViewHeight = 200;
                                                           
                                                       }
                                                   }];
+//    
+//    [cell.contentImageView sd_setImageWithURL:[NSURL URLWithString:imgUrl] placeholderImage:kPlaceholderImage];
     
-    
+    [cell setNeedsLayout];
     return cell;
     
     

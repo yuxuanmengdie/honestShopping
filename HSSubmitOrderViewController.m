@@ -395,9 +395,11 @@ static const float kPostagePrice = 6.00;
         
         if (_placeAddressCell == nil) {
             _placeAddressCell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([HSSubmitOrderAddressTableViewCell class])];
-            _placeAddressCell.contentView.bounds = tableView.bounds;
+            _placeAddressCell.bounds = tableView.bounds;
             _placeAddressCell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+            [_placeAddressCell setNeedsLayout];
         }
+        NSLog(@"cell hei %f", _placeAddressCell.detailLabel.frame.size.width);
         [_placeAddressCell setUpWithModel:_addressModel];
         _placeAddressCell.detailLabel.preferredMaxLayoutWidth = _placeAddressCell.detailLabel.frame.size.width;
         [_placeAddressCell.contentView updateConstraintsIfNeeded];

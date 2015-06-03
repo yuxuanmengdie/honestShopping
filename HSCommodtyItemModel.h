@@ -48,6 +48,7 @@
 @property (copy, nonatomic) NSString *maill_price;
 @property (copy, nonatomic) NSString *ordernum;
 @property (copy, nonatomic) NSString *likes;
+@property (copy, nonatomic) NSString *imageurl;
 @property (strong, nonatomic) NSArray *banner; // 顶部的轮播图
 
 

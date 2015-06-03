@@ -27,7 +27,20 @@
     __weak typeof(_stepper) weakStepper = _stepper;
     [_stepper setValueChangedCallback:^(PKYStepper *stepper, float newValue){
         weakStepper.countLabel.text = [NSString stringWithFormat:@"%d",(int)newValue];
+        
     }];
+    
+//    [_stepper setIncrementCallback:^(PKYStepper *stepper, float newValue){
+//        if (newValue > weakStepper.maximum) {
+//            [public showHudInWindowWithText:@"亲，不能在多了"];
+//        }
+//    }];
+//    [_stepper setDecrementCallback:^(PKYStepper *stepper, float newValue){
+//        if (newValue < weakStepper.minimum) {
+//            [public showHudInWindowWithText:@"亲，不能在少了"];
+//        }
+//    }];
+    
     [_stepper setBorderColor:kAPPTintColor];
     [_stepper setLabelTextColor:kAPPTintColor];
     [_stepper setButtonTextColor:kAPPTintColor forState:UIControlStateNormal];
@@ -35,7 +48,7 @@
     
     [_buyBtn setTitle:@"立刻购买" forState:UIControlStateNormal];
     [_buyBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [_buyBtn setBackgroundImage:[public ImageWithColor:ColorRGB(253, 169, 10)] forState:UIControlStateNormal];
+    [_buyBtn setBackgroundImage:[public ImageWithColor:kAppYellowColor] forState:UIControlStateNormal];
     _buyBtn.layer.masksToBounds = YES;
     _buyBtn.layer.cornerRadius = 5.0;
     

@@ -409,11 +409,16 @@ static const int kAdsCellImageViewTag = 600;
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
+//    BOOL iscon = [self p_containIndexPathWithArr:collectionView.indexPathsForVisibleItems indexPath:indexPath];
+//    int res = iscon ? 1 : 0;
+//    NSLog(@"ddd con = %d",res);
+    
     if (indexPath.section == 3) {
         HSCommodityCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:kCommodityCellIndentifier forIndexPath:indexPath];
         HSCommodtyItemModel *itemModel = _itemsData[indexPath.row];
         //    [cell.imgView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]]];
         cell.imgView.image = kPlaceholderImage;
+        [cell.imgView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]] placeholderImage:kPlaceholderImage];
         [cell dataSetUpWithModel:itemModel];
         
         [[SDWebImageManager sharedManager] downloadImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]]
@@ -424,8 +429,11 @@ static const int kAdsCellImageViewTag = 600;
                                                       completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
                                                           if (image) {
                                                               // do something with image
-                                                              cell.imgView.image = image;
+//                                                              HSCommodityCollectionViewCell *collCell = (HSCommodityCollectionViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
+//                                                              cell.imgView.image = image;
+//                                                              [cell.imgView setNeedsLayout];
                                                               
+                                                              //NSIndexPath *idx = [indexPath copy];
                                                               NSValue *imgSize =  [NSValue valueWithCGSize:image.size];
                                                               NSDictionary *dic = [_imageSizeDic objectForKey:[self p_keyFromIndex:indexPath]];
                                                               if (dic != nil ) {
@@ -441,7 +449,8 @@ static const int kAdsCellImageViewTag = 600;
                                                               
                                                               [_imageSizeDic setObject:tmpDic forKey:[self p_keyFromIndex:indexPath]];
                                                               if (collectionView.dataSource != nil) {
-                                                                  [collectionView reloadItemsAtIndexPaths:@[indexPath]];
+                                                                  //[collectionView reloadData];
+                                                                 [collectionView reloadItemsAtIndexPaths:@[indexPath]];
                                                               }
                                                               
                                                           }
@@ -479,6 +488,7 @@ static const int kAdsCellImageViewTag = 600;
         }
         HSAdItemModel *adModel = _adsData[idx];
         imgView.image = kPlaceholderImage;
+        [imgView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kBannerImageHeaderURL,adModel.content]] placeholderImage:kPlaceholderImage];
         [[SDWebImageManager sharedManager] downloadImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kBannerImageHeaderURL,adModel.content]]
                                                         options:0
                                                        progress:^(NSInteger receivedSize, NSInteger expectedSize) {
@@ -487,8 +497,10 @@ static const int kAdsCellImageViewTag = 600;
                                                       completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
                                                           if (image) {
                                                               // do something with image
-                                                              imgView.image = nil;
-                                                              imgView.image = image;
+//                                                              UICollectionViewCell *collCell = [collectionView cellForItemAtIndexPath:indexPath];
+//                                                             UIImageView *imagView = (UIImageView *)[cell viewWithTag:kAdsCellImageViewTag];
+//                                                             imgView.image = image;
+//                                                              [imgView setNeedsLayout];
                                                               
                                                               NSValue *imgSize =  [NSValue valueWithCGSize:image.size];
                                                               NSDictionary *dic = [_imageSizeDic objectForKey:[self p_keyFromIndex:indexPath]];
@@ -504,7 +516,8 @@ static const int kAdsCellImageViewTag = 600;
                                                                                        kImageURLKey:imageURL};
                                                               
                                                               [_imageSizeDic setObject:tmpDic forKey:[self p_keyFromIndex:indexPath]];
-                                                              if (collectionView.dataSource != nil) {
+                                                              if (collectionView.dataSource != nil ) {
+                                                                 //  [collectionView reloadData];
                                                                   [collectionView reloadItemsAtIndexPaths:@[indexPath]];
                                                               }
                                                               
@@ -690,5 +703,20 @@ static const int kAdsCellImageViewTag = 600;
     return result;
 }
 
+- (BOOL)p_containIndexPathWithArr:(NSArray *)arr indexPath:(NSIndexPath *)indexPath
+{
+    __block BOOL isCon = NO;
+    NSLog(@"index. section= %ld row = %ld",(long)indexPath.section,(long)indexPath.row);
+    [arr enumerateObjectsUsingBlock:^(NSIndexPath *obj, NSUInteger idx, BOOL *stop) {
+        NSLog(@"obj. section= %ld row = %ld",(long)obj.section,(long)obj.row);
+        if (obj.row == indexPath.row && obj.section == indexPath.section ) {
+            isCon = YES;
+            *stop = YES;
+        }
+        
+    }];
+    
+    return isCon;
+}
 
 @end

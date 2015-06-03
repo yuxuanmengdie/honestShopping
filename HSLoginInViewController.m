@@ -11,6 +11,11 @@
 #import "HSUserInfoModel.h"
 #import "HSRegisterViewController.h"
 
+#import "UMSocialWechatHandler.h"
+#import "UMSocialSnsPlatformManager.h"
+#import "UMSocialAccountManager.h"
+#import "UMSocial.h"
+
 @interface HSLoginInViewController ()<UITextFieldDelegate>
 {
     HSUserInfoModel *_userInfoModel;
@@ -163,6 +168,8 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
         return;
     }
     
+//    [self weixinLogin];
+//    [self qqLogin];
     [self loginRequest:_userNameTextField.text password:_passWordTextFiled.text];
 }
 
@@ -231,81 +238,126 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
 
 #pragma mark -
 #pragma mark 微信登录
-
-/*
-- (void)getAccess_token
- {
- //https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code
- 
- NSString *url =[NSString stringWithFormat:@"https://api.weixin.qq.com/sns/oauth2/access_token?appid=%@&secret=%@&code=%@&grant_type=authorization_code",kWXAPP_ID,kWXAPP_SECRET,self.wxCode.text];
- 
- dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
- NSURL *zoneUrl = [NSURL URLWithString:url];
- NSString *zoneStr = [NSString stringWithContentsOfURL:zoneUrl encoding:NSUTF8StringEncoding error:nil];
- NSData *data = [zoneStr dataUsingEncoding:NSUTF8StringEncoding];
- dispatch_async(dispatch_get_main_queue(), ^{
- if (data) {
- NSDictionary *dic = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
- 
-// {
-// "access_token" = "OezXcEiiBSKSxW0eoylIeJDUKD6z6dmr42JANLPjNN7Kaf3e4GZ2OncrCfiKnGWiusJMZwzQU8kXcnT1hNs_ykAFDfDEuNp6waj-bDdepEzooL_k1vb7EQzhP8plTbD0AgR8zCRi1It3eNS7yRyd5A";
-// "expires_in" = 7200;
-// openid = oyAaTjsDx7pl4Q42O3sDzDtA7gZs;
-// "refresh_token" = "OezXcEiiBSKSxW0eoylIeJDUKD6z6dmr42JANLPjNN7Kaf3e4GZ2OncrCfiKnGWi2ZzH_XfVVxZbmha9oSFnKAhFsS0iyARkXCa7zPu4MqVRdwyb8J16V8cWw7oNIff0l-5F-4-GJwD8MopmjHXKiA";
-// scope = "snsapi_userinfo,snsapi_base";
-// }
- 
-
-self.access_token.text = [dic objectForKey:@"access_token"];
-self.openid.text = [dic objectForKey:@"openid"];
-
-}
-});
-});
- }
-
- 利用GCD来获取对应的token和openID.
-
-第三步：userinfo
--(void)getUserInfo
+- (void)weixinLogin
 {
-    // https://api.weixin.qq.com/sns/userinfo?access_token=ACCESS_TOKEN&openid=OPENID
+    UMSocialSnsPlatform *snsPlatform = [UMSocialSnsPlatformManager getSocialPlatformWithName:UMShareToWechatSession];
     
-    NSString *url =[NSString stringWithFormat:@"https://api.weixin.qq.com/sns/userinfo?access_token=%@&openid=%@",self.access_token.text,self.openid.text];
-    
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        NSURL *zoneUrl = [NSURL URLWithString:url];
-        NSString *zoneStr = [NSString stringWithContentsOfURL:zoneUrl encoding:NSUTF8StringEncoding error:nil];
-        NSData *data = [zoneStr dataUsingEncoding:NSUTF8StringEncoding];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if (data) {
-                NSDictionary *dic = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
- 
-//                 {
-//                 city = Haidian;
-//                 country = CN;
-//                 headimgurl = "http://wx.qlogo.cn/mmopen/FrdAUicrPIibcpGzxuD0kjfnvc2klwzQ62a1brlWq1sjNfWREia6W8Cf8kNCbErowsSUcGSIltXTqrhQgPEibYakpl5EokGMibMPU/0";
-//                 language = "zh_CN";
-//                 nickname = "xxx";
-//                 openid = oyAaTjsDx7pl4xxxxxxx;
-//                 privilege =     (
-//                 );
-//                 province = Beijing;
-//                 sex = 1;
-//                 unionid = oyAaTjsxxxxxxQ42O3xxxxxxs;
-//                 }
- 
-                
-                self.nickname.text = [dic objectForKey:@"nickname"];
-                self.wxHeadImg.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[dic objectForKey:@"headimgurl"]]]];
-                
-            }
-        });
+    snsPlatform.loginClickHandler(self,[UMSocialControllerService defaultControllerService],YES,^(UMSocialResponseEntity *response){
+        
+        if (response.responseCode == UMSResponseCodeSuccess) {
+            
+            UMSocialAccountEntity *snsAccount = [[UMSocialAccountManager socialAccountDictionary]valueForKey:UMShareToWechatSession];
+            
+            NSLog(@"username is %@, uid is %@, token is %@ url is %@ , ",snsAccount.userName,snsAccount.usid,snsAccount.accessToken,snsAccount.iconURL);
+            
+        }
         
     });
+    
+    //得到的数据在回调Block对象形参respone的data属性
+    [[UMSocialDataService defaultDataService] requestSnsInformation:UMShareToWechatSession  completion:^(UMSocialResponseEntity *response){
+        NSLog(@"SnsInformation is %@",response.data);
+    }];
 }
 
-*/
+#pragma mark -
+#pragma mark 新浪登录
+- (void)sinaLogin
+{
+    UMSocialSnsPlatform *snsPlatform = [UMSocialSnsPlatformManager getSocialPlatformWithName:UMShareToSina];
+    
+    snsPlatform.loginClickHandler(self,[UMSocialControllerService defaultControllerService],YES,^(UMSocialResponseEntity *response){
+        
+        //          获取微博用户名、uid、token等
+        
+        if (response.responseCode == UMSResponseCodeSuccess) {
+            
+            UMSocialAccountEntity *snsAccount = [[UMSocialAccountManager socialAccountDictionary] valueForKey:UMShareToSina];
+            
+            NSLog(@"username is %@, uid is %@, token is %@ url is %@",snsAccount.userName,snsAccount.usid,snsAccount.accessToken,snsAccount.iconURL);
+            
+        }});
+    
+    //获取accestoken以及新浪用户信息，得到的数据在回调Block对象形参respone的data属性
+    [[UMSocialDataService defaultDataService] requestSnsInformation:UMShareToSina  completion:^(UMSocialResponseEntity *response){
+        NSLog(@"SnsInformation is %@",response.data);
+    }];
+}
+
+#pragma mark -
+#pragma mark qq登录
+- (void)qqLogin
+{
+    UMSocialSnsPlatform *snsPlatform = [UMSocialSnsPlatformManager getSocialPlatformWithName:UMShareToQQ];
+    
+    snsPlatform.loginClickHandler(self,[UMSocialControllerService defaultControllerService],YES,^(UMSocialResponseEntity *response){
+        
+        //          获取微博用户名、uid、token等
+        
+        if (response.responseCode == UMSResponseCodeSuccess) {
+            
+            UMSocialAccountEntity *snsAccount = [[UMSocialAccountManager socialAccountDictionary] valueForKey:UMShareToQQ];
+            
+            NSLog(@"username is %@, uid is %@, token is %@ url is %@",snsAccount.userName,snsAccount.usid,snsAccount.accessToken,snsAccount.iconURL);
+            
+        }});
+    
+    //获取accestoken以及QQ用户信息，得到的数据在回调Block对象形参respone的data属性
+    [[UMSocialDataService defaultDataService] requestSnsInformation:UMShareToQQ  completion:^(UMSocialResponseEntity *response){
+        NSLog(@"SnsInformation is %@",response.data);
+    }];
+    
+}
+
+#pragma mark -
+#pragma mark 根据第三方的ID 注册
+- (void)loginInWithOtherID:(NSString *)openID
+{
+    [self showhudLoadingWithText:@"正在登录..." isDimBackground:YES];
+    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+                                    kPostJsonOpenid:openID
+                                    };
+    // 142346261  123456
+    
+    [self.httpRequestOperationManager POST:kWeixinLoginURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+        NSLog(@"success\n%@",operation.responseString);
+        [self showHudWithText:@"登录失败"];
+        [self hiddenHudLoading];
+        
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"%s failed\n%@",__func__,operation.responseString);
+        [self hiddenHudLoading];
+        if (operation.responseData == nil) {
+            [self showHudWithText:@"登录失败"];
+            return ;
+        }
+        NSError *jsonError = nil;
+        id json = [NSJSONSerialization JSONObjectWithData:operation.responseData options:NSJSONReadingMutableContainers error:&jsonError];
+        if (jsonError == nil && [json isKindOfClass:[NSDictionary class]]) {
+            
+            _userInfoModel = [[HSUserInfoModel alloc] initWithDictionary:json error:nil];
+            if (_userInfoModel.id.length > 0) { /// 登录后返回有数据
+                [self showHudInWindowWithText:@"登录成功"];
+//                [public saveUserInfoToPlist:[_userInfoModel toDictionary]];
+                [public setLoginInStatus:YES];
+                
+//                [public saveLastUserName:userName];
+//                [public saveLastPassword:passWord];
+                if (_remeberPWButton.selected) {
+                    
+                }
+                [self backAction:nil];
+            }
+        }
+        else
+        {
+            [self showHudWithText:@"登录失败"];
+        }
+    }];
+
+}
+
+
 
 
 @end

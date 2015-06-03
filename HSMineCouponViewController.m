@@ -28,9 +28,11 @@ UITableViewDelegate>
     [_couponTableView registerNib:[UINib nibWithNibName:NSStringFromClass([HSCouponTableViewCell class]) bundle:nil] forCellReuseIdentifier:NSStringFromClass([HSCouponTableViewCell class])];
     
     _couponTableView.tableFooterView = [[UIView alloc] init];
-    [self couponRequestWithUid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
     _couponTableView.dataSource = self;
     _couponTableView.delegate = self;
+    
+    [self couponRequestWithUid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
+
     
 }
 

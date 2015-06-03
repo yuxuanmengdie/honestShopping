@@ -29,6 +29,9 @@ UITableViewDelegate>
     [_favoriteTableView registerNib:[UINib nibWithNibName:NSStringFromClass([HSFavoriteTableViewCell class]) bundle:nil] forCellReuseIdentifier:NSStringFromClass([HSFavoriteTableViewCell class])];
     
     _favoriteTableView.tableFooterView = [[UIView alloc] init];
+    _favoriteTableView.dataSource = self;
+    _favoriteTableView.delegate = self;
+
     [self favoriteRequestWithUid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
 
 }
@@ -80,8 +83,6 @@ UITableViewDelegate>
             }];
             
             _favoriteDataArray = tmp;
-            _favoriteTableView.dataSource = self;
-            _favoriteTableView.delegate = self;
             [_favoriteTableView reloadData];
             
         }
@@ -107,6 +108,14 @@ UITableViewDelegate>
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     NSInteger num = _favoriteDataArray.count;
+    if (num == 0 && !self.isRequestLoading) {
+        [self placeViewWithImgName:nil text:@"还没有收藏"];
+    }
+    else
+    {
+        [self removePlaceView];
+    }
+
     return num;
 }
 

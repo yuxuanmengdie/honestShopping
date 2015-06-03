@@ -8,6 +8,8 @@
 
 #import "public.h"
 #import "HSUserInfoModel.h"
+#import "MBProgressHUD.h"
+
 #import <CommonCrypto/CommonDigest.h>
 #include <ifaddrs.h>
 #include <arpa/inet.h>
@@ -407,5 +409,20 @@ static const double kTimedLoginInterval = 60*60;
 + (void)timerAction
 {
     [public loginIn];
+}
+
++ (void)showHudInWindowWithText:(NSString *)text
+{
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:[UIApplication sharedApplication].keyWindow animated:YES];
+    hud.mode = MBProgressHUDModeText;
+    hud.dimBackground = NO;
+    hud.alpha = 0.9;
+    hud.labelText = text;
+    hud.margin = 10.f;
+    hud.yOffset = 150;
+    hud.animationType = MBProgressHUDAnimationZoomOut;// | MBProgressHUDAnimationZoomIn;
+    hud.removeFromSuperViewOnHide = YES;
+    [hud hide:YES afterDelay:1.5];
+
 }
 @end

@@ -13,6 +13,7 @@
 #import "HSSanPinfitterView.h"
 #import "UIView+HSLayout.h"
 #import "UIImageView+WebCache.h"
+#import "UIView+HSLayout.h"
 
 #import "HSCommodtyItemModel.h"
 
@@ -26,6 +27,12 @@ CHTCollectionViewDelegateWaterfallLayout>
     NSMutableDictionary *_typeLoadingDic;
     
     int _sanpintype;
+    
+    UICollectionView *_sanpinCollectionView2;
+    
+    UICollectionView *_sanpinCollectionView3;
+    
+    UICollectionView *_sanpinCollectionView4;
 }
 
 @property (weak, nonatomic) IBOutlet HSSanPinfitterView *fitterView;
@@ -39,6 +46,8 @@ static NSString *const kCommodityCellIndentifier = @"CommodityCellIndentifier_id
 
 static const int kCellImgViewTag = 500;
 
+static const int kSanpinCollectionViewTagOri = 800;
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
@@ -46,18 +55,75 @@ static const int kCellImgViewTag = 500;
     _sanpinDataDic = [[NSMutableDictionary alloc] init];
     _typeLoadingDic = [[NSMutableDictionary alloc] init];
     
+    UICollectionViewFlowLayout *flow = [[UICollectionViewFlowLayout alloc] init];
+    _sanpinCollectionView2 = [[UICollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:flow];
+    _sanpinCollectionView3 = [[UICollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:flow];
+    _sanpinCollectionView4 = [[UICollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:flow];
+    [self initCollectionView:_sanpinCollectionView2];
+    [self initCollectionView:_sanpinCollectionView3];
+    [self initCollectionView:_sanpinCollectionView4];
+    _sanpinCollectionView.tag = kSanpinCollectionViewTagOri;
+    _sanpinCollectionView2.tag = kSanpinCollectionViewTagOri + 1;
+    _sanpinCollectionView3.tag = kSanpinCollectionViewTagOri + 2;
+    _sanpinCollectionView4.tag = kSanpinCollectionViewTagOri + 3;
+    
     [_sanpinCollectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:kCommodityCellIndentifier];
-
+    
     _sanpinCollectionView.delegate = self;
     _sanpinCollectionView.dataSource = self;
-    [self fitterViewSetUp];
     CHTCollectionViewWaterfallLayout *layout = [[CHTCollectionViewWaterfallLayout alloc] init];
     layout.sectionInset = UIEdgeInsetsMake(10, 10, 10, 10);
     layout.minimumColumnSpacing = 5;
     layout.minimumInteritemSpacing = 5;
     layout.columnCount = 1;
     _sanpinCollectionView.collectionViewLayout = layout;
+    
+    [self fitterViewSetUp];
 
+}
+
+#pragma mark -
+#pragma mark 初始化collectionView
+- (void)initCollectionView:(UICollectionView *)sanpinView
+{
+    sanpinView.backgroundColor = [UIColor whiteColor];
+    sanpinView.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.view addSubview:sanpinView];
+    _fitterView.translatesAutoresizingMaskIntoConstraints = NO;
+    id top = _fitterView;
+    [self.view HS_dispacingWithFisrtView:top fistatt:NSLayoutAttributeBottom secondView:sanpinView secondAtt:NSLayoutAttributeTop constant:0];
+    [self.view HS_dispacingWithFisrtView:self.view fistatt:NSLayoutAttributeLeading secondView:sanpinView secondAtt:NSLayoutAttributeLeading constant:0];
+    [self.view HS_dispacingWithFisrtView:self.view fistatt:NSLayoutAttributeTrailing secondView:sanpinView secondAtt:NSLayoutAttributeTrailing constant:0];
+    [self.view HS_dispacingWithFisrtView:self.view fistatt:NSLayoutAttributeBottom secondView:sanpinView secondAtt:NSLayoutAttributeBottom constant:0];
+    
+    [sanpinView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:kCommodityCellIndentifier];
+    
+    sanpinView.delegate = self;
+    sanpinView.dataSource = self;
+    CHTCollectionViewWaterfallLayout *layout = [[CHTCollectionViewWaterfallLayout alloc] init];
+    layout.sectionInset = UIEdgeInsetsMake(10, 10, 10, 10);
+    layout.minimumColumnSpacing = 5;
+    layout.minimumInteritemSpacing = 5;
+    layout.columnCount = 1;
+    sanpinView.collectionViewLayout = layout;
+}
+
+
+- (void)showCollectionView:(int)idx
+{
+    _sanpinCollectionView.hidden = YES;
+    _sanpinCollectionView2.hidden = YES;
+    _sanpinCollectionView3.hidden = YES;
+    _sanpinCollectionView4.hidden = YES;
+    
+   
+    [self sanpinViewWithIdx:idx].hidden = NO;
+}
+
+- (UICollectionView *)sanpinViewWithIdx:(int)idx
+{
+    UICollectionView *collectionView = (UICollectionView *)[self.view viewWithTag:idx+kSanpinCollectionViewTagOri];
+    return collectionView;
 }
 
 - (void)fitterViewSetUp
@@ -68,6 +134,7 @@ static const int kCellImgViewTag = 500;
     __weak typeof(self) wself = self;
     _fitterView.actionBlock = ^(int idx){
         __strong typeof(wself) swself = wself;
+        [swself showCollectionView:idx];
         int type = idx + 1;
         swself->_sanpintype = type;
         
@@ -76,7 +143,8 @@ static const int kCellImgViewTag = 500;
         if ((isLoading == nil || ![isLoading boolValue]) && typeArr.count == 0) {
             [swself sanpinTypeRequest:type key:[public md5Str:[public getIPAddress:YES]]];
         }
-        [_sanpinCollectionView reloadData];
+        [[swself sanpinViewWithIdx:idx] reloadData];
+        
         
     };
     [_fitterView beginActionWithIdx:0];
@@ -133,7 +201,7 @@ static const int kCellImgViewTag = 500;
                 }
             }];
             [_sanpinDataDic setObject:tmp forKey:[self p_keyFromType:type]];
-            [_sanpinCollectionView reloadData];
+            [[self  sanpinViewWithIdx:type-1] reloadData];
             
         }
         
@@ -146,7 +214,10 @@ static const int kCellImgViewTag = 500;
 #pragma  mark collectionView dataSource and delegate
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-    NSArray *typeArr = _sanpinDataDic[[self p_keyFromType:_sanpintype]];
+   
+    int tag = (int)collectionView.tag - kSanpinCollectionViewTagOri + 1; //sanpinType 从1开始
+     NSArray *typeArr = _sanpinDataDic[[self p_keyFromType:tag]];
+    
     return typeArr.count;
 }
 
@@ -163,10 +234,11 @@ static const int kCellImgViewTag = 500;
         [cell addSubview:imgView];
         [cell HS_edgeFillWithSubView:imgView];
     }
-    NSArray *typeArr = _sanpinDataDic[[self p_keyFromType:_sanpintype]];
+    int tag = (int)collectionView.tag - kSanpinCollectionViewTagOri + 1; //sanpinType 从1开始
+    NSArray *typeArr = _sanpinDataDic[[self p_keyFromType:tag]];
     HSCommodtyItemModel *itemModel = typeArr[indexPath.row];
     imgView.image = kPlaceholderImage;
-    [[SDWebImageManager sharedManager] downloadImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]]
+    [[SDWebImageManager sharedManager] downloadImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.imageurl]]
                                                     options:0
                                                    progress:^(NSInteger receivedSize, NSInteger expectedSize) {
                                                        // progression tracking code
@@ -177,7 +249,7 @@ static const int kCellImgViewTag = 500;
                                                           imgView.image = image;
                                                           
                                                           NSValue *imgSize =  [NSValue valueWithCGSize:image.size];
-                                                          NSDictionary *dic = [self.imageSizeDic objectForKey:[self p_keyFromIndex:indexPath selectedIdx:_sanpintype]];
+                                                          NSDictionary *dic = [self.imageSizeDic objectForKey:[self p_keyFromIndex:indexPath selectedIdx:tag]];
                                                           if (dic != nil ) {
                                                               NSURL *imgURL = dic[kImageURLKey];
                                                               NSValue *sizeValue = dic[kImageSizeKey];
@@ -189,9 +261,10 @@ static const int kCellImgViewTag = 500;
                                                           NSDictionary *tmpDic = @{kImageSizeKey:imgSize,
                                                                                    kImageURLKey:imageURL};
                                                           
-                                                          [self.imageSizeDic setObject:tmpDic forKey:[self p_keyFromIndex:indexPath selectedIdx:_sanpintype]];
-                                                          if (collectionView.dataSource != nil) {
+                                                          [self.imageSizeDic setObject:tmpDic forKey:[self p_keyFromIndex:indexPath selectedIdx:tag]];
+                                                          if (collectionView.dataSource != nil ) {
                                                               [collectionView reloadItemsAtIndexPaths:@[indexPath]];
+                                                             
                                                           }
                                                           
                                                       }
@@ -209,8 +282,8 @@ static const int kCellImgViewTag = 500;
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
     CGSize imgSize = CGSizeMake(80, 40);
-    
-    NSDictionary *dic = [self.imageSizeDic objectForKey:[self p_keyFromIndex:indexPath selectedIdx:_sanpintype]];
+    int tag = (int)collectionView.tag - kSanpinCollectionViewTagOri + 1; //sanpinType 从1开始
+    NSDictionary *dic = [self.imageSizeDic objectForKey:[self p_keyFromIndex:indexPath selectedIdx:tag]];
     if (dic != nil) {
         NSValue *sizeValue = dic[kImageSizeKey];
         imgSize = [sizeValue CGSizeValue];
@@ -221,7 +294,8 @@ static const int kCellImgViewTag = 500;
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSArray *typeArr = _sanpinDataDic[[self p_keyFromType:_sanpintype]];
+    int tag = (int)collectionView.tag - kSanpinCollectionViewTagOri + 1; //sanpinType 从1开始
+    NSArray *typeArr = _sanpinDataDic[[self p_keyFromType:tag]];
     HSCommodtyItemModel *itemModel = typeArr[indexPath.row];
     
     if (self.cellSelectedBlock) {

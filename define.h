@@ -91,12 +91,16 @@ static NSString *const kPostJsonQuantity = @"quantity";
 
 static NSString *const kPostJsonOrderNo = @"orderNo";
 
+static NSString *const kPostJsonOpenid = @"openid";
+
 #pragma mark -
 #pragma mark 请求url
 /// 注册
 #define kRegisterURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=register"]
 /// 登录
 #define kLoginURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=login"]
+/// 第三方登录 /index.php?g=api&m=User&a=weixinLogin
+#define kWeixinLoginURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=weixinLogin"]
 ///获取手机验证码
 #define kGetVerifyCodeURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=getVerifyCode"]
 /// 验证手机验证码
@@ -199,6 +203,11 @@ static NSString *const kUserInfoPlistName = @"HSuser";
 
 #define kPlaceholderImage  [UIImage imageNamed:@"bank_icon_failed"]
 
-#define kAppYellowColor [UIColor yellowColor]
+#define kAppYellowColor ColorRGB(253, 169, 10)
+
+
+#pragma mark -
+#pragma mark 各平台的key
+static NSString *const kUMengAppKey = @"53290df956240b6b4a0084b3";//@"556e697267e58ee877007380"; /放心吃
 
 #endif

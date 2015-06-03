@@ -14,13 +14,6 @@
                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="PEn-tJ-EwN">
                     <rect key="frame" x="0.0" y="0.0" width="320" height="240"/>
                 </imageView>
-                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="wZ9-bf-XYE">
-                    <rect key="frame" x="120" y="8" width="80" height="80"/>
-                    <constraints>
-                        <constraint firstAttribute="width" constant="80" id="Etz-rU-aLD"/>
-                        <constraint firstAttribute="height" constant="80" id="etm-jR-37z"/>
-                    </constraints>
-                </imageView>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OaC-BT-OQ3">
                     <rect key="frame" x="142" y="96" width="36" height="17"/>
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -43,6 +36,13 @@
                     <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     <nil key="highlightedColor"/>
                 </label>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="icon_header" translatesAutoresizingMaskIntoConstraints="NO" id="wZ9-bf-XYE">
+                    <rect key="frame" x="120" y="8" width="80" height="80"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="80" id="Etz-rU-aLD"/>
+                        <constraint firstAttribute="height" constant="80" id="etm-jR-37z"/>
+                    </constraints>
+                </imageView>
             </subviews>
             <constraints>
                 <constraint firstAttribute="centerX" secondItem="wZ9-bf-XYE" secondAttribute="centerX" id="0E3-Ib-UZX"/>
@@ -69,4 +69,7 @@
             <point key="canvasLocation" x="189" y="201"/>
         </collectionReusableView>
     </objects>
+    <resources>
+        <image name="icon_header" width="70" height="71"/>
+    </resources>
 </document>

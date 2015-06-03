@@ -236,6 +236,11 @@ static NSString *const kCellIdentifier = @"HSMineViewControllerCellIdentifier";
             if (isSign) {
                 [self showHudInWindowWithText:@"签到成功"];
                 _userInfoModel.sign = isSign;
+                
+                if ([public isLoginInStatus]) {
+                    [self userInfoRequest:_userInfoModel.username phone:_userInfoModel.phone];
+                }
+
                 [_mineCollectionView reloadData];
             }
             else if(tmp.allKeys.count == 1)
@@ -305,8 +310,10 @@ static NSString *const kCellIdentifier = @"HSMineViewControllerCellIdentifier";
         {
             [view signStatus:NO];
             [view welcomeText:nil isLogin:NO];
+            
         }
         view.bgImageView.image = [UIImage imageNamed:@"icon_mine_headBg.jpg"];
+        view.pointsLabel.text = [NSString stringWithFormat:@"积分：%@",[public controlNullString:_userInfoModel.score]];
         __weak typeof(self) wself = self;
         view.signBlock = ^{ /// 如果没登录  进入登录界面
             __strong typeof(wself) swself = wself;

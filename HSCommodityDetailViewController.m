@@ -19,10 +19,11 @@
 #import "AFHTTPRequestOperationManager.h"
 #import "HSDBManager.h"
 #import "UIImageView+WebCache.h"
-
+#import "UMSocial.h"
+#import "UMSocialWechatHandler.h"
 
 @interface HSCommodityDetailViewController ()<UITableViewDataSource,
-UITableViewDelegate>
+UITableViewDelegate,UMSocialUIDelegate>
 {
     HSCommodityItemDetailPicModel *_detailPicModel;
     
@@ -75,8 +76,42 @@ static const int kTopExistCellNum = 1;
 #pragma mark rightNavBar action
 - (void)shareAction
 {
+    //设置微信AppId，设置分享url，默认使用友盟的网址
+//    [UMSocialWechatHandler setWXAppId:@"wxd930ea5d5a258f4f" appSecret:@"db426a9829e4b49a0dcac7b4162da6b6" url:@"http://www.umeng.com/social"];
+//    [UMSocialSnsService presentSnsIconSheetView:self
+//                                         appKey:@"507fcab25270157b37000010"
+//                                      shareText:@"你要分享的文字"
+//                                     shareImage:[UIImage imageNamed:@"arrow"]
+//                                shareToSnsNames:[NSArray arrayWithObjects:UMShareToSina,UMShareToTencent,UMShareToRenren,UMShareToWechatSession,UMShareToWechatTimeline,UMShareToQQ,UMShareToQzone,nil]
+//                                       delegate:self];
     
+     [UMSocialWechatHandler setWXAppId:@"wxd930ea5d5a258f4f" appSecret:@"db426a9829e4b49a0dcac7b4162da6b6" url:@"http://www.umeng.com/social"];
+    NSString *shareText = @"友盟社会化组件可以让移动应用快速具备社会化分享、登录、评论、喜欢等功能，并提供实时、全面的社会化数据统计分析服务。 http://www.umeng.com/social";             //分享内嵌文字
+    UIImage *shareImage = [UIImage imageNamed:@"icon_mine_1"];          //分享内嵌图片
+    
+    //调用快速分享接口
+    [UMSocialSnsService presentSnsIconSheetView:self
+                                         appKey:kUMengAppKey
+                                      shareText:shareText
+                                     shareImage:shareImage
+                                shareToSnsNames:[NSArray arrayWithObjects:UMShareToSina,UMShareToTencent,UMShareToRenren,UMShareToQQ,UMShareToQzone,UMShareToWechatSession,UMShareToWechatTimeline,nil]//nil
+                                       delegate:self];
+
 }
+
+#pragma mark - 
+#pragma mark 分享deleagte
+
+-(void)didFinishGetUMSocialDataInViewController:(UMSocialResponseEntity *)response
+{
+    //根据`responseCode`得到发送结果,如果分享成功
+    if(response.responseCode == UMSResponseCodeSuccess)
+    {
+        //得到分享到的微博平台名
+        NSLog(@"share to sns name is %@",[[response.data allKeys] objectAtIndex:0]);
+    }
+}
+
 
 - (void)buyViewBlock
 {

@@ -15,16 +15,16 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="751" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DdS-fD-ko6">
-                        <rect key="frame" x="33" y="8" width="36" height="17"/>
+                        <rect key="frame" x="37" y="8" width="36" height="17"/>
                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                         <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                         <nil key="highlightedColor"/>
                     </label>
-                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="253" verticalHuggingPriority="251" horizontalCompressionResistancePriority="753" image="icon_selected" translatesAutoresizingMaskIntoConstraints="NO" id="Hri-84-EEi">
-                        <rect key="frame" x="8" y="17" width="20" height="20"/>
+                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="253" verticalHuggingPriority="251" horizontalCompressionResistancePriority="753" image="icon_address" translatesAutoresizingMaskIntoConstraints="NO" id="Hri-84-EEi">
+                        <rect key="frame" x="8" y="15" width="24" height="24"/>
                     </imageView>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KAP-CU-xrT">
-                        <rect key="frame" x="33" y="30" width="279" height="15"/>
+                        <rect key="frame" x="37" y="30" width="275" height="15"/>
                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
                         <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                         <nil key="highlightedColor"/>
@@ -36,7 +36,7 @@
                         <nil key="highlightedColor"/>
                     </label>
                     <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uII-eU-WFo">
-                        <rect key="frame" x="33" y="18" width="243" height="17"/>
+                        <rect key="frame" x="37" y="18" width="239" height="17"/>
                         <fontDescription key="fontDescription" type="system" pointSize="14"/>
                         <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                         <nil key="highlightedColor"/>
@@ -73,10 +73,10 @@
                 <outlet property="tipLable" destination="uII-eU-WFo" id="0Sj-Hn-2iV"/>
                 <outlet property="userNameLabel" destination="DdS-fD-ko6" id="bGR-Bh-97R"/>
             </connections>
-            <point key="canvasLocation" x="186" y="165"/>
+            <point key="canvasLocation" x="186" y="164"/>
         </tableViewCell>
     </objects>
     <resources>
-        <image name="icon_selected" width="20" height="20"/>
+        <image name="icon_address" width="24" height="24"/>
     </resources>
 </document>

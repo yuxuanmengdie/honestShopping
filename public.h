@@ -76,4 +76,8 @@
 /// 定时登录 默认间隔1小时
 + (void)timedLoginIn;
 
+/// showHud
++ (void)showHudInWindowWithText:(NSString *)text;
+
+
 @end
