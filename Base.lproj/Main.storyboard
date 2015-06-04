@@ -1792,12 +1792,49 @@
                     <view key="view" contentMode="scaleToFill" id="Bid-Zj-6xp">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AAv-Nv-xjy">
+                                <rect key="frame" x="259" y="167" width="42" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="10" sectionFooterHeight="10" translatesAutoresizingMaskIntoConstraints="NO" id="EDC-Ud-00g">
+                                <rect key="frame" x="0.0" y="20" width="600" height="531"/>
+                                <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                            </tableView>
+                            <view contentMode="scaleToFill" placeholderIntrinsicWidth="600" placeholderIntrinsicHeight="49" translatesAutoresizingMaskIntoConstraints="NO" id="FiI-Ix-tdr" customClass="HSSettleView">
+                                <rect key="frame" x="0.0" y="551" width="600" height="49"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </view>
+                        </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="EDC-Ud-00g" firstAttribute="leading" secondItem="Bid-Zj-6xp" secondAttribute="leading" id="9yL-DJ-u0J"/>
+                            <constraint firstItem="EDC-Ud-00g" firstAttribute="top" secondItem="qzl-fN-zEO" secondAttribute="bottom" id="BMO-GH-eKq"/>
+                            <constraint firstItem="tFb-8S-QVd" firstAttribute="top" secondItem="FiI-Ix-tdr" secondAttribute="bottom" id="D4d-bX-fKf"/>
+                            <constraint firstItem="FiI-Ix-tdr" firstAttribute="leading" secondItem="Bid-Zj-6xp" secondAttribute="leading" id="G3N-GQ-Gby"/>
+                            <constraint firstItem="FiI-Ix-tdr" firstAttribute="top" secondItem="EDC-Ud-00g" secondAttribute="bottom" id="N8a-M9-0Jb"/>
+                            <constraint firstAttribute="trailing" secondItem="EDC-Ud-00g" secondAttribute="trailing" id="OXE-ZW-a6M"/>
+                            <constraint firstAttribute="trailing" secondItem="FiI-Ix-tdr" secondAttribute="trailing" id="UHz-Jk-OGH"/>
+                            <constraint firstAttribute="bottom" secondItem="EDC-Ud-00g" secondAttribute="bottom" constant="136" id="hjY-aM-8Sj"/>
+                            <constraint firstAttribute="bottom" secondItem="FiI-Ix-tdr" secondAttribute="bottom" id="lsD-ND-Idh"/>
+                        </constraints>
+                        <variation key="default">
+                            <mask key="constraints">
+                                <exclude reference="hjY-aM-8Sj"/>
+                                <exclude reference="D4d-bX-fKf"/>
+                            </mask>
+                        </variation>
                     </view>
+                    <connections>
+                        <outlet property="orderDetailTableView" destination="EDC-Ud-00g" id="Amf-89-4Qv"/>
+                        <outlet property="settleView" destination="FiI-Ix-tdr" id="lbW-vf-NT8"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="qBn-2I-dUn" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="979" y="4223"/>
+            <point key="canvasLocation" x="979" y="4371"/>
         </scene>
     </scenes>
     <resources>

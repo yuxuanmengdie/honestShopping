@@ -44,6 +44,10 @@ UIAlertViewDelegate>
 
 static NSString *const kCellIdentifier = @"HSMineViewControllerCellIdentifier";
 
+static const int kLoginOutAlertTag = 700;
+
+static const int kTakePhoneAlertTag = 701;
+
 - (void)awakeFromNib
 {
     /// 每次进入程序都登录，更新sessioncode
@@ -77,6 +81,7 @@ static NSString *const kCellIdentifier = @"HSMineViewControllerCellIdentifier";
     layout.columnCount = 3;
     _mineCollectionView.collectionViewLayout = layout;
     
+    
 }
 
 
@@ -101,12 +106,18 @@ static NSString *const kCellIdentifier = @"HSMineViewControllerCellIdentifier";
     {
         _userInfoModel = nil;
     }
+    [_mineCollectionView reloadData];
 }
 
 
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
+    if ([public isLoginInStatus]) {
+        [self setNavBarRightBarWithTitle:@"退出帐号" action:@selector(loginOut)];
+    }
+
+    
     [self getLastetUserInfoModel];
     if ([public isLoginInStatus]) {
         [self userInfoRequest:_userInfoModel.username phone:_userInfoModel.phone];
@@ -130,6 +141,16 @@ static NSString *const kCellIdentifier = @"HSMineViewControllerCellIdentifier";
     // Pass the selected object to the new view controller.
 }
 */
+
+#pragma mark -
+#pragma mark 帐号登出
+- (void)loginOut
+{
+    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:nil message:@"是否退出帐号" delegate:self cancelButtonTitle:@"否" otherButtonTitles:@"是", nil];
+    alertView.tag = kLoginOutAlertTag;
+    [alertView show];
+
+}
 
 #pragma mark -
 #pragma mark 登录请求
@@ -401,6 +422,7 @@ static NSString *const kCellIdentifier = @"HSMineViewControllerCellIdentifier";
     }
     else if (indexPath.row == (_mineDataArray.count - 1) - 1) {  /// 打电话 应该提示
         UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:nil message:@"是否拨打客服电话" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"拨打", nil];
+        alertView.tag = kTakePhoneAlertTag;
         [alertView show];
         
     }
@@ -422,8 +444,24 @@ static NSString *const kCellIdentifier = @"HSMineViewControllerCellIdentifier";
 #pragma mark alertView的委托
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    if (buttonIndex == 1) { // 拨打电话
-         [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"tel://02525326589"]];
+    if (alertView.tag == kTakePhoneAlertTag) { /// 提示打电话
+        
+        if (buttonIndex == 1) { // 拨打电话
+            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"tel://02525326589"]];
+        }
+
+    }
+    
+    else if (alertView.tag == kLoginOutAlertTag)
+    {
+        if (buttonIndex == 1) { //退出帐号
+            [public setLoginOut];
+            _userInfoModel = nil;
+            [_mineCollectionView reloadData];
+            self.navigationItem.rightBarButtonItem = nil;
+
+        }
+
     }
 }
 

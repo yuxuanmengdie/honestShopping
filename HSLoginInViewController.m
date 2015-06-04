@@ -60,9 +60,26 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
     _iconImageView.image = [UIImage imageNamed:@"icon_logo"];
     [self leftViewWithTextFiled:_userNameTextField imgName:kUserImageName];
     [self leftViewWithTextFiled:_passWordTextFiled imgName:kPassWordImageName];
-    NSDictionary *userInfo = [public userInfoFromPlist];
-    NSLog(@"userInfo=%@",userInfo);
     
+    if ([public loginType] == kAccountLoginType) { /// 帐号登录
+        _userNameTextField.text = [public controlNullString:[public lastUserName]];
+        
+        if ([public isRemeberPassword]) {
+            _passWordTextFiled.text = [public controlNullString:[public lastPassword]];
+        }
+    }
+    
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSNumber *result = [userDefaults objectForKey:kRemeberPassword];
+    if (result == nil) {
+        [public setRemeberPassword:YES];
+    }
+    else
+    {
+        _remeberPWButton.selected = [public isRemeberPassword];
+    }
+
+
 }
 
 - (void)didReceiveMemoryWarning {
@@ -153,6 +170,7 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
 
 - (IBAction)remeberPWAction:(id)sender {
     _remeberPWButton.selected = !_remeberPWButton.selected;
+    [public setRemeberPassword:_remeberPWButton.isSelected];
 }
 
 - (IBAction)findPWAction:(id)sender {

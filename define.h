@@ -200,7 +200,8 @@ static NSString *const kUserInfoPlistName = @"HSuser";
 static NSString *const kLoginType = @"hs_loginType";
 /// 第三方的openID
 static NSString *const kOtherOpenID = @"hs_otherOpenID";
-
+/// 记住密码的key
+static NSString *const kRemeberPassword = @"hs_remeberPassword";
 
 #pragma mark -
 #pragma mark 占位图片

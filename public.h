@@ -60,8 +60,11 @@ typedef NS_ENUM(NSUInteger, HSLoginType) {
 /// 是否登录状态
 + (BOOL)isLoginInStatus;
 
-/// 设置登录状态
+/// 设置登录状态 以及登录的方式
 + (void)setLoginInStatus:(BOOL)isLogin type:(HSLoginType)type;
+
+/// 登出
++ (void)setLoginOut;
 
 /// 返回登录的方式
 + (HSLoginType)loginType;
@@ -96,5 +99,13 @@ typedef NS_ENUM(NSUInteger, HSLoginType) {
 /// showHud
 + (void)showHudInWindowWithText:(NSString *)text;
 
+/// 是否是江浙沪
++ (BOOL)isAreaInJiangZheHu:(NSString *)sheng;
+
+/// 是否记住密码
++ (BOOL)isRemeberPassword;
+
+/// 设置记住密码
++ (void)setRemeberPassword:(BOOL)isRemeber;
 
 @end

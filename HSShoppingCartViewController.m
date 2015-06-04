@@ -8,6 +8,7 @@
 
 #import "HSShoppingCartViewController.h"
 #import "HSSubmitOrderViewController.h"
+#import "HSLoginInViewController.h"
 
 #import "PKYStepper.h"
 #import "HSCatrTableViewCell.h"
@@ -161,6 +162,17 @@ UITableViewDelegate>
 
 
 - (IBAction)buyAction:(id)sender {
+    
+    if (![public isLoginInStatus]) {
+        [self showHudWithText:@"请先登录"];
+        [self pushViewControllerWithIdentifer:NSStringFromClass([HSLoginInViewController class])];
+        return ;
+    }
+    
+    if ([self selectedItems].count == 0) {
+         [self showHudWithText:@"没有选择任何商品"];
+        return;
+    }
     
     UIStoryboard *storyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
     HSSubmitOrderViewController *submitVC = [storyBoard instantiateViewControllerWithIdentifier:NSStringFromClass([HSSubmitOrderViewController class])];

@@ -8,6 +8,7 @@
 
 #import "HSSubmitOrderViewController.h"
 #import "HSMineAddressViewController.h"
+#import "HSPayOrderViewController.h"
 
 #import "HSSubmitOrderAddressTableViewCell.h"
 #import "HSSubmitOrderCommdityTableViewCell.h"
@@ -194,6 +195,20 @@ static const float kPostagePrice = 6.00;
     
     return tmp;
 }
+#pragma mark -
+#pragma mark push到支付订单页面
+- (void)pushToOrderPayVC
+{
+    UIStoryboard *stroyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    HSPayOrderViewController *pay = [stroyBoard instantiateViewControllerWithIdentifier:NSStringFromClass([HSPayOrderViewController class])];
+    pay.hidesBottomBarWhenPushed = YES;
+    pay.title = @"支付订单";
+    pay.addressModel = _addressModel;
+    pay.itemNumDic = _itemNumDic;
+    pay.commdityDataArray = _itemsDataArray;
+    [self.navigationController pushViewController:pay animated:YES];
+}
+
 
 #pragma mark -
 #pragma mark 确认订单
@@ -235,6 +250,8 @@ static const float kPostagePrice = 6.00;
             NSString *orderNo = tmpDic[kPostJsonOrderNo];
             if (orderNo.length > 0) {
                  [self showHudWithText:@"订单提交成功"];
+                [self pushToOrderPayVC];
+                
             }
             
         }

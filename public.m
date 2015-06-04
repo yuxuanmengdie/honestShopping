@@ -275,9 +275,9 @@
 /// 取出用户信息
 + (NSDictionary *)userInfoFromPlist
 {
-//    if (![public isLoginInStatus]) { /// 不是登录状态
-//        return nil;
-//    }
+    if (![public isLoginInStatus]) { /// 不是登录状态
+        return nil;
+    }
     
     NSString *doc = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
     NSString *path = [doc stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.plist",kUserInfoPlistName]];
@@ -305,6 +305,13 @@
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults setObject:[NSNumber numberWithBool:isLogin] forKey:kUserIsLoginKey];
     [userDefaults setObject:[NSNumber numberWithInt:type] forKey:kLoginType];
+    [userDefaults synchronize];
+}
+
++ (void)setLoginOut
+{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setObject:[NSNumber numberWithBool:NO] forKey:kUserIsLoginKey];
     [userDefaults synchronize];
 }
 
@@ -456,6 +463,47 @@ static const double kTimedLoginInterval = 60*60;
     hud.animationType = MBProgressHUDAnimationZoomOut;// | MBProgressHUDAnimationZoomIn;
     hud.removeFromSuperViewOnHide = YES;
     [hud hide:YES afterDelay:1.5];
+
+}
+
+
++ (BOOL)isAreaInJiangZheHu:(NSString *)sheng
+{
+    if (sheng.length < 2) {
+        return NO;
+    }
+    
+    NSArray *desArr = @[@"浙江",@"江苏",@"上海"];
+    __block BOOL isIn = NO;
+    
+    [desArr enumerateObjectsUsingBlock:^(NSString *obj, NSUInteger idx, BOOL *stop) {
+        NSRange range = [sheng rangeOfString:obj];
+        if (range.location != NSNotFound) {
+            isIn = YES;
+            *stop = YES;
+        }
+        
+    }];
+    
+    return isIn;
+}
+
+
+/// 是否记住密码
++ (BOOL)isRemeberPassword
+{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSNumber *result = [userDefaults objectForKey:kRemeberPassword];
+    BOOL isRe = result == nil ? NO : [result boolValue];
+    return isRe;
+}
+
+/// 设置记住密码
++ (void)setRemeberPassword:(BOOL)isRemeber
+{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setObject:[NSNumber numberWithBool:isRemeber] forKey:kRemeberPassword];
+    [userDefaults synchronize];
 
 }
 @end
