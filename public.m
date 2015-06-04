@@ -275,6 +275,10 @@
 /// 取出用户信息
 + (NSDictionary *)userInfoFromPlist
 {
+//    if (![public isLoginInStatus]) { /// 不是登录状态
+//        return nil;
+//    }
+    
     NSString *doc = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
     NSString *path = [doc stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.plist",kUserInfoPlistName]];
 
@@ -296,11 +300,40 @@
 }
 
 /// 设置登录状态
-+ (void)setLoginInStatus:(BOOL)isLogin
++ (void)setLoginInStatus:(BOOL)isLogin type:(HSLoginType)type
 {
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults setObject:[NSNumber numberWithBool:isLogin] forKey:kUserIsLoginKey];
+    [userDefaults setObject:[NSNumber numberWithInt:type] forKey:kLoginType];
     [userDefaults synchronize];
+}
+
++ (HSLoginType)loginType
+{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSNumber *result = [userDefaults objectForKey:kLoginType];
+    if (result == nil) {
+        return kNoneLoginType;
+    }
+    
+    int type = [result intValue];
+    
+    return type;
+}
+
+
++ (void)saveOtherOpenID:(NSString *)openID
+{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setObject:[public controlNullString:openID ] forKey:kOtherOpenID];
+    [userDefaults synchronize];
+}
+
++ (NSString *)lastOtherOpenID
+{
+     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSString *result = [userDefaults objectForKey:kOtherOpenID];
+    return result;
 }
 
 + (NSString *)controlNullString:(NSString *)ori

@@ -8,6 +8,14 @@
 
 #import <Foundation/Foundation.h>
 
+
+typedef NS_ENUM(NSUInteger, HSLoginType) {
+    kAccountLoginType = 1,
+    kWenxiLoginType,
+    kQQLoginType,
+    kSinaLoginType,
+    kNoneLoginType
+};
 @interface public : NSObject
 
 
@@ -53,7 +61,16 @@
 + (BOOL)isLoginInStatus;
 
 /// 设置登录状态
-+ (void)setLoginInStatus:(BOOL)isLogin;
++ (void)setLoginInStatus:(BOOL)isLogin type:(HSLoginType)type;
+
+/// 返回登录的方式
++ (HSLoginType)loginType;
+
+/// 保存openID
++ (void)saveOtherOpenID:(NSString *)openID;
+
+/// 取出openID
++ (NSString *)lastOtherOpenID;
 
 /// 保存上次的用户名称
 + (void)saveLastUserName:(NSString *)userName;

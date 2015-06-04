@@ -102,11 +102,11 @@ UITableViewDelegate>
             }];
             
             _addressDataArray = tmpArr;
-                       [_addressTableView reloadData];
+            [_addressTableView reloadData];
         }
         else
         {
-            
+            [_addressTableView reloadData];
         }
     }];
     

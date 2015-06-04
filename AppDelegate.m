@@ -10,8 +10,7 @@
 #import "UMSocial.h"
 #import "UMSocialWechatHandler.h"
 #import "UMSocialQQHandler.h"
-
-
+#import <AlipaySDK/AlipaySDK.h>
 
 @interface AppDelegate ()
 
@@ -77,6 +76,30 @@
   sourceApplication:(NSString *)sourceApplication
          annotation:(id)annotation
 {
+    
+    if ([url.host isEqualToString:@"safepay"]) {
+        
+        [[AlipaySDK defaultService] processOrderWithPaymentResult:url
+                                                  standbyCallback:^(NSDictionary *resultDic) {
+                                                      NSLog(@"result = %@",resultDic);
+                                                  }];
+        //}
+        
+                 [[AlipaySDK defaultService] processAuth_V2Result:url
+                                               standbyCallback:^(NSDictionary *resultDic) {
+                  NSLog(@"result = %@",resultDic);
+                  NSString *resultStr = resultDic[@"result"];
+                }];
+        
+    }
+    
+    if ([url.host isEqualToString:@"platformapi"]){//支付宝钱包快登授权返回 authCode
+        [[AlipaySDK defaultService] processAuthResult:url standbyCallback:^(NSDictionary *resultDic) {
+            NSLog(@"result = %@",resultDic);
+        }];
+    }
+    
+
     return  [UMSocialSnsService handleOpenURL:url];
 }
 @end

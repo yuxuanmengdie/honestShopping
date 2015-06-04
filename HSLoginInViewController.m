@@ -204,7 +204,7 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
             if (_userInfoModel.id.length > 0) { /// 登录后返回有数据
                 [self showHudInWindowWithText:@"登录成功"];
                 [public saveUserInfoToPlist:[_userInfoModel toDictionary]];
-                [public setLoginInStatus:YES];
+                [public setLoginInStatus:YES type:kAccountLoginType];
                 
                 [public saveLastUserName:userName];
                 [public saveLastPassword:passWord];
@@ -311,7 +311,7 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
 
 #pragma mark -
 #pragma mark 根据第三方的ID 注册
-- (void)loginInWithOtherID:(NSString *)openID
+- (void)loginInWithOtherID:(NSString *)openID type:(HSLoginType)loginType
 {
     [self showhudLoadingWithText:@"正在登录..." isDimBackground:YES];
     NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
@@ -339,7 +339,7 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
             if (_userInfoModel.id.length > 0) { /// 登录后返回有数据
                 [self showHudInWindowWithText:@"登录成功"];
 //                [public saveUserInfoToPlist:[_userInfoModel toDictionary]];
-                [public setLoginInStatus:YES];
+                [public setLoginInStatus:YES type:loginType];
                 
 //                [public saveLastUserName:userName];
 //                [public saveLastPassword:passWord];

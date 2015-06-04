@@ -196,6 +196,10 @@ static NSString *const kPostJsonOpenid = @"openid";
 static NSString *const kUserIsLoginKey = @"HS_kUserIsLoginKey";
 /// 保存到用户信息保存到doc 的plist文件
 static NSString *const kUserInfoPlistName = @"HSuser";
+/// 登录的方式
+static NSString *const kLoginType = @"hs_loginType";
+/// 第三方的openID
+static NSString *const kOtherOpenID = @"hs_otherOpenID";
 
 
 #pragma mark -
@@ -210,4 +214,8 @@ static NSString *const kUserInfoPlistName = @"HSuser";
 #pragma mark 各平台的key
 static NSString *const kUMengAppKey = @"53290df956240b6b4a0084b3";//@"556e697267e58ee877007380"; /放心吃
 
+
+
+#pragma mark -
+#pragma mark 支付宝key
 #endif

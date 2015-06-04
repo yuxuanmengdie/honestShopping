@@ -12,6 +12,7 @@
 #import "HSLoginInViewController.h"
 #import "HSMineAddressViewController.h"
 #import "HSMineFavoriteViewController.h"
+#import "HSPayOrderViewController.h"
 
 #import "HSMineTopTableViewCell.h"
 #import "HSMineTableViewCell.h"
@@ -389,8 +390,14 @@ static NSString *const kCellIdentifier = @"HSMineViewControllerCellIdentifier";
     }
     else if (indexPath.row == 3) // 我的试吃
     {
-        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"" message:@"敬请期待" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
-        [alertView show];
+        UIStoryboard *stroyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+        HSPayOrderViewController *pay = [stroyBoard instantiateViewControllerWithIdentifier:NSStringFromClass([HSPayOrderViewController class])];
+        pay.hidesBottomBarWhenPushed = YES;
+        pay.title = @"付款";
+//        pay.hidesBottomBarWhenPushed = YES;
+        [self.navigationController pushViewController:pay animated:YES];
+//        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"" message:@"敬请期待" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
+//        [alertView show];
     }
     else if (indexPath.row == (_mineDataArray.count - 1) - 1) {  /// 打电话 应该提示
         UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:nil message:@"是否拨打客服电话" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"拨打", nil];
