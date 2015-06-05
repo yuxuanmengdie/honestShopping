@@ -78,6 +78,14 @@ UITableViewDelegate>
 }
 
 #pragma mark -
+#pragma mark 获取订单详情
+- (void)getOrderDetailRequest:(NSString *)orderID
+{
+    
+}
+
+
+#pragma mark -
 #pragma mark 获取商品的总数
 - (int)totalNum
 {
