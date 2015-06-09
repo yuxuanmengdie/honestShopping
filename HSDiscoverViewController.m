@@ -261,41 +261,32 @@ static const int kFirstSectionNum = 3;
         model = _discoverArray[count + kFirstSectionNum-1];
     }
     imgView.image = kPlaceholderImage;
-    [[SDWebImageManager sharedManager] downloadImageWithURL:[NSURL URLWithString:model.content]
-                                                    options:0
-                                                   progress:^(NSInteger receivedSize, NSInteger expectedSize) {
-                                                       // progression tracking code
-                                                   }
-                                                  completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
-                                                      if (image) {
-                                                          // do something with image
-                                                          imgView.image = image;
-                                                          
-                                                          NSValue *imgSize =  [NSValue valueWithCGSize:image.size];
-                                                          NSDictionary *dic = [self.imageSizeDic objectForKey:[self p_keyFromIndex:indexPath]];
-                                                          if (dic != nil ) {
-                                                              NSURL *imgURL = dic[kImageURLKey];
-                                                              NSValue *sizeValue = dic[kImageSizeKey];
-                                                              if ([imgURL isEqual:imageURL] && [sizeValue isEqual:imgSize]) {
-                                                                  return ;
-                                                              }
-                                                          }
-                                                          
-                                                          NSDictionary *tmpDic = @{kImageSizeKey:imgSize,
-                                                                                   kImageURLKey:imageURL};
-                                                          
-                                                          [self.imageSizeDic setObject:tmpDic forKey:[self p_keyFromIndex:indexPath]];
-                                                          
-                                                          // NSLog(@"cell   %d  ob=%@",indexPath.row,_imageSizeDic[ind]);
-                                                          if (_discoverCollectionView.dataSource != nil) {
-                                                              [_discoverCollectionView reloadItemsAtIndexPaths:@[indexPath]];
-                                                          }
-                                                          
-                                                          
-                                                          
-                                                      }
-                                                  }];
-    
+    [imgView sd_setImageWithURL:[NSURL URLWithString:model.content] placeholderImage:kPlaceholderImage completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+        if (image) {
+            // do something with image
+            
+            NSValue *imgSize =  [NSValue valueWithCGSize:image.size];
+            NSDictionary *dic = [self.imageSizeDic objectForKey:[self p_keyFromIndex:indexPath]];
+            if (dic != nil ) {
+                NSURL *imgURL = dic[kImageURLKey];
+                NSValue *sizeValue = dic[kImageSizeKey];
+                if ([imgURL isEqual:imageURL] && [sizeValue isEqual:imgSize]) {
+                    return ;
+                }
+            }
+            
+            NSDictionary *tmpDic = @{kImageSizeKey:imgSize,
+                                     kImageURLKey:imageURL};
+            
+            [self.imageSizeDic setObject:tmpDic forKey:[self p_keyFromIndex:indexPath]];
+            
+            // NSLog(@"cell   %d  ob=%@",indexPath.row,_imageSizeDic[ind]);
+            if (_discoverCollectionView.dataSource != nil) {
+                [_discoverCollectionView reloadItemsAtIndexPaths:@[indexPath]];
+            }
+    }
+
+    }];
     
     return cell;
 }

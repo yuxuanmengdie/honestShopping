@@ -506,4 +506,53 @@ static const double kTimedLoginInterval = 60*60;
     [userDefaults synchronize];
 
 }
+
+/// 根据订单的状态status 返回 具体的描述
++ (NSString *)orderStatusStrWithState:(NSString *)status
+{
+    if (status.length == 0) {
+        return @"";
+    }
+    
+    NSString *result = @"";
+    int sta = [status intValue];
+    
+    //1.代付款 2.待发货 3.待收获 4.完成 5。关闭
+    switch (sta) {
+        case 1:
+        {
+            result = @"待付款";
+        }
+            break;
+        case 2:
+        {
+             result = @"待发货";
+        }
+            break;
+
+        case 3:
+        {
+             result = @"待收货";
+        }
+            break;
+
+        case 4:
+        {
+             result = @"完成";
+        }
+            break;
+
+        case 5:
+        {
+             result = @"关闭";
+        }
+            break;
+
+            
+        default:
+            break;
+    }
+    
+    return result;
+}
 @end

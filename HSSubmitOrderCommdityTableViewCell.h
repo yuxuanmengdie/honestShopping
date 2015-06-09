@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "HSCommodityItemDetailPicModel.h"
+#import "HSOrderModel.h"
 
 @interface HSSubmitOrderCommdityTableViewCell : UITableViewCell
 
@@ -21,6 +22,10 @@
 
 @property (weak, nonatomic) IBOutlet UILabel *numLabel;
 
+/// 商品model
 - (void)setUpWithModel:(HSCommodityItemDetailPicModel *)detailModel imagePreURl:(NSString *)preURL num:(int)num;
 
+
+/// 订单中单个的model
+- (void)setupWithOrderItemModel:(HSOrderitemModel *)itemModel;
 @end

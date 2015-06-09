@@ -210,37 +210,31 @@ static const int kSizeNum = 10;
     cell.imgView.image = nil;
     [cell dataSetUpWithModel:itemModel];
     
-    [[SDWebImageManager sharedManager] downloadImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]]
-                                                    options:0
-                                                   progress:^(NSInteger receivedSize, NSInteger expectedSize) {
-                                                       // progression tracking code
-                                                   }
-                                                  completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
-                                                      if (image) {
-                                                          // do something with image
-                                                          cell.imgView.image = image;
-                                                          
-                                                          NSValue *imgSize =  [NSValue valueWithCGSize:image.size];
-                                                          NSDictionary *dic = [self.imageSizeDic objectForKey:[self keyFromIndex:indexPath]];
-                                                          if (dic != nil ) {
-                                                              NSURL *imgURL = dic[kImageURLKey];
-                                                              NSValue *sizeValue = dic[kImageSizeKey];
-                                                              if ([imgURL isEqual:imageURL] && [sizeValue isEqual:imgSize]) {
-                                                                  return ;
-                                                              }
-                                                          }
-                                                          
-                                                          NSDictionary *tmpDic = @{kImageSizeKey:imgSize,
-                                                                                   kImageURLKey:imageURL};
-                                                          
-                                                          [self.imageSizeDic setObject:tmpDic forKey:[self keyFromIndex:indexPath]];
-                                                          if (collectionView.dataSource != nil) {
-                                                              [collectionView reloadItemsAtIndexPaths:@[indexPath]];
-                                                          }
-                                                      }
-                                                  }];
-    
-    
+    [cell.imgView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]] placeholderImage:kPlaceholderImage completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+        if (image) {
+            // do something with image
+            
+            NSValue *imgSize =  [NSValue valueWithCGSize:image.size];
+            NSDictionary *dic = [self.imageSizeDic objectForKey:[self keyFromIndex:indexPath]];
+            if (dic != nil ) {
+                NSURL *imgURL = dic[kImageURLKey];
+                NSValue *sizeValue = dic[kImageSizeKey];
+                if ([imgURL isEqual:imageURL] && [sizeValue isEqual:imgSize]) {
+                    return ;
+                }
+            }
+            
+            NSDictionary *tmpDic = @{kImageSizeKey:imgSize,
+                                     kImageURLKey:imageURL};
+            
+            [self.imageSizeDic setObject:tmpDic forKey:[self keyFromIndex:indexPath]];
+            if (collectionView.dataSource != nil) {
+                [collectionView reloadItemsAtIndexPaths:@[indexPath]];
+            }
+        }
+
+    }];
+        
     return cell;
 }
 

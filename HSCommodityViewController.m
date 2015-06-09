@@ -418,44 +418,29 @@ static const int kAdsCellImageViewTag = 600;
         HSCommodtyItemModel *itemModel = _itemsData[indexPath.row];
         //    [cell.imgView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]]];
         cell.imgView.image = kPlaceholderImage;
-        [cell.imgView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]] placeholderImage:kPlaceholderImage];
+        [cell.imgView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]] placeholderImage:kPlaceholderImage completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+            if (image) {
+                NSValue *imgSize =  [NSValue valueWithCGSize:image.size];
+                NSDictionary *dic = [_imageSizeDic objectForKey:[self p_keyFromIndex:indexPath]];
+                if (dic != nil ) {
+                    NSURL *imgURL = dic[kImageURLKey];
+                    NSValue *sizeValue = dic[kImageSizeKey];
+                    if ([imgURL isEqual:imageURL] && [sizeValue isEqual:imgSize]) {
+                        return ;
+                    }
+                }
+                
+                NSDictionary *tmpDic = @{kImageSizeKey:imgSize,
+                                         kImageURLKey:imageURL};
+                
+                [_imageSizeDic setObject:tmpDic forKey:[self p_keyFromIndex:indexPath]];
+                if (collectionView.dataSource != nil) {
+                    //[collectionView reloadData];
+                    [collectionView reloadItemsAtIndexPaths:@[indexPath]];
+                }
+            }
+        }];
         [cell dataSetUpWithModel:itemModel];
-        
-        [[SDWebImageManager sharedManager] downloadImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]]
-                                                        options:0
-                                                       progress:^(NSInteger receivedSize, NSInteger expectedSize) {
-                                                           // progression tracking code
-                                                       }
-                                                      completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
-                                                          if (image) {
-                                                              // do something with image
-//                                                              HSCommodityCollectionViewCell *collCell = (HSCommodityCollectionViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
-//                                                              cell.imgView.image = image;
-//                                                              [cell.imgView setNeedsLayout];
-                                                              
-                                                              //NSIndexPath *idx = [indexPath copy];
-                                                              NSValue *imgSize =  [NSValue valueWithCGSize:image.size];
-                                                              NSDictionary *dic = [_imageSizeDic objectForKey:[self p_keyFromIndex:indexPath]];
-                                                              if (dic != nil ) {
-                                                                  NSURL *imgURL = dic[kImageURLKey];
-                                                                  NSValue *sizeValue = dic[kImageSizeKey];
-                                                                  if ([imgURL isEqual:imageURL] && [sizeValue isEqual:imgSize]) {
-                                                                      return ;
-                                                                  }
-                                                              }
-                                                              
-                                                              NSDictionary *tmpDic = @{kImageSizeKey:imgSize,
-                                                                                       kImageURLKey:imageURL};
-                                                              
-                                                              [_imageSizeDic setObject:tmpDic forKey:[self p_keyFromIndex:indexPath]];
-                                                              if (collectionView.dataSource != nil) {
-                                                                  //[collectionView reloadData];
-                                                                 [collectionView reloadItemsAtIndexPaths:@[indexPath]];
-                                                              }
-                                                              
-                                                          }
-                                                      }];
-        
         
         return cell;
         
@@ -488,42 +473,31 @@ static const int kAdsCellImageViewTag = 600;
         }
         HSAdItemModel *adModel = _adsData[idx];
         imgView.image = kPlaceholderImage;
-        [imgView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kBannerImageHeaderURL,adModel.content]] placeholderImage:kPlaceholderImage];
-        [[SDWebImageManager sharedManager] downloadImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kBannerImageHeaderURL,adModel.content]]
-                                                        options:0
-                                                       progress:^(NSInteger receivedSize, NSInteger expectedSize) {
-                                                           // progression tracking code
-                                                       }
-                                                      completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
-                                                          if (image) {
-                                                              // do something with image
-//                                                              UICollectionViewCell *collCell = [collectionView cellForItemAtIndexPath:indexPath];
-//                                                             UIImageView *imagView = (UIImageView *)[cell viewWithTag:kAdsCellImageViewTag];
-//                                                             imgView.image = image;
-//                                                              [imgView setNeedsLayout];
-                                                              
-                                                              NSValue *imgSize =  [NSValue valueWithCGSize:image.size];
-                                                              NSDictionary *dic = [_imageSizeDic objectForKey:[self p_keyFromIndex:indexPath]];
-                                                              if (dic != nil ) {
-                                                                  NSURL *imgURL = dic[kImageURLKey];
-                                                                  NSValue *sizeValue = dic[kImageSizeKey];
-                                                                  if ([imgURL isEqual:imageURL] && [sizeValue isEqual:imgSize]) {
-                                                                      return ;
-                                                                  }
-                                                              }
-                                                              
-                                                              NSDictionary *tmpDic = @{kImageSizeKey:imgSize,
-                                                                                       kImageURLKey:imageURL};
-                                                              
-                                                              [_imageSizeDic setObject:tmpDic forKey:[self p_keyFromIndex:indexPath]];
-                                                              if (collectionView.dataSource != nil ) {
-                                                                 //  [collectionView reloadData];
-                                                                  [collectionView reloadItemsAtIndexPaths:@[indexPath]];
-                                                              }
-                                                              
-                                                          }
-                                                      }];
+        [imgView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kBannerImageHeaderURL,adModel.content]] placeholderImage:kPlaceholderImage completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+            if (image) {
 
+                NSValue *imgSize =  [NSValue valueWithCGSize:image.size];
+                NSDictionary *dic = [_imageSizeDic objectForKey:[self p_keyFromIndex:indexPath]];
+                if (dic != nil ) {
+                    NSURL *imgURL = dic[kImageURLKey];
+                    NSValue *sizeValue = dic[kImageSizeKey];
+                    if ([imgURL isEqual:imageURL] && [sizeValue isEqual:imgSize]) {
+                        return ;
+                    }
+                }
+                
+                NSDictionary *tmpDic = @{kImageSizeKey:imgSize,
+                                         kImageURLKey:imageURL};
+                
+                [_imageSizeDic setObject:tmpDic forKey:[self p_keyFromIndex:indexPath]];
+                if (collectionView.dataSource != nil ) {
+                    //  [collectionView reloadData];
+                    [collectionView reloadItemsAtIndexPaths:@[indexPath]];
+                }
+                
+            }
+
+        }];
         
         cell.layer.masksToBounds = YES;
         cell.layer.cornerRadius = 2;

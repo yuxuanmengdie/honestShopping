@@ -8,6 +8,11 @@
 
 #import "JSONModel.h"
 
+@protocol HSOrderitemModel <NSObject>
+
+
+@end
+
 @interface HSOrderModel : JSONModel
 
 @property (copy, nonatomic) NSString *id;
@@ -62,7 +67,36 @@
 
 @property (copy, nonatomic) NSString *img;
 
+/// 订单详细中商品的
+@property (strong, nonatomic) NSArray <Optional,HSOrderitemModel>* item_list;
+
 @end
+
+/// 订单详细中商品的model
+@interface HSOrderitemModel : JSONModel
+
+@property (copy, nonatomic) NSString *id;
+
+@property (copy, nonatomic) NSString *orderId;
+
+@property (copy, nonatomic) NSString *itemId;
+
+@property (copy, nonatomic) NSString *title;
+
+@property (copy, nonatomic) NSString *img;
+
+@property (copy, nonatomic) NSString *price;
+
+@property (copy, nonatomic) NSString *quantity;
+
+@property (copy, nonatomic) NSString *brand;
+
+@property (copy, nonatomic) NSString *cate_id;
+
+@property (copy, nonatomic) NSString *uid;
+
+@end
+
 
 /*
  

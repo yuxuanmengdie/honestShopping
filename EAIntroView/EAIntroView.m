@@ -61,7 +61,7 @@
     self.swipeToExit = YES;
     self.easeOutCrossDisolves = YES;
     self.hideOffscreenPages = YES;
-    self.bgViewContentMode = UIViewContentModeScaleAspectFill;
+    self.bgViewContentMode =  UIViewContentModeScaleAspectFill;
     self.motionEffectsRelativeValue = 40.f;
     self.backgroundColor = [UIColor blackColor];
     _scrollingEnabled = YES;

@@ -342,42 +342,31 @@ static const int kTopExistCellNum = 1;
     
     NSString *imgPath = _detailPicModel.tuwen[indexPath.row - kTopExistCellNum];
     cell.detailImageView.image = kPlaceholderImage;
-    [[SDWebImageManager sharedManager] downloadImageWithURL:[NSURL URLWithString:[self p_introImgFullUrl:imgPath]]
-                                                    options:0
-                                                   progress:^(NSInteger receivedSize, NSInteger expectedSize) {
-                                                       // progression tracking code
-                                                   }
-                                                  completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
-                                                      if (image) {
-                                                          // do something with image
-                                                          cell.detailImageView.image = image;
-                                                          
-                                                          NSValue *imgSize =  [NSValue valueWithCGSize:image.size];
-                                                          NSDictionary *dic = [_imageSizeDic objectForKey:[self p_keyFromIndex:indexPath]];
-                                                          if (dic != nil ) {
-                                                              NSURL *imgURL = dic[kImageURLKey];
-                                                              NSValue *sizeValue = dic[kImageSizeKey];
-                                                              if ([imgURL isEqual:imageURL] && [sizeValue isEqual:imgSize]) {
-                                                                  return ;
-                                                              }
-                                                          }
-                                                          
-                                                          NSDictionary *tmpDic = @{kImageSizeKey:imgSize,
-                                                                                   kImageURLKey:imageURL};
-                                                          
-                                                          [_imageSizeDic setObject:tmpDic forKey:[self p_keyFromIndex:indexPath]];
-                                                          
-                                                          
-                                                          
-                                                          // NSLog(@"cell   %d  ob=%@",indexPath.row,_imageSizeDic[ind]);
-                                                          if (tableView.dataSource != nil) {
-                                                               [tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic ];
-                                                          }
-                                                         
-                                                          
-                                                         
-                                                      }
-                                                  }];
+    [cell.detailImageView sd_setImageWithURL:[NSURL URLWithString:[self p_introImgFullUrl:imgPath]]  placeholderImage:kPlaceholderImage completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+        if (image) {
+            // do something with image
+            NSValue *imgSize =  [NSValue valueWithCGSize:image.size];
+            NSDictionary *dic = [_imageSizeDic objectForKey:[self p_keyFromIndex:indexPath]];
+            if (dic != nil ) {
+                NSURL *imgURL = dic[kImageURLKey];
+                NSValue *sizeValue = dic[kImageSizeKey];
+                if ([imgURL isEqual:imageURL] && [sizeValue isEqual:imgSize]) {
+                    return ;
+                }
+            }
+            
+            NSDictionary *tmpDic = @{kImageSizeKey:imgSize,
+                                     kImageURLKey:imageURL};
+            
+            [_imageSizeDic setObject:tmpDic forKey:[self p_keyFromIndex:indexPath]];
+            
+            if (tableView.dataSource != nil) {
+                [tableView reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic ];
+            }
+            
+        }
+
+    }];
 
     return cell;
 }

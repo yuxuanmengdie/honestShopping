@@ -106,7 +106,7 @@ static const int kTakePhoneAlertTag = 701;
     {
         _userInfoModel = nil;
     }
-    [_mineCollectionView reloadData];
+ //   [_mineCollectionView reloadData];
 }
 
 

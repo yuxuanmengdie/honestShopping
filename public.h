@@ -108,4 +108,7 @@ typedef NS_ENUM(NSUInteger, HSLoginType) {
 /// 设置记住密码
 + (void)setRemeberPassword:(BOOL)isRemeber;
 
+/// 根据订单的状态status 返回 具体的描述
++ (NSString *)orderStatusStrWithState:(NSString *)status;
+
 @end

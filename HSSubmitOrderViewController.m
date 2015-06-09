@@ -13,9 +13,11 @@
 #import "HSSubmitOrderAddressTableViewCell.h"
 #import "HSSubmitOrderCommdityTableViewCell.h"
 #import "UIView+HSLayout.h"
+#import "HSCouponSelectedView.h"
 
 #import "HSCommodityItemDetailPicModel.h"
 #import "HSAddressModel.h"
+#import "HSCouponModel.h"
 
 @interface HSSubmitOrderViewController ()<UITableViewDelegate,
 UITableViewDataSource>
@@ -25,6 +27,19 @@ UITableViewDataSource>
     HSSubmitOrderAddressTableViewCell *_placeAddressCell;
     
     HSAddressModel *_addressModel;
+    
+    /// 选择优惠券的底部视图
+    UIView *_bgView;
+    /// 优惠券 选择视图
+    HSCouponSelectedView *_couponView;
+    
+    NSArray *_couponDataArray;
+    /// 需要上传的优惠券ID 的model
+    HSCouponModel *_couponModel;
+    /// 邮费
+    NSString *_postageprice;
+    
+    AFHTTPRequestOperationManager *_postageRequestOperation;
 }
 @property (weak, nonatomic) IBOutlet UITableView *submitOrdertableView;
 
@@ -40,7 +55,7 @@ UITableViewDataSource>
 
 @implementation HSSubmitOrderViewController
 
-static const float kPostagePrice = 6.00;
+static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifier";
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -56,6 +71,7 @@ static const float kPostagePrice = 6.00;
     
     [self getDefaultAddressWithUid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
     [self bottomViewSetup];
+    [self couponRequestWithUid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -78,7 +94,17 @@ static const float kPostagePrice = 6.00;
 - (void)bottomViewSetup
 {
     self._totalPriceLabel.textColor = [UIColor redColor];
-    self._totalPriceLabel.text = [NSString stringWithFormat:@"应付金额：%0.2f",[self totolMoneyWithoutPostage]+kPostagePrice];
+    float postPrice = 0.0;
+    if ([public isAreaInJiangZheHu:_addressModel.sheng])
+    {
+        postPrice = 0.0;
+    }
+    else
+    {
+        postPrice = 12.0;
+    }
+
+    self._totalPriceLabel.text = [NSString stringWithFormat:@"应付金额：%0.2f",[self totolMoneyWithoutPostage]+postPrice];
 
     [_submitButton setBackgroundImage:[public ImageWithColor:kAppYellowColor] forState:UIControlStateNormal];
     [_submitButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
@@ -89,9 +115,160 @@ static const float kPostagePrice = 6.00;
 
 
 - (IBAction)submitAction:(id)sender {
-    [self addOrderWithUid:[public controlNullString:_userInfoModel.id] couponId:@"" username:[public controlNullString:_addressModel.consignee] addressName:@"" mobile:[public controlNullString:_addressModel.mobile] address:[NSString stringWithFormat:@"%@%@%@%@",[public controlNullString:_addressModel.sheng],[public controlNullString:_addressModel.shi],[public controlNullString:_addressModel.qu],[public controlNullString:_addressModel.address]]supportmethod:@"1" freetype:@"1" sessionCode:[public controlNullString:_userInfoModel.sessionCode] list:[self listOrder]];
+    [self addOrderWithUid:[public controlNullString:_userInfoModel.id] couponId:[public controlNullString:_couponModel.id] username:[public controlNullString:_addressModel.consignee] addressName:@"" mobile:[public controlNullString:_addressModel.mobile] address:[NSString stringWithFormat:@"%@%@%@%@",[public controlNullString:_addressModel.sheng],[public controlNullString:_addressModel.shi],[public controlNullString:_addressModel.qu],[public controlNullString:_addressModel.address]]supportmethod:@"1" freetype:@"1" sessionCode:[public controlNullString:_userInfoModel.sessionCode] list:[self listOrder]];
     
 }
+
+#pragma mark - 
+#pragma mark 选择优惠券view
+- (void)p_showCouponSelectedView
+{
+    if (_bgView == nil) {
+        _bgView = [[UIView alloc] initWithFrame:CGRectZero];
+        _bgView.backgroundColor = [UIColor blackColor];
+        _bgView.alpha = 0.6;
+        _bgView.translatesAutoresizingMaskIntoConstraints = NO;
+        [self.view addSubview:_bgView];
+        [self.view HS_edgeFillWithSubView:_bgView];
+        
+        _bgView.userInteractionEnabled = YES;
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(bgTapAction)];
+        [_bgView addGestureRecognizer:tap];
+    }
+    
+    if (_couponView == nil) {
+        _couponView = [[HSCouponSelectedView alloc] initWithFrame:CGRectZero];
+        _couponView.backgroundColor = [UIColor whiteColor];
+        _couponView.translatesAutoresizingMaskIntoConstraints = NO;
+        
+        [_couponView.couponTableView registerClass:[UITableViewCell class] forCellReuseIdentifier:kCouponTableViewIdentifier];
+        _couponView.couponTableView.dataSource = self;
+        _couponView.couponTableView.delegate = self;
+        [self.view addSubview:_couponView];
+        [self.view HS_centerXYWithSubView:_couponView];
+        [self.view HS_dispacingWithFisrtView:_couponView fistatt:NSLayoutAttributeLeading secondView:self.view secondAtt:NSLayoutAttributeLeading constant:20];
+        
+        _couponView.layer.masksToBounds = YES;
+        _couponView.layer.cornerRadius = 5.0;
+        
+    }
+    
+    _bgView.hidden = NO;
+    _couponView.hidden = NO;
+    
+    __weak typeof(self) wself = self;
+    _couponView.verifyBlock = ^(NSString *text){
+        __strong typeof(wself) swself = wself;
+        if (text.length == 0) {
+            [swself showHudWithText:@"不能为空"];
+            return ;
+        }
+        
+        [swself getCouponIdByCouponNoWithUid:[public controlNullString:swself.userInfoModel.id] sessionCode:[public controlNullString:swself.userInfoModel.sessionCode] couponNo:text];
+    };
+    [_couponView.couponTableView reloadData];
+}
+
+- (void)bgTapAction
+{
+    _bgView.hidden = YES;
+    _couponView.hidden = YES;
+    [_couponView.couponTextField resignFirstResponder];
+}
+#pragma mark - 
+#pragma mark 根据优惠券编号 获取ID
+- (void)getCouponIdByCouponNoWithUid:(NSString *)uid sessionCode:(NSString *)sessionCode couponNo:(NSString *)couponNo
+{
+    [self showhudLoadingWithText:@"验证中..." isDimBackground:YES];
+    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+                                    kPostJsonUid:uid,
+                                    kPostJsonSessionCode:sessionCode,
+                                    kPostJsonCouponNo:couponNo
+                                    };
+    // 142346261  123456
+    
+    [self.httpRequestOperationManager POST:kGetCouponIdByCouponNoURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+        NSLog(@"success\n%@",operation.responseString);
+        
+        [self hiddenHudLoading];
+        
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"%s failed\n%@",__func__,operation.responseString);
+       [self hiddenHudLoading];
+        if (operation.responseData == nil) {
+            return ;
+        }
+        NSError *jsonError = nil;
+        id json = [NSJSONSerialization JSONObjectWithData:operation.responseData options:NSJSONReadingMutableContainers error:&jsonError];
+        if (jsonError == nil && [json isKindOfClass:[NSDictionary class]]) {
+            NSDictionary *jsonDic = (NSDictionary *)json;
+            
+            NSNumber *status = jsonDic[kPostJsonStatus];
+            if (status != nil) {
+                [self showHudWithText:@"优惠券编码有误"];
+            }
+            else
+            {
+                
+            }
+        }
+        else
+        {
+            
+        }
+    }];
+
+}
+
+#pragma mark -
+#pragma mark 获取优惠券
+- (void)couponRequestWithUid:(NSString *)uid sessionCode:(NSString *)sessionCode
+{
+    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+                                    kPostJsonUid:uid,
+                                    kPostJsonSessionCode:sessionCode
+                                    };
+    [self.httpRequestOperationManager POST:kGetCouponsByUidURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"%s failed\n%@",__func__,operation.responseString);
+        if (operation.responseData == nil) {
+            [self couponRequestWithUid:uid sessionCode:sessionCode];
+            return ;
+        }
+        NSError *jsonError = nil;
+        id json = [NSJSONSerialization JSONObjectWithData:operation.responseData options:NSJSONReadingMutableContainers error:&jsonError];
+        if (jsonError == nil && [json isKindOfClass:[NSArray class]]) {
+            NSArray *jsonArr = (NSArray *)json;
+            NSMutableArray *tmpArr = [[NSMutableArray alloc] initWithCapacity:jsonArr.count];
+            [jsonArr enumerateObjectsUsingBlock:^(NSDictionary *obj, NSUInteger idx, BOOL *stop) {
+                @autoreleasepool {
+                    HSCouponModel *couponModel = [[HSCouponModel alloc] initWithDictionary:obj error:nil];
+                    [tmpArr addObject:couponModel];
+                }
+                
+            }];
+            
+            _couponDataArray = [tmpArr copy];
+            if (_couponView == nil || (_couponView != nil && _couponView.hidden)) {
+                [self p_showCouponSelectedView];
+                [self bgTapAction];
+            }
+            
+            _couponView.tableViewHeight = 44*_couponDataArray.count;
+            [_couponView.couponTableView reloadData];
+            
+        }
+        else
+        {
+            
+        }
+        
+        [_couponView.couponTableView reloadData];
+    }];
+    
+}
+
+
 
 #pragma mark -
 #pragma mark 获取默认地址
@@ -125,7 +302,12 @@ static const float kPostagePrice = 6.00;
                 HSAddressModel *model = [[HSAddressModel alloc] initWithDictionary:obj error:nil];
                 if (model.id.length > 0) {
                     _addressModel = model;
-                    [_submitOrdertableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0]] withRowAnimation:UITableViewRowAnimationAutomatic];
+                    
+                    [self p_reloadWithAddressModel:model];
+                    //[_submitOrdertableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0]] withRowAnimation:UITableViewRowAnimationAutomatic];
+                    NSString *freeType = [public isAreaInJiangZheHu:model.sheng] ? @"0" : @"1";
+                    [self getFreePriceRequestWithUid:[public controlNullString:_userInfoModel.id] num:[NSString stringWithFormat:@"%d",[self totalNum]] freetype:freeType sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
+                
                 }
                 
                 if (idx == 0) {
@@ -175,6 +357,56 @@ static const float kPostagePrice = 6.00;
 }
 
 #pragma mark -
+#pragma mark 重新请求
+- (void)reloadRequestData
+{
+     [self getDefaultAddressWithUid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
+}
+
+#pragma mark -
+#pragma mark 获取邮费
+- (void)getFreePriceRequestWithUid:(NSString *)uid num:(NSString *)num freetype:(NSString *)freetype sessionCode:(NSString *)sessionCode
+{
+    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+                                    kPostJsonUid:uid,
+                                    kPostJsonSessionCode:sessionCode,
+                                    kPostJsonNum:num,
+                                    kPostJsonFreetype:freetype
+                                    };
+    // 142346261  123456
+    if (_postageRequestOperation == nil) {
+        _postageRequestOperation = [[AFHTTPRequestOperationManager alloc] init];
+    }
+    [_postageRequestOperation POST:kGetFreePriceURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+        NSLog(@"success\n%@",operation.responseString);
+        
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"%s failed\n%@",__func__,operation.responseString);
+        if (operation.responseData == nil) {
+            [self getFreePriceRequestWithUid:uid num:num freetype:freetype sessionCode:sessionCode];
+            return ;
+        }
+        NSError *jsonError = nil;
+        id json = [NSJSONSerialization JSONObjectWithData:operation.responseData options:NSJSONReadingMutableContainers error:&jsonError];
+        if (jsonError == nil && [json isKindOfClass:[NSDictionary class]]) {
+            NSDictionary *jsonDic = (NSDictionary *)json;
+            NSNumber *price = jsonDic[kPostJsonFreeprice];
+            if (price != nil) {
+                _postageprice = [NSString stringWithFormat:@"%0.2f",[price floatValue]];
+                [_submitOrdertableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:_commdityDataArray.count + 1 inSection:1],[NSIndexPath indexPathForRow:_commdityDataArray.count + 2 inSection:1]] withRowAnimation:UITableViewRowAnimationAutomatic];
+                self._totalPriceLabel.text = [NSString stringWithFormat:@"应付金额：%0.2f",[self totolMoneyWithoutPostage] + [price floatValue]];
+
+            }
+            }
+        else
+        {
+            
+        }
+    }];
+
+}
+
+#pragma mark -
 #pragma mark 根据商品数组组织订单的上传字段
 - (NSArray *)listOrder
 {
@@ -197,15 +429,14 @@ static const float kPostagePrice = 6.00;
 }
 #pragma mark -
 #pragma mark push到支付订单页面
-- (void)pushToOrderPayVC
+- (void)pushToOrderPayVC:(NSString *)orderID
 {
     UIStoryboard *stroyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
     HSPayOrderViewController *pay = [stroyBoard instantiateViewControllerWithIdentifier:NSStringFromClass([HSPayOrderViewController class])];
     pay.hidesBottomBarWhenPushed = YES;
     pay.title = @"支付订单";
-    pay.addressModel = _addressModel;
-    pay.itemNumDic = _itemNumDic;
-    pay.commdityDataArray = _itemsDataArray;
+    pay.userInfoModel = _userInfoModel;
+    pay.orderID = orderID;
     [self.navigationController pushViewController:pay animated:YES];
 }
 
@@ -250,7 +481,7 @@ static const float kPostagePrice = 6.00;
             NSString *orderNo = tmpDic[kPostJsonOrderNo];
             if (orderNo.length > 0) {
                  [self showHudWithText:@"订单提交成功"];
-                [self pushToOrderPayVC];
+                [self pushToOrderPayVC:orderNo];
                 
             }
             
@@ -270,11 +501,20 @@ static const float kPostagePrice = 6.00;
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
+    if (tableView == _couponView.couponTableView) {
+        return 1;
+    }
+    
     return 2;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
+    if (tableView == _couponView.couponTableView) {
+        return _couponDataArray.count;
+    }
+
+    
     NSInteger num = 0;
     if (section == 0) {
         num = 1;
@@ -289,6 +529,32 @@ static const float kPostagePrice = 6.00;
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    /// 优惠券
+    if (tableView == _couponView.couponTableView) {
+        UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:kCouponTableViewIdentifier forIndexPath:indexPath];
+        for (UIView *subView in cell.contentView.subviews) {
+            [subView removeFromSuperview];
+        }
+
+        UILabel *textLabel = (UILabel *)[cell.contentView viewWithTag:601];
+        if (textLabel == nil) {
+            textLabel = [[UILabel alloc] init];
+            textLabel.font = [UIFont systemFontOfSize:14];
+            textLabel.tag = 601;
+            textLabel.translatesAutoresizingMaskIntoConstraints = NO;
+            [cell.contentView addSubview:textLabel];
+            [cell.contentView HS_dispacingWithFisrtView:textLabel fistatt:NSLayoutAttributeLeading secondView:cell.contentView secondAtt:NSLayoutAttributeLeading constant:8];
+            [cell.contentView HS_centerYWithSubView:textLabel];
+        }
+       
+        HSCouponModel *couponModel = _couponDataArray[indexPath.row];
+        textLabel.text = [public controlNullString:couponModel.name];
+         NSLog(@"%@",[public controlNullString:couponModel.name]);
+        return cell;
+    }
+
+    
+    /// 订单的tableview
     if (indexPath.section == 0) { /// 地址
         HSSubmitOrderAddressTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([HSSubmitOrderAddressTableViewCell class]) forIndexPath:indexPath];
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
@@ -308,24 +574,11 @@ static const float kPostagePrice = 6.00;
         else
         {
             UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([UITableViewCell class]) forIndexPath:indexPath];
+            for (UIView *subView in cell.contentView.subviews) {
+                [subView removeFromSuperview];
+            }
             if (indexPath.row == _commdityDataArray.count) { // 优惠券
                  UILabel *leftLabel = (UILabel *)[cell.contentView viewWithTag:501];
-                if (leftLabel == nil) {
-                    leftLabel = [[UILabel alloc] init];
-                    leftLabel.tag = 501;
-                    leftLabel.font = [UIFont systemFontOfSize:14];
-                    leftLabel.translatesAutoresizingMaskIntoConstraints = NO;
-                    [cell.contentView addSubview:leftLabel];
-                    [cell.contentView HS_dispacingWithFisrtView:cell.contentView fistatt:NSLayoutAttributeLeading secondView:leftLabel secondAtt:NSLayoutAttributeLeading constant:-8];
-                    [cell.contentView HS_centerYWithSubView:leftLabel];
-                    
-                }
-                leftLabel.text = @"优惠券";
-
-            }
-            else if (indexPath.row == _commdityDataArray.count + 1) // 运费
-            {
-                UILabel *leftLabel = (UILabel *)[cell.contentView viewWithTag:501];
                 UILabel *rightLabel = (UILabel *)[cell.contentView viewWithTag:502];
                 if (leftLabel == nil) {
                     leftLabel = [[UILabel alloc] init];
@@ -341,6 +594,40 @@ static const float kPostagePrice = 6.00;
                 if (rightLabel == nil) {
                     rightLabel = [[UILabel alloc] init];
                     rightLabel.tag = 502;
+                    rightLabel.textAlignment = NSTextAlignmentRight;
+                    rightLabel.textColor = kAppYellowColor;
+                    rightLabel.font = [UIFont systemFontOfSize:14];
+                    rightLabel.translatesAutoresizingMaskIntoConstraints = NO;
+                    [cell.contentView addSubview:rightLabel];
+                    [cell.contentView HS_dispacingWithFisrtView:cell.contentView fistatt:NSLayoutAttributeTrailing secondView:rightLabel secondAtt:NSLayoutAttributeTrailing constant:8];
+                    [cell.contentView HS_centerYWithSubView:rightLabel];
+                    [cell.contentView HS_dispacingWithFisrtView:leftLabel fistatt:NSLayoutAttributeTrailing secondView:rightLabel secondAtt:NSLayoutAttributeLeading constant:-8];
+                    [rightLabel setContentCompressionResistancePriority:240 forAxis:UILayoutConstraintAxisHorizontal];
+                    [rightLabel setContentHuggingPriority:240 forAxis:UILayoutConstraintAxisHorizontal];
+                }
+
+                leftLabel.text = @"优惠券：";
+                rightLabel.text = [public controlNullString:_couponModel.name];
+                cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+            }
+            else if (indexPath.row == _commdityDataArray.count + 1) // 运费
+            {
+                UILabel *leftLabel = (UILabel *)[cell.contentView viewWithTag:503];
+                UILabel *rightLabel = (UILabel *)[cell.contentView viewWithTag:504];
+                if (leftLabel == nil) {
+                    leftLabel = [[UILabel alloc] init];
+                    leftLabel.tag = 503;
+                    leftLabel.font = [UIFont systemFontOfSize:14];
+                    leftLabel.translatesAutoresizingMaskIntoConstraints = NO;
+                    [cell.contentView addSubview:leftLabel];
+                    [cell.contentView HS_dispacingWithFisrtView:cell.contentView fistatt:NSLayoutAttributeLeading secondView:leftLabel secondAtt:NSLayoutAttributeLeading constant:-8];
+                    [cell.contentView HS_centerYWithSubView:leftLabel];
+                    
+                }
+                
+                if (rightLabel == nil) {
+                    rightLabel = [[UILabel alloc] init];
+                    rightLabel.tag = 504;
                     rightLabel.textColor = kAppYellowColor;
                     rightLabel.font = [UIFont systemFontOfSize:14];
                     rightLabel.translatesAutoresizingMaskIntoConstraints = NO;
@@ -349,16 +636,27 @@ static const float kPostagePrice = 6.00;
                     [cell.contentView HS_centerYWithSubView:rightLabel];
 
                 }
-                leftLabel.text = @"运费";
-                rightLabel.text = @"6.00";
+                leftLabel.text = @"运费：";
+                if (_postageprice.length == 0) {
+                     rightLabel.text = @"江浙沪包邮，其他省市12元";
+                }
+                else if ([public isAreaInJiangZheHu:_addressModel.sheng])
+                {
+                    rightLabel.text = @"江浙沪包邮";
+                }
+                else
+                {
+                    rightLabel.text = [NSString stringWithFormat:@"%@元",_postageprice];
+                }
+                cell.accessoryType = UITableViewCellAccessoryNone;
             }
             else // 合计
             {
-                UILabel *leftLabel = (UILabel *)[cell.contentView viewWithTag:501];
-                UILabel *rightLabel = (UILabel *)[cell.contentView viewWithTag:502];
+                UILabel *leftLabel = (UILabel *)[cell.contentView viewWithTag:505];
+                UILabel *rightLabel = (UILabel *)[cell.contentView viewWithTag:506];
                 if (rightLabel == nil) {
                     rightLabel = [[UILabel alloc] init];
-                    rightLabel.tag = 502;
+                    rightLabel.tag = 505;
                     //rightLabel.textColor = kAppYellowColor;
                     rightLabel.font = [UIFont systemFontOfSize:14];
                     rightLabel.translatesAutoresizingMaskIntoConstraints = NO;
@@ -370,7 +668,7 @@ static const float kPostagePrice = 6.00;
 
                 if (leftLabel == nil) {
                     leftLabel = [[UILabel alloc] init];
-                    leftLabel.tag = 501;
+                    leftLabel.tag = 506;
                     leftLabel.font = [UIFont systemFontOfSize:14];
                     leftLabel.translatesAutoresizingMaskIntoConstraints = NO;
                     [cell.contentView addSubview:leftLabel];
@@ -379,7 +677,17 @@ static const float kPostagePrice = 6.00;
                     
                 }
                 int num = [self totalNum]; // 商品总数
-                float price = [self totolMoneyWithoutPostage] + 6.00;
+                float postPrice = 0.0;
+                if ([public isAreaInJiangZheHu:_addressModel.sheng])
+                {
+                    postPrice = 0.0;
+                }
+                else
+                {
+                    postPrice = 12.0;
+                }
+
+                float price = [self totolMoneyWithoutPostage] + postPrice;
                 NSString *str1 = @"共有";
                 NSString *str2 = @"件商品";
                 NSString *str3 = @"合计:";
@@ -397,7 +705,7 @@ static const float kPostagePrice = 6.00;
                 [right addAttribute:NSFontAttributeName value:[UIFont boldSystemFontOfSize:14.0] range:NSMakeRange(str3.length,right.length-str3.length)];
                 leftLabel.attributedText = left;
                 rightLabel.attributedText = right;
-                
+                cell.accessoryType = UITableViewCellAccessoryNone;
             }
             return cell;
         }
@@ -406,6 +714,10 @@ static const float kPostagePrice = 6.00;
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    if (tableView == _couponView.couponTableView) {
+        return 44;
+    }
+
     CGFloat height = 0.0;
     
     if (indexPath.section == 0) {
@@ -441,6 +753,21 @@ static const float kPostagePrice = 6.00;
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
+    if (tableView == _couponView.couponTableView) {
+        
+        HSCouponModel *model = _couponDataArray[indexPath.row];
+        [self bgTapAction];
+        if ([model.t_price floatValue] > [self totolMoneyWithoutPostage]) { /// 不满足条件
+            [self showHudWithText:@"商品金额不满足使用条件"];
+            return;
+        }
+        _couponModel = model;
+        
+        [_submitOrdertableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:_commdityDataArray.count inSection:1]] withRowAnimation:UITableViewRowAnimationAutomatic];
+        return;
+    }
+    
+    
     if (indexPath.section == 0) {
         
         UIStoryboard *stroyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
@@ -450,13 +777,41 @@ static const float kPostagePrice = 6.00;
         vc.addressID = _addressModel.id;
         vc.title = @"选择收货地址";
         [self.navigationController pushViewController:vc animated:YES];
-        
+       
         __weak typeof(self) wself = self;
         vc.selectBlock = ^(HSAddressModel *addModel){
             __strong typeof(wself) swself = wself;
+            [swself->_postageRequestOperation.operationQueue cancelAllOperations]; /// 取消上次的邮费请求
+            
             swself->_addressModel = addModel;
-            [swself->_submitOrdertableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0]] withRowAnimation:UITableViewRowAnimationAutomatic];
-        };
+            [swself p_reloadWithAddressModel:addModel];
+            
+            NSString *freeType = [public isAreaInJiangZheHu:addModel.sheng] ? @"0" : @"1";
+            [swself getFreePriceRequestWithUid:[public controlNullString:swself.userInfoModel.id] num:[NSString stringWithFormat:@"%d",[swself totalNum]] freetype:freeType sessionCode:[public controlNullString:swself.userInfoModel.sessionCode]];
+            };
     }
+    else if (indexPath.section == 1 && indexPath.row == _commdityDataArray.count) // 优惠券
+    {
+        [self p_showCouponSelectedView];
+    }
+}
+
+#pragma mark -
+#pragma mark 根据address信息刷新界面
+- (void)p_reloadWithAddressModel:(HSAddressModel *)addModel
+{
+    float postPrice = 0.0;
+    if ([public isAreaInJiangZheHu:addModel.sheng])
+    {
+        postPrice = 0.0;
+    }
+    else
+    {
+        postPrice = 12.0;
+    }
+    self._totalPriceLabel.text = [NSString stringWithFormat:@"应付金额：%0.2f",[self totolMoneyWithoutPostage]+postPrice];
+     [_submitOrdertableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0],[NSIndexPath indexPathForRow:_commdityDataArray.count+1 inSection:1]] withRowAnimation:UITableViewRowAnimationAutomatic];
+    
+
 }
 @end

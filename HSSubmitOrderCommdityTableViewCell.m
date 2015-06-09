@@ -31,4 +31,14 @@
 }
 
 
+- (void)setupWithOrderItemModel:(HSOrderitemModel *)itemModel
+{
+    [_commdityImageView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,[public controlNullString:itemModel.img]]] placeholderImage:kPlaceholderImage];
+    _titleLabel.text = [public controlNullString:itemModel.title];
+    _priceLabel.text = [NSString stringWithFormat:@"￥%@",[public controlNullString:itemModel.price]];
+    _detailLabel.text = [public controlNullString:itemModel.title];
+    _numLabel.text = [NSString stringWithFormat:@"x%@",[public controlNullString:itemModel.quantity]];
+
+}
+
 @end

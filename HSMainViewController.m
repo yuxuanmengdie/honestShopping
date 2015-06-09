@@ -12,6 +12,9 @@
 #import "HSLoginInViewController.h"
 #import "HSTabBarView.h"
 #import "UIView+HSLayout.h"
+#import "HSBannerModel.h"
+
+#import "UIImageView+WebCache.h"
 
 @interface HSMainViewController ()
 {
@@ -25,54 +28,31 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    self.navigationController.navigationBarHidden = YES;
-    self.title = @"放心吃";
+//    self.navigationController.navigationBarHidden = YES;
+//    self.title = @"放心吃";
     self.tabBar.selectedImageTintColor =  kAPPTintColor;
     self.tabBar.translucent = NO;
 //    [self.tabBarItem setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIColor redColor],NSForegroundColorAttributeName, nil] forState:UIControlStateNormal];
     
-    UIBarButtonItem *rightItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(rightNavItemAction)];
-    self.navigationItem.rightBarButtonItem = rightItem;
+//    UIBarButtonItem *rightItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(rightNavItemAction)];
+//    self.navigationItem.rightBarButtonItem = rightItem;
     
     
-    /// 获取版本号 判断是否需要引导页
-    NSString *verson = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
-    
-    NSString *saveedVerson = [[NSUserDefaults standardUserDefaults] objectForKey:kAPPCurrentVersion];
-    
-    if (saveedVerson == nil || ![verson isEqualToString:saveedVerson]) {
-        [self showIntroView];
-        
-        [[NSUserDefaults standardUserDefaults] setObject:verson forKey:kAPPCurrentVersion];
-    }
-    
-    
-//    UITabBarItem *tabBarItem1 = [self.tabBar.items objectAtIndex:2];
-//    UIImage *img =  [public ImageWithColor:[UIColor blueColor] frame:CGRectMake(0, 0, 50, 300)];
-//    UIImage *oriImg = [public ImageWithColor:[UIColor yellowColor] frame:CGRectMake(0, 0, 50, 100)];
-    //    tabBarItem1.imageInsets = UIEdgeInsetsMake(-10, -10, -10, -10);
-//    tabBarItem1.selectedImage = [img imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+//    /// 获取版本号 判断是否需要引导页
+//    NSString *verson = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
 //    
-//    tabBarItem1.image = [oriImg imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
-//    tabBarItem1.enabled = YES;
-
-    [self.tabBar.items enumerateObjectsUsingBlock:^(UITabBarItem *barItem, NSUInteger idx, BOOL *stop) {
-        [barItem setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIColor redColor],NSForegroundColorAttributeName, nil] forState:UIControlStateNormal];
-        [barItem setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:kAPPTintColor,NSForegroundColorAttributeName, nil] forState:UIControlStateSelected];
-    }];
-
+//    NSString *saveedVerson = [[NSUserDefaults standardUserDefaults] objectForKey:kAPPCurrentVersion];
+//    
+//    if (saveedVerson == nil || ![verson isEqualToString:saveedVerson]) {
+//        [self showIntroView];
+//        
+//        [[NSUserDefaults standardUserDefaults] setObject:verson forKey:kAPPCurrentVersion];
+//    }
+    
     [self tabBarViewInit];
-//    UIView *customView = [[UIView alloc] init];
-//    customView.backgroundColor = [UIColor blueColor];
-//    customView.frame = CGRectMake(80, CGRectGetMaxY(self.view.frame)-60, CGRectGetWidth(self.view.frame)/self.tabBar.items.count, 60);
-////    [self.view addSubview:customView];
-//    self.tabBar.clipsToBounds = NO;
-//    NSLog(@"frame=%@,item=%f",NSStringFromCGRect(self.tabBar.frame),self.tabBar.itemWidth);
-//
-//    UITabBarItem *tabBarItem1 = [self.tabBar.items objectAtIndex:2];
-//    [tabBarItem1 setImage:[public ImageWithColor:[UIColor blueColor] frame:customView.bounds]];
-//    tabBarItem1.imageInsets = UIEdgeInsetsMake(0, -10, -6, -10);
-   
+    
+//    [self getGuideRequest];
+//    [self getWelcomeRequest];
     
 }
 
@@ -109,11 +89,6 @@
     // Pass the selected object to the new view controller.
 }
 */
-
-- (void)rightNavItemAction
-{
-    
-}
 
 
 - (void)tabBar:(UITabBar *)tabBar didSelectItem:(UITabBarItem *)item
@@ -164,6 +139,101 @@
 {
     [super viewWillDisappear:animated];
     [self.tabBar setHidden:NO];
+}
+
+
+#pragma mark -
+#pragma mark 引导图
+- (void)getGuideRequest
+{
+    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]]};
+    // 142346261  123456
+    
+    AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
+    [manager POST:kGetGuideURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+        NSLog(@"success\n%@",operation.responseString);
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"%s failed\n%@",__func__,operation.responseString);
+        if (operation.responseData == nil) {
+            return ;
+        }
+        NSError *jsonError = nil;
+        id json = [NSJSONSerialization JSONObjectWithData:operation.responseData options:NSJSONReadingMutableContainers error:&jsonError];
+        if (jsonError == nil && [json isKindOfClass:[NSArray class]]) {
+            NSArray *jsonArr = (NSArray *)json;
+            [jsonArr enumerateObjectsUsingBlock:^(NSDictionary *obj, NSUInteger idx, BOOL *stop) {
+                HSBannerModel *bannerModel = [[HSBannerModel alloc] initWithDictionary:obj error:nil];
+                
+                NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kBannerImageHeaderURL,[public controlNullString:bannerModel.content]]];
+                BOOL isCache = [[SDWebImageManager sharedManager] cachedImageExistsForURL:url];
+                if (!isCache) {
+                    [self downloadImageWihtURL:url];
+                }
+                
+            }];
+        }
+        else
+        {
+            
+        }
+
+        }];
+
+}
+
+#pragma mark -
+#pragma mark 欢迎图
+- (void)getWelcomeRequest
+{
+    
+    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]]};
+    // 142346261  123456
+    AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
+    [manager POST:kGetWelcomeURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+        NSLog(@"success\n%@",operation.responseString);
+        
+        
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"%s failed\n%@",__func__,operation.responseString);
+       
+        if (operation.responseData == nil) {
+                        return ;
+        }
+        NSError *jsonError = nil;
+        id json = [NSJSONSerialization JSONObjectWithData:operation.responseData options:NSJSONReadingMutableContainers error:&jsonError];
+        if (jsonError == nil && [json isKindOfClass:[NSArray class]]) {
+            NSArray *jsonArr = (NSArray *)json;
+            [jsonArr enumerateObjectsUsingBlock:^(NSDictionary *obj, NSUInteger idx, BOOL *stop) {
+                HSBannerModel *bannerModel = [[HSBannerModel alloc] initWithDictionary:obj error:nil];
+                
+                NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kBannerImageHeaderURL,[public controlNullString:bannerModel.content]]];
+                BOOL isCache = [[SDWebImageManager sharedManager] cachedImageExistsForURL:url];
+                if (!isCache) {
+                    [self downloadImageWihtURL:url];
+                }
+                
+            }];
+        }
+        else
+        {
+            
+        }
+    }];
+
+}
+
+#pragma mark-
+#pragma mark 图片下载
+- (void)downloadImageWihtURL:(NSURL *)url
+{
+    [[SDWebImageManager sharedManager] downloadImageWithURL:url options:SDWebImageHighPriority progress:^(NSInteger receivedSize, NSInteger expectedSize) {
+    } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+        
+        if (error != nil) { /// 下载失败
+            [self downloadImageWihtURL:url];
+        }
+    }];
+
 }
 
 @end

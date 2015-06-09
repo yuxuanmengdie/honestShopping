@@ -93,6 +93,14 @@ static NSString *const kPostJsonOrderNo = @"orderNo";
 
 static NSString *const kPostJsonOpenid = @"openid";
 
+static NSString *const kPostJsonOrderId = @"orderId";
+
+static NSString *const kPostJsonCouponNo = @"couponNo";
+
+static NSString *const kPostJsonFreeprice = @"freeprice";
+
+static NSString *const kPostJsonNum = @"num";
+
 #pragma mark -
 #pragma mark 请求url
 /// 注册
@@ -165,7 +173,8 @@ static NSString *const kPostJsonOpenid = @"openid";
 #define kAddOrderURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Order&a=addOrder"]
 /// 修改订单状态
 #define kUpdateOrderNextURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Order&a=updateOrderNext"]
-
+/// 获取运费 freetype 0包邮1非包邮
+#define kGetFreePriceURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Order&a=getFreePrice"]
 
 /// 获取首页优惠劵列表
 #define kGetCouponListURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Item&a=getCouponList"]
@@ -175,14 +184,21 @@ static NSString *const kPostJsonOpenid = @"openid";
 #define kGetCouponsByUidURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=getCouponsByUid"]
 /// 领取优惠劵
 #define kBlindCouponWithUserURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=blindCouponWithUser"]
-
+/// 获取优惠劵ID by 优惠劵号 /index.php?g=api&m=Order&a=getCouponIdByCouponNo
+#define kGetCouponIdByCouponNoURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Order&a=getCouponIdByCouponNo"]
 
 /// 获取微信支付perpayid
 #define kGetWxPerpayidURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Order&a=getWxPerpayid"]
 /// 分享
 #define kShareURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Item&a=share"]
+///获取引导图（advert目录）
+#define kGetGuideURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Item&a=getGuide"]
+/// 获取欢迎图（advert目录）
+#define kGetWelcomeURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Item&a=getWelcome"]
 
 
+#pragma mark -
+#pragma mark 图片前缀
 /// banner 图片前缀路径
 #define kBannerImageHeaderURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/data/upload/advert/"]
 /// 普通图片路径

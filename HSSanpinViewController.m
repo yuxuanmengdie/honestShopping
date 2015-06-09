@@ -238,38 +238,32 @@ static const int kSanpinCollectionViewTagOri = 800;
     NSArray *typeArr = _sanpinDataDic[[self p_keyFromType:tag]];
     HSCommodtyItemModel *itemModel = typeArr[indexPath.row];
     imgView.image = kPlaceholderImage;
-    [[SDWebImageManager sharedManager] downloadImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.imageurl]]
-                                                    options:0
-                                                   progress:^(NSInteger receivedSize, NSInteger expectedSize) {
-                                                       // progression tracking code
-                                                   }
-                                                  completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
-                                                      if (image) {
-                                                          // do something with image
-                                                          imgView.image = image;
-                                                          
-                                                          NSValue *imgSize =  [NSValue valueWithCGSize:image.size];
-                                                          NSDictionary *dic = [self.imageSizeDic objectForKey:[self p_keyFromIndex:indexPath selectedIdx:tag]];
-                                                          if (dic != nil ) {
-                                                              NSURL *imgURL = dic[kImageURLKey];
-                                                              NSValue *sizeValue = dic[kImageSizeKey];
-                                                              if ([imgURL isEqual:imageURL] && [sizeValue isEqual:imgSize]) {
-                                                                  return ;
-                                                              }
-                                                          }
-                                                          
-                                                          NSDictionary *tmpDic = @{kImageSizeKey:imgSize,
-                                                                                   kImageURLKey:imageURL};
-                                                          
-                                                          [self.imageSizeDic setObject:tmpDic forKey:[self p_keyFromIndex:indexPath selectedIdx:tag]];
-                                                          if (collectionView.dataSource != nil ) {
-                                                              [collectionView reloadItemsAtIndexPaths:@[indexPath]];
-                                                             
-                                                          }
-                                                          
-                                                      }
-                                                  }];
-    
+    [imgView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.imageurl]] placeholderImage:kPlaceholderImage completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+        if (image) {
+            // do something with image
+        
+            NSValue *imgSize =  [NSValue valueWithCGSize:image.size];
+            NSDictionary *dic = [self.imageSizeDic objectForKey:[self p_keyFromIndex:indexPath selectedIdx:tag]];
+            if (dic != nil ) {
+                NSURL *imgURL = dic[kImageURLKey];
+                NSValue *sizeValue = dic[kImageSizeKey];
+                if ([imgURL isEqual:imageURL] && [sizeValue isEqual:imgSize]) {
+                    return ;
+                }
+            }
+            
+            NSDictionary *tmpDic = @{kImageSizeKey:imgSize,
+                                     kImageURLKey:imageURL};
+            
+            [self.imageSizeDic setObject:tmpDic forKey:[self p_keyFromIndex:indexPath selectedIdx:tag]];
+            if (collectionView.dataSource != nil ) {
+                [collectionView reloadItemsAtIndexPaths:@[indexPath]];
+                
+            }
+            
+        }
+
+    }];
     
     cell.layer.masksToBounds = YES;
     cell.layer.cornerRadius = 2;

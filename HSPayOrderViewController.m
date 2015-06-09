@@ -20,14 +20,21 @@
 #import "HSOrderStatusTableViewCell.h"
 
 #import "HSCommodityItemDetailPicModel.h"
+#import "HSOrderModel.h"
 
 @interface HSPayOrderViewController ()<UITableViewDataSource,
 UITableViewDelegate>
 {
+    
+    NSArray *_commdityDataArray;
+    
      HSSubmitOrderAddressTableViewCell *_placeAddressCell;
     
     /// 支付方式 0 支付宝 1微信
     int _payType;
+    
+    /// 订单信息
+    HSOrderModel *_orderModel;
 }
 
 @property (weak, nonatomic) IBOutlet UITableView *orderDetailTableView;
@@ -53,7 +60,10 @@ UITableViewDelegate>
     _orderDetailTableView.dataSource = self;
     _orderDetailTableView.delegate = self;
 
-    [self setupSettleView];
+//    [self setupSettleView];
+    [self getOrderDetailRequest:[public controlNullString:_userInfoModel.id] orderID:[public controlNullString:_orderID] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
+    
+    _settleView.hidden = YES;
     
 }
 
@@ -68,7 +78,7 @@ UITableViewDelegate>
 - (void)setupSettleView
 {
     [_settleView.settltButton setTitle:@"支付订单" forState:UIControlStateNormal];
-    _settleView.textLabel.text = [NSString stringWithFormat:@"应付金额：%0.2f",[self totolMoneyWithoutPostage]];
+    _settleView.textLabel.text = [NSString stringWithFormat:@"应付金额：%0.2f",[self totolMoney]];
     
     __weak typeof(self) wself = self;
     
@@ -79,9 +89,54 @@ UITableViewDelegate>
 
 #pragma mark -
 #pragma mark 获取订单详情
-- (void)getOrderDetailRequest:(NSString *)orderID
+- (void)getOrderDetailRequest:(NSString *)uid orderID:(NSString *)orderID sessionCode:(NSString *)sessionCode
 {
+    [self showNetLoadingView];
+    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+                                    kPostJsonUid:uid,
+                                    kPostJsonOrderId:orderID,
+                                    kPostJsonSessionCode:sessionCode
+                                    };
+    // 142346261  123456
     
+    [self.httpRequestOperationManager POST:kGetOrderDetailURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+        NSLog(@"success\n%@",operation.responseString);
+        
+        [self hiddenMsg];
+        
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"%s failed\n%@",__func__,operation.responseString);
+        [self hiddenMsg];
+        if (operation.responseData == nil) {
+            [self showReqeustFailedMsg];
+            return ;
+        }
+        NSError *jsonError = nil;
+        id json = [NSJSONSerialization JSONObjectWithData:operation.responseData options:NSJSONReadingMutableContainers error:&jsonError];
+        if (jsonError == nil && [json isKindOfClass:[NSDictionary class]]) {
+            NSDictionary *tmpDic = (NSDictionary *)json;
+            HSOrderModel *orderModel = [[HSOrderModel alloc] initWithDictionary:tmpDic error:nil];
+            if (orderModel.id.length > 0) {
+                _orderModel = orderModel;
+                _commdityDataArray = _orderModel.item_list;
+                _settleView.hidden = NO;
+                [self setupSettleView];
+                [_orderDetailTableView reloadData];
+            }
+        }
+        else
+        {
+            
+        }
+    }];
+
+}
+#pragma mark -
+#pragma mark 重新请求
+- (void)reloadRequestData
+{
+    [self getOrderDetailRequest:[public controlNullString:_userInfoModel.id] orderID:[public controlNullString:_orderID] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
+
 }
 
 
@@ -91,29 +146,33 @@ UITableViewDelegate>
 {
     __block int num = 0;
     
-    [_itemNumDic.allValues enumerateObjectsUsingBlock:^(NSNumber *obj, NSUInteger idx, BOOL *stop) {
-        num += [obj intValue];
+    [_commdityDataArray enumerateObjectsUsingBlock:^(HSOrderitemModel *obj, NSUInteger idx, BOOL *stop) {
+        int count = [obj.quantity intValue];
+        num += count;
     }];
     
     return num;
 }
 
 #pragma mark -
-#pragma mark 获取总价格 不包含邮费
-- (float)totolMoneyWithoutPostage
+#pragma mark 获取总价格
+- (float)totolMoney
 {
-    __block float total = 0.0;
-    [_commdityDataArray enumerateObjectsUsingBlock:^(HSCommodityItemDetailPicModel *obj, NSUInteger idx, BOOL *stop) {
-        
-        NSString *cid = [public controlNullString:obj.id];
-        NSNumber *num = _itemNumDic[cid];
-        int count = [num intValue] < 0 ? 0 : [num intValue];
-        float price = [obj.price floatValue] < 0 ? 0: [obj.price floatValue];
-        
-        total += count * price;
-        
-    }];
-    return total;
+    float result = [_orderModel.order_sumPrice floatValue];
+    
+    return result;
+//    __block float total = 0.0;
+//    [_commdityDataArray enumerateObjectsUsingBlock:^(HSCommodityItemDetailPicModel *obj, NSUInteger idx, BOOL *stop) {
+//        
+//        NSString *cid = [public controlNullString:obj.id];
+//        NSNumber *num = _itemNumDic[cid];
+//        int count = [num intValue] < 0 ? 0 : [num intValue];
+//        float price = [obj.price floatValue] < 0 ? 0: [obj.price floatValue];
+//        
+//        total += count * price;
+//        
+//    }];
+//    return total;
 }
 
 
@@ -237,9 +296,9 @@ UITableViewDelegate>
         
         if (indexPath.row == 0) {
             HSOrderStatusTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([HSOrderStatusTableViewCell class]) forIndexPath:indexPath];
-            cell.orderStatusLabel.text = [NSString stringWithFormat:@"订单状态：%@",@"待支付"];
-            cell.orderIDLabel.text = [NSString stringWithFormat:@"订单编号：%@",@"A598456261249845"];
-            cell.orderTimeLabel.text = [NSString stringWithFormat:@"订单时间：%@",@"2015-06-04 23:59:20"];
+            cell.orderStatusLabel.text = [NSString stringWithFormat:@"订单状态：%@",[public orderStatusStrWithState:_orderModel.status]];
+            cell.orderIDLabel.text = [NSString stringWithFormat:@"订单编号：%@",[public controlNullString:_orderModel.orderId]];
+            cell.orderTimeLabel.text = [NSString stringWithFormat:@"订单时间：%@",[public controlNullString:_orderModel.add_time]];
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
             return cell;
             
@@ -247,7 +306,7 @@ UITableViewDelegate>
         else
         {
             HSSubmitOrderAddressTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([HSSubmitOrderAddressTableViewCell class]) forIndexPath:indexPath];
-            [cell setUpWithModel:_addressModel];
+            [cell setupWithUserName:_orderModel.userName phone:_orderModel.mobile address:_orderModel.address];
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
             return cell;
 
@@ -257,9 +316,8 @@ UITableViewDelegate>
     {
         if (indexPath.row < _commdityDataArray.count) { /// 商品详情
             HSSubmitOrderCommdityTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([HSSubmitOrderCommdityTableViewCell class]) forIndexPath:indexPath];
-            HSCommodityItemDetailPicModel *detailModel = _commdityDataArray[indexPath.row];
-            int num = [_itemNumDic[[public controlNullString:detailModel.id]] intValue];
-            [cell setUpWithModel:detailModel imagePreURl:kImageHeaderURL num:num];
+            HSOrderitemModel *itemlModel = _commdityDataArray[indexPath.row];
+            [cell setupWithOrderItemModel:itemlModel];
             
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
             return cell;
@@ -329,7 +387,7 @@ UITableViewDelegate>
                     
                 }
                 int num = [self totalNum]; // 商品总数
-                float price = [self totolMoneyWithoutPostage] + 6.00;
+                float price = [self totolMoney];
                 NSString *str1 = @"共有";
                 NSString *str2 = @"件商品";
                 NSString *str3 = @"合计:";
@@ -431,7 +489,7 @@ UITableViewDelegate>
                 [_placeAddressCell setNeedsLayout];
             }
             NSLog(@"cell hei %f", _placeAddressCell.detailLabel.frame.size.width);
-            [_placeAddressCell setUpWithModel:_addressModel];
+            [_placeAddressCell setupWithUserName:_orderModel.userName phone:_orderModel.mobile address:_orderModel.address];
             _placeAddressCell.detailLabel.preferredMaxLayoutWidth = _placeAddressCell.detailLabel.frame.size.width;
             [_placeAddressCell.contentView updateConstraintsIfNeeded];
             [_placeAddressCell.contentView layoutIfNeeded];

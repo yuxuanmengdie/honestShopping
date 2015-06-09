@@ -39,4 +39,13 @@
     }
 }
 
+- (void)setupWithUserName:(NSString *)username phone:(NSString *)phone address:(NSString *)address
+{
+    _tipLable.hidden = YES;
+    
+    _userNameLabel.text = [NSString stringWithFormat:@"收货人：%@",[public controlNullString:username]];
+    _phoneLabel.text = [public controlNullString:phone];
+    _detailLabel.text = [NSString stringWithFormat:@"收货地址：%@",[public controlNullString:address]];
+}
+
 @end
