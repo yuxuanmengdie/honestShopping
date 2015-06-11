@@ -33,9 +33,9 @@
     {
         _tipLable.hidden = YES;
         
-        _userNameLabel.text = [NSString stringWithFormat:@"收货人：%@",[public controlNullString:addressModel.consignee]];
-        _phoneLabel.text = [public controlNullString:addressModel.mobile];
-        _detailLabel.text = [NSString stringWithFormat:@"收货地址：%@%@%@%@",[public controlNullString:addressModel.sheng],[public controlNullString:addressModel.shi],[public controlNullString:addressModel.qu],[public controlNullString:addressModel.address]];
+        _userNameLabel.text = [NSString stringWithFormat:@"收货人：%@",[HSPublic controlNullString:addressModel.consignee]];
+        _phoneLabel.text = [HSPublic controlNullString:addressModel.mobile];
+        _detailLabel.text = [NSString stringWithFormat:@"收货地址：%@%@%@%@",[HSPublic controlNullString:addressModel.sheng],[HSPublic controlNullString:addressModel.shi],[HSPublic controlNullString:addressModel.qu],[HSPublic controlNullString:addressModel.address]];
     }
 }
 
@@ -43,9 +43,9 @@
 {
     _tipLable.hidden = YES;
     
-    _userNameLabel.text = [NSString stringWithFormat:@"收货人：%@",[public controlNullString:username]];
-    _phoneLabel.text = [public controlNullString:phone];
-    _detailLabel.text = [NSString stringWithFormat:@"收货地址：%@",[public controlNullString:address]];
+    _userNameLabel.text = [NSString stringWithFormat:@"收货人：%@",[HSPublic controlNullString:username]];
+    _phoneLabel.text = [HSPublic controlNullString:phone];
+    _detailLabel.text = [NSString stringWithFormat:@"收货地址：%@",[HSPublic controlNullString:address]];
 }
 
 @end

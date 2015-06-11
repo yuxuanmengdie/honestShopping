@@ -61,8 +61,8 @@
     
     [self setTitleColor:_normolTintColor forState:UIControlStateNormal];
     [self setTitleColor:_selectedTintColor forState:UIControlStateSelected];
-    [self setBackgroundImage:[public ImageWithColor:_selectedTintColor] forState:UIControlStateNormal];
-    [self setBackgroundImage:[public ImageWithColor:_normolTintColor] forState:UIControlStateSelected];
+    [self setBackgroundImage:[HSPublic ImageWithColor:_selectedTintColor] forState:UIControlStateNormal];
+    [self setBackgroundImage:[HSPublic ImageWithColor:_normolTintColor] forState:UIControlStateSelected];
 
 }
 

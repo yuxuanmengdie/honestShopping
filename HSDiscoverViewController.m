@@ -75,8 +75,8 @@ static const int kFirstSectionNum = 3;
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    if ([public isLoginInStatus]) {
-       _userInfoModel =[[HSUserInfoModel alloc] initWithDictionary:[public userInfoFromPlist] error:nil];
+    if ([HSPublic isLoginInStatus]) {
+       _userInfoModel =[[HSUserInfoModel alloc] initWithDictionary:[HSPublic userInfoFromPlist] error:nil];
         _isVIP = [_userInfoModel.is_vip isEqualToString:@"1"];
     }
     else
@@ -103,10 +103,10 @@ static const int kFirstSectionNum = 3;
 - (void)discoverRequest
 {
     [self showNetLoadingView];
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]]
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]]
                                    };
     __weak typeof(self) wself = self;
-    [self.httpRequestOperationManager POST:kGetDiscoverURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+    [self.httpRequestOperationManager POST:kGetDiscoverURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSLog(@"JSON: %@", responseObject);
         [wself showReqeustFailedMsg];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
@@ -158,11 +158,11 @@ static const int kFirstSectionNum = 3;
 - (void)isVIPWithUid:(NSString *)uid sessionCode:(NSString *)sessionCode
 {
     [self showhudLoadingInWindowWithText:nil isDimBackground:YES];
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonUid:uid,
                                     kPostJsonSessionCode:sessionCode
                                     };
-    [self.httpRequestOperationManager POST:kIsVIPURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [self.httpRequestOperationManager POST:kIsVIPURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         [self hiddenHudLoading];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"%s failed\n%@",__func__,operation.responseString);
@@ -322,13 +322,13 @@ static const int kFirstSectionNum = 3;
 {
     if (indexPath.section == 1) { // 会员区
         
-        if (![public isLoginInStatus]) {
+        if (![HSPublic isLoginInStatus]) {
             [self showHudWithText:@"请先登录"];
             return ;
         }
         
         if (!_isVIP) {
-            [self isVIPWithUid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
+            [self isVIPWithUid:[HSPublic controlNullString:_userInfoModel.id] sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode]];
             return;
         }
         

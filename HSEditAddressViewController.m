@@ -55,11 +55,11 @@
 
     if (_addressChangeType == HSeditaddressByAddType) { // 新增地址
         
-        [self addAddressRequestWithUid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode] consignee:[public controlNullString:_containerVC.userNameTextFiled.text] address:[public controlNullString:_containerVC.detailAddressTextView.text] mobile:[public controlNullString:_containerVC.phoneTextFiled.text] sheng:[public controlNullString:_containerVC.sheng] shi:[public controlNullString:_containerVC.shi] qu:[public controlNullString:_containerVC.qu]];
+        [self addAddressRequestWithUid:[HSPublic controlNullString:_userInfoModel.id] sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode] consignee:[HSPublic controlNullString:_containerVC.userNameTextFiled.text] address:[HSPublic controlNullString:_containerVC.detailAddressTextView.text] mobile:[HSPublic controlNullString:_containerVC.phoneTextFiled.text] sheng:[HSPublic controlNullString:_containerVC.sheng] shi:[HSPublic controlNullString:_containerVC.shi] qu:[HSPublic controlNullString:_containerVC.qu]];
     }
     else /// 修改地址
     {
-        [self updateAddressRequestWithUid:[public controlNullString:_addressModel.uid] add_id:[public controlNullString:_addressModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode] consignee:[public controlNullString:_containerVC.userNameTextFiled.text] address:[public controlNullString:_containerVC.detailAddressTextView.text] mobile:[public controlNullString:_containerVC.phoneTextFiled.text] sheng:[public controlNullString:_containerVC.sheng] shi:[public controlNullString:_containerVC.shi] qu:[public controlNullString:_containerVC.qu]];
+        [self updateAddressRequestWithUid:[HSPublic controlNullString:_addressModel.uid] add_id:[HSPublic controlNullString:_addressModel.id] sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode] consignee:[HSPublic controlNullString:_containerVC.userNameTextFiled.text] address:[HSPublic controlNullString:_containerVC.detailAddressTextView.text] mobile:[HSPublic controlNullString:_containerVC.phoneTextFiled.text] sheng:[HSPublic controlNullString:_containerVC.sheng] shi:[HSPublic controlNullString:_containerVC.shi] qu:[HSPublic controlNullString:_containerVC.qu]];
     }
 }
 
@@ -68,7 +68,7 @@
 - (void)addAddressRequestWithUid:(NSString *)uid sessionCode:(NSString *)sessionCode consignee:(NSString *)consignee address:(NSString *)address mobile:(NSString *)mobile sheng:(NSString *)sheng shi:(NSString *)shi qu:(NSString *)qu
 {
     [self showhudLoadingWithText:@"保存中..." isDimBackground:YES];
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonUid:uid,
                                     kPostJsonSessionCode:sessionCode,
                                     kPostJsonConsignee:consignee,
@@ -78,7 +78,7 @@
                                     kPostJsonShi:shi,
                                     kPostJsonQu:qu
                                     };
-    [self.httpRequestOperationManager POST:kAddressUpdateURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [self.httpRequestOperationManager POST:kAddressUpdateURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         [self hiddenHudLoading];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"%s failed\n%@",__func__,operation.responseString);
@@ -116,7 +116,7 @@
 - (void)updateAddressRequestWithUid:(NSString *)uid add_id:(NSString *)add_id sessionCode:(NSString *)sessionCode consignee:(NSString *)consignee address:(NSString *)address mobile:(NSString *)mobile sheng:(NSString *)sheng shi:(NSString *)shi qu:(NSString *)qu
 {
     [self showhudLoadingInWindowWithText:@"保存中..." isDimBackground:YES];
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonUid:uid,
                                     kPostJsonid:add_id,
                                     kPostJsonSessionCode:sessionCode,
@@ -127,7 +127,7 @@
                                     kPostJsonShi:shi,
                                     kPostJsonQu:qu
                                     };
-    [self.httpRequestOperationManager POST:kAddressUpdateURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [self.httpRequestOperationManager POST:kAddressUpdateURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         [self hiddenHudLoading];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"%s failed\n%@",__func__,operation.responseString);
@@ -189,7 +189,7 @@
         return NO;
     }
     
-    if (![public isPhoneNumberRegex:_containerVC.phoneTextFiled.text ]) {
+    if (![HSPublic isPhoneNumberRegex:_containerVC.phoneTextFiled.text ]) {
         [self showHudWithText:@"手机号码格式不符"];
         return NO;
     }

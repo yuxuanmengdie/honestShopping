@@ -146,11 +146,11 @@
 #pragma mark 引导图
 - (void)getGuideRequest
 {
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]]};
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]]};
     // 142346261  123456
     
     AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
-    [manager POST:kGetGuideURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [manager POST:kGetGuideURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         NSLog(@"success\n%@",operation.responseString);
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"%s failed\n%@",__func__,operation.responseString);
@@ -164,7 +164,7 @@
             [jsonArr enumerateObjectsUsingBlock:^(NSDictionary *obj, NSUInteger idx, BOOL *stop) {
                 HSBannerModel *bannerModel = [[HSBannerModel alloc] initWithDictionary:obj error:nil];
                 
-                NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kBannerImageHeaderURL,[public controlNullString:bannerModel.content]]];
+                NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kBannerImageHeaderURL,[HSPublic controlNullString:bannerModel.content]]];
                 BOOL isCache = [[SDWebImageManager sharedManager] cachedImageExistsForURL:url];
                 if (!isCache) {
                     [self downloadImageWihtURL:url];
@@ -186,10 +186,10 @@
 - (void)getWelcomeRequest
 {
     
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]]};
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]]};
     // 142346261  123456
     AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
-    [manager POST:kGetWelcomeURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [manager POST:kGetWelcomeURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         NSLog(@"success\n%@",operation.responseString);
         
         
@@ -206,7 +206,7 @@
             [jsonArr enumerateObjectsUsingBlock:^(NSDictionary *obj, NSUInteger idx, BOOL *stop) {
                 HSBannerModel *bannerModel = [[HSBannerModel alloc] initWithDictionary:obj error:nil];
                 
-                NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kBannerImageHeaderURL,[public controlNullString:bannerModel.content]]];
+                NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kBannerImageHeaderURL,[HSPublic controlNullString:bannerModel.content]]];
                 BOOL isCache = [[SDWebImageManager sharedManager] cachedImageExistsForURL:url];
                 if (!isCache) {
                     [self downloadImageWihtURL:url];

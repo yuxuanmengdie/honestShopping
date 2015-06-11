@@ -69,9 +69,9 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
     _submitOrdertableView.dataSource = self;
     _submitOrdertableView.delegate = self;
     
-    [self getDefaultAddressWithUid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
+    [self getDefaultAddressWithUid:[HSPublic controlNullString:_userInfoModel.id] sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode]];
     [self bottomViewSetup];
-    [self couponRequestWithUid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
+    [self couponRequestWithUid:[HSPublic controlNullString:_userInfoModel.id] sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode]];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -95,7 +95,7 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
 {
     self._totalPriceLabel.textColor = [UIColor redColor];
     float postPrice = 0.0;
-    if ([public isAreaInJiangZheHu:_addressModel.sheng])
+    if ([HSPublic isAreaInJiangZheHu:_addressModel.sheng])
     {
         postPrice = 0.0;
     }
@@ -106,7 +106,7 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
 
     self._totalPriceLabel.text = [NSString stringWithFormat:@"应付金额：%0.2f",[self totolMoneyWithoutPostage]+postPrice];
 
-    [_submitButton setBackgroundImage:[public ImageWithColor:kAppYellowColor] forState:UIControlStateNormal];
+    [_submitButton setBackgroundImage:[HSPublic ImageWithColor:kAppYellowColor] forState:UIControlStateNormal];
     [_submitButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [_submitButton setTitle:@"确认订单" forState:UIControlStateNormal];
     _submitButton.layer.masksToBounds = YES;
@@ -115,7 +115,7 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
 
 
 - (IBAction)submitAction:(id)sender {
-    [self addOrderWithUid:[public controlNullString:_userInfoModel.id] couponId:[public controlNullString:_couponModel.id] username:[public controlNullString:_addressModel.consignee] addressName:@"" mobile:[public controlNullString:_addressModel.mobile] address:[NSString stringWithFormat:@"%@%@%@%@",[public controlNullString:_addressModel.sheng],[public controlNullString:_addressModel.shi],[public controlNullString:_addressModel.qu],[public controlNullString:_addressModel.address]]supportmethod:@"1" freetype:@"1" sessionCode:[public controlNullString:_userInfoModel.sessionCode] list:[self listOrder]];
+    [self addOrderWithUid:[HSPublic controlNullString:_userInfoModel.id] couponId:[HSPublic controlNullString:_couponModel.id] username:[HSPublic controlNullString:_addressModel.consignee] addressName:@"" mobile:[HSPublic controlNullString:_addressModel.mobile] address:[NSString stringWithFormat:@"%@%@%@%@",[HSPublic controlNullString:_addressModel.sheng],[HSPublic controlNullString:_addressModel.shi],[HSPublic controlNullString:_addressModel.qu],[HSPublic controlNullString:_addressModel.address]]supportmethod:@"1" freetype:@"1" sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode] list:[self listOrder]];
     
 }
 
@@ -164,7 +164,7 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
             return ;
         }
         
-        [swself getCouponIdByCouponNoWithUid:[public controlNullString:swself.userInfoModel.id] sessionCode:[public controlNullString:swself.userInfoModel.sessionCode] couponNo:text];
+        [swself getCouponIdByCouponNoWithUid:[HSPublic controlNullString:swself.userInfoModel.id] sessionCode:[HSPublic controlNullString:swself.userInfoModel.sessionCode] couponNo:text];
     };
     [_couponView.couponTableView reloadData];
 }
@@ -180,14 +180,14 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
 - (void)getCouponIdByCouponNoWithUid:(NSString *)uid sessionCode:(NSString *)sessionCode couponNo:(NSString *)couponNo
 {
     [self showhudLoadingWithText:@"验证中..." isDimBackground:YES];
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonUid:uid,
                                     kPostJsonSessionCode:sessionCode,
                                     kPostJsonCouponNo:couponNo
                                     };
     // 142346261  123456
     
-    [self.httpRequestOperationManager POST:kGetCouponIdByCouponNoURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [self.httpRequestOperationManager POST:kGetCouponIdByCouponNoURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         NSLog(@"success\n%@",operation.responseString);
         
         [self hiddenHudLoading];
@@ -209,7 +209,14 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
             }
             else
             {
-                
+                NSString *cou_ID = jsonDic[@"cou_id"];
+                NSString *price = jsonDic[@"price"];
+                NSString *name = jsonDic[@"name"];
+                _couponModel = [[HSCouponModel alloc] init];
+                _couponModel.price = price;
+                _couponModel.id = cou_ID;
+                _couponModel.name = name;
+                [self p_reloadWithAddressModel:_addressModel];
             }
         }
         else
@@ -224,11 +231,11 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
 #pragma mark 获取优惠券
 - (void)couponRequestWithUid:(NSString *)uid sessionCode:(NSString *)sessionCode
 {
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonUid:uid,
                                     kPostJsonSessionCode:sessionCode
                                     };
-    [self.httpRequestOperationManager POST:kGetCouponsByUidURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [self.httpRequestOperationManager POST:kGetCouponsByUidURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"%s failed\n%@",__func__,operation.responseString);
         if (operation.responseData == nil) {
@@ -275,13 +282,13 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
 - (void)getDefaultAddressWithUid:(NSString *)uid sessionCode:(NSString *)sessionCode
 {
     [self showNetLoadingView];
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonUid:uid,
                                     kPostJsonSessionCode:sessionCode
                                     };
     // 142346261  123456
     
-    [self.httpRequestOperationManager POST:kGetDefaultAddressURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [self.httpRequestOperationManager POST:kGetDefaultAddressURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         NSLog(@"success\n%@",operation.responseString);
         
         [self hiddenMsg];
@@ -305,8 +312,8 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
                     
                     [self p_reloadWithAddressModel:model];
                     //[_submitOrdertableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0]] withRowAnimation:UITableViewRowAnimationAutomatic];
-                    NSString *freeType = [public isAreaInJiangZheHu:model.sheng] ? @"0" : @"1";
-                    [self getFreePriceRequestWithUid:[public controlNullString:_userInfoModel.id] num:[NSString stringWithFormat:@"%d",[self totalNum]] freetype:freeType sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
+                    NSString *freeType = [HSPublic isAreaInJiangZheHu:model.sheng] ? @"0" : @"1";
+                    [self getFreePriceRequestWithUid:[HSPublic controlNullString:_userInfoModel.id] num:[NSString stringWithFormat:@"%d",[self totalNum]] freetype:freeType sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode]];
                 
                 }
                 
@@ -345,7 +352,7 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
     __block float total = 0.0;
     [_commdityDataArray enumerateObjectsUsingBlock:^(HSCommodityItemDetailPicModel *obj, NSUInteger idx, BOOL *stop) {
         
-        NSString *cid = [public controlNullString:obj.id];
+        NSString *cid = [HSPublic controlNullString:obj.id];
         NSNumber *num = _itemNumDic[cid];
         int count = [num intValue] < 0 ? 0 : [num intValue];
         float price = [obj.price floatValue] < 0 ? 0: [obj.price floatValue];
@@ -360,14 +367,14 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
 #pragma mark 重新请求
 - (void)reloadRequestData
 {
-     [self getDefaultAddressWithUid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
+     [self getDefaultAddressWithUid:[HSPublic controlNullString:_userInfoModel.id] sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode]];
 }
 
 #pragma mark -
 #pragma mark 获取邮费
 - (void)getFreePriceRequestWithUid:(NSString *)uid num:(NSString *)num freetype:(NSString *)freetype sessionCode:(NSString *)sessionCode
 {
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonUid:uid,
                                     kPostJsonSessionCode:sessionCode,
                                     kPostJsonNum:num,
@@ -377,7 +384,7 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
     if (_postageRequestOperation == nil) {
         _postageRequestOperation = [[AFHTTPRequestOperationManager alloc] init];
     }
-    [_postageRequestOperation POST:kGetFreePriceURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [_postageRequestOperation POST:kGetFreePriceURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         NSLog(@"success\n%@",operation.responseString);
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
@@ -393,8 +400,9 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
             NSNumber *price = jsonDic[kPostJsonFreeprice];
             if (price != nil) {
                 _postageprice = [NSString stringWithFormat:@"%0.2f",[price floatValue]];
-                [_submitOrdertableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:_commdityDataArray.count + 1 inSection:1],[NSIndexPath indexPathForRow:_commdityDataArray.count + 2 inSection:1]] withRowAnimation:UITableViewRowAnimationAutomatic];
-                self._totalPriceLabel.text = [NSString stringWithFormat:@"应付金额：%0.2f",[self totolMoneyWithoutPostage] + [price floatValue]];
+//                [_submitOrdertableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:_commdityDataArray.count + 1 inSection:1],[NSIndexPath indexPathForRow:_commdityDataArray.count + 2 inSection:1]] withRowAnimation:UITableViewRowAnimationAutomatic];
+//                self._totalPriceLabel.text = [NSString stringWithFormat:@"应付金额：%0.2f",[self totolMoneyWithoutPostage] + [price floatValue]];
+                [self p_reloadWithAddressModel:_addressModel];
 
             }
             }
@@ -415,11 +423,11 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
     [_commdityDataArray enumerateObjectsUsingBlock:^(HSCommodityItemDetailPicModel *obj, NSUInteger idx, BOOL *stop) {
         NSString *itemId = obj.id;
         
-        NSString *cid = [public controlNullString:obj.id];
+        NSString *cid = [HSPublic controlNullString:obj.id];
         NSNumber *num = _itemNumDic[cid];
         int count = [num intValue] < 0 ? 0 : [num intValue];
         
-        NSDictionary *dic = @{kPostJsonItemid:[public controlNullString:itemId],
+        NSDictionary *dic = @{kPostJsonItemid:[HSPublic controlNullString:itemId],
                               kPostJsonQuantity:[NSNumber numberWithInt:count]};
         [tmp addObject:dic];
         
@@ -449,7 +457,7 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
 - (void)addOrderWithUid:(NSString *)uid couponId:(NSString *)couponId username:(NSString *)username addressName:(NSString *)addressName mobile:(NSString *)mobile address:(NSString *)address supportmethod:(NSString *)supportmethod freetype:(NSString *)freetype sessionCode:(NSString *)sessionCode list:(NSArray *)list
 {
     [self showhudLoadingInWindowWithText:@"提交订单..." isDimBackground:YES];
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonUid:uid,
                                     kPostJsonCouponId:couponId,
                                     kPostJsonUserName:username,
@@ -463,7 +471,7 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
                                     };
     // 142346261  123456
     
-    [self.httpRequestOperationManager POST:kAddOrderURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [self.httpRequestOperationManager POST:kAddOrderURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         NSLog(@"success\n%@",operation.responseString);
         
         [self hiddenHudLoading];
@@ -548,8 +556,8 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
         }
        
         HSCouponModel *couponModel = _couponDataArray[indexPath.row];
-        textLabel.text = [public controlNullString:couponModel.name];
-         NSLog(@"%@",[public controlNullString:couponModel.name]);
+        textLabel.text = [HSPublic controlNullString:couponModel.name];
+         NSLog(@"%@",[HSPublic controlNullString:couponModel.name]);
         return cell;
     }
 
@@ -566,7 +574,7 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
         if (indexPath.row < _commdityDataArray.count) { /// 商品详情
             HSSubmitOrderCommdityTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([HSSubmitOrderCommdityTableViewCell class]) forIndexPath:indexPath];
             HSCommodityItemDetailPicModel *detailModel = _commdityDataArray[indexPath.row];
-            int num = [_itemNumDic[[public controlNullString:detailModel.id]] intValue];
+            int num = [_itemNumDic[[HSPublic controlNullString:detailModel.id]] intValue];
             [cell setUpWithModel:detailModel imagePreURl:kImageHeaderURL num:num];
             
             return cell;
@@ -607,7 +615,7 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
                 }
 
                 leftLabel.text = @"优惠券：";
-                rightLabel.text = [public controlNullString:_couponModel.name];
+                rightLabel.text = [HSPublic controlNullString:_couponModel.name];
                 cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
             }
             else if (indexPath.row == _commdityDataArray.count + 1) // 运费
@@ -640,7 +648,7 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
                 if (_postageprice.length == 0) {
                      rightLabel.text = @"江浙沪包邮，其他省市12元";
                 }
-                else if ([public isAreaInJiangZheHu:_addressModel.sheng])
+                else if ([HSPublic isAreaInJiangZheHu:_addressModel.sheng])
                 {
                     rightLabel.text = @"江浙沪包邮";
                 }
@@ -678,16 +686,16 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
                 }
                 int num = [self totalNum]; // 商品总数
                 float postPrice = 0.0;
-                if ([public isAreaInJiangZheHu:_addressModel.sheng])
+                if ([HSPublic isAreaInJiangZheHu:_addressModel.sheng])
                 {
                     postPrice = 0.0;
                 }
                 else
                 {
-                    postPrice = 12.0;
+                    postPrice = _postageprice.length > 0 ? [_postageprice floatValue] : 12;
                 }
 
-                float price = [self totolMoneyWithoutPostage] + postPrice;
+                float price = [self totolMoneyWithoutPostage] + postPrice - [_couponModel.price floatValue];
                 NSString *str1 = @"共有";
                 NSString *str2 = @"件商品";
                 NSString *str3 = @"合计:";
@@ -763,7 +771,8 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
         }
         _couponModel = model;
         
-        [_submitOrdertableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:_commdityDataArray.count inSection:1]] withRowAnimation:UITableViewRowAnimationAutomatic];
+        //[_submitOrdertableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:_commdityDataArray.count inSection:1]] withRowAnimation:UITableViewRowAnimationAutomatic];
+        [self p_reloadWithAddressModel:_addressModel];
         return;
     }
     
@@ -786,8 +795,8 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
             swself->_addressModel = addModel;
             [swself p_reloadWithAddressModel:addModel];
             
-            NSString *freeType = [public isAreaInJiangZheHu:addModel.sheng] ? @"0" : @"1";
-            [swself getFreePriceRequestWithUid:[public controlNullString:swself.userInfoModel.id] num:[NSString stringWithFormat:@"%d",[swself totalNum]] freetype:freeType sessionCode:[public controlNullString:swself.userInfoModel.sessionCode]];
+            NSString *freeType = [HSPublic isAreaInJiangZheHu:addModel.sheng] ? @"0" : @"1";
+            [swself getFreePriceRequestWithUid:[HSPublic controlNullString:swself.userInfoModel.id] num:[NSString stringWithFormat:@"%d",[swself totalNum]] freetype:freeType sessionCode:[HSPublic controlNullString:swself.userInfoModel.sessionCode]];
             };
     }
     else if (indexPath.section == 1 && indexPath.row == _commdityDataArray.count) // 优惠券
@@ -801,16 +810,17 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
 - (void)p_reloadWithAddressModel:(HSAddressModel *)addModel
 {
     float postPrice = 0.0;
-    if ([public isAreaInJiangZheHu:addModel.sheng])
+    if ([HSPublic isAreaInJiangZheHu:addModel.sheng])
     {
         postPrice = 0.0;
     }
     else
     {
-        postPrice = 12.0;
+        //postPrice = 12.0;
+         postPrice = _postageprice.length > 0 ? [_postageprice floatValue] : 12;
     }
-    self._totalPriceLabel.text = [NSString stringWithFormat:@"应付金额：%0.2f",[self totolMoneyWithoutPostage]+postPrice];
-     [_submitOrdertableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0],[NSIndexPath indexPathForRow:_commdityDataArray.count+1 inSection:1]] withRowAnimation:UITableViewRowAnimationAutomatic];
+    self._totalPriceLabel.text = [NSString stringWithFormat:@"应付金额：%0.2f",[self totolMoneyWithoutPostage]+postPrice -[_couponModel.price floatValue]];
+     [_submitOrdertableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0],[NSIndexPath indexPathForRow:_commdityDataArray.count inSection:1],[NSIndexPath indexPathForRow:_commdityDataArray.count+1 inSection:1],[NSIndexPath indexPathForRow:_commdityDataArray.count+2 inSection:1]] withRowAnimation:UITableViewRowAnimationAutomatic];
     
 
 }

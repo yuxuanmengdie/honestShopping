@@ -21,6 +21,7 @@
 #import "UIImageView+WebCache.h"
 #import "UMSocial.h"
 #import "UMSocialWechatHandler.h"
+#import "UMSocialQQHandler.h"
 
 @interface HSCommodityDetailViewController ()<UITableViewDataSource,
 UITableViewDelegate,UMSocialUIDelegate>
@@ -30,7 +31,7 @@ UITableViewDelegate,UMSocialUIDelegate>
      NSMutableDictionary *_imageSizeDic;
     
     AFHTTPRequestOperationManager *_operationManager;
-    /// 是否已经收藏
+    /// 是否已经关注
     BOOL _isCollected;
     
     HSCommodityItemTopBannerView *_placeheadView;
@@ -46,6 +47,8 @@ UITableViewDelegate,UMSocialUIDelegate>
 
 ///顶部的轮播图放到
 static const int kTopExistCellNum = 1;
+
+static NSString  *const kTopCellIndentifier = @"topCellIndentifer";
 
 //- (void)awakeFromNib
 //{
@@ -64,6 +67,7 @@ static const int kTopExistCellNum = 1;
     _isCollected = [HSDBManager selectedItemWithTableName:[HSDBManager tableNameWithUid] keyID:_itemModel.id] == nil ? NO : YES;
     
     [_detailTableView registerNib:[UINib nibWithNibName:NSStringFromClass([HSCommodityDetailTableViewCell class]) bundle:nil] forCellReuseIdentifier:NSStringFromClass([HSCommodityDetailTableViewCell class])];
+    [_detailTableView registerClass:[UITableViewCell class] forCellReuseIdentifier:kTopCellIndentifier];
     _detailTableView.separatorStyle = UITableViewCellSelectionStyleNone;
 //    _detailTableView.dataSource = self;
 //    _detailTableView.delegate = self;
@@ -73,7 +77,7 @@ static const int kTopExistCellNum = 1;
 }
 
 #pragma mark -
-#pragma mark rightNavBar action
+#pragma mark rightNavBar action 分享
 - (void)shareAction
 {
     //设置微信AppId，设置分享url，默认使用友盟的网址
@@ -85,16 +89,18 @@ static const int kTopExistCellNum = 1;
 //                                shareToSnsNames:[NSArray arrayWithObjects:UMShareToSina,UMShareToTencent,UMShareToRenren,UMShareToWechatSession,UMShareToWechatTimeline,UMShareToQQ,UMShareToQzone,nil]
 //                                       delegate:self];
     
-     [UMSocialWechatHandler setWXAppId:@"wxd930ea5d5a258f4f" appSecret:@"db426a9829e4b49a0dcac7b4162da6b6" url:@"http://www.umeng.com/social"];
-    NSString *shareText = @"友盟社会化组件可以让移动应用快速具备社会化分享、登录、评论、喜欢等功能，并提供实时、全面的社会化数据统计分析服务。 http://www.umeng.com/social";             //分享内嵌文字
-    UIImage *shareImage = [UIImage imageNamed:@"icon_mine_1"];          //分享内嵌图片
+    
+    [UMSocialWechatHandler setWXAppId:@"wxf674afd7fa6b3db1" appSecret:@"768ef498760a90567afeac93211abfa9" url:[self p_shareURLWithModel:_detailPicModel]];
+    [UMSocialQQHandler setQQWithAppId:@"1104470651" appKey:@"1VATaXjYJuiJ0itg" url:[self p_shareURLWithModel:_detailPicModel]];
+    NSString *shareText = [NSString stringWithFormat:@"%@\n%@", _detailPicModel.title,_detailPicModel.intro];//@"友盟社会化组件可以让移动应用快速具备社会化分享、登录、评论、喜欢等功能，并提供实时、全面的社会化数据统计分析服务。 http://www.umeng.com/social";             //分享内嵌文字
+    UIImage *shareImage = [UIImage imageNamed:@"icon_mine_6"];          //分享内嵌图片
     
     //调用快速分享接口
     [UMSocialSnsService presentSnsIconSheetView:self
                                          appKey:kUMengAppKey
                                       shareText:shareText
                                      shareImage:shareImage
-                                shareToSnsNames:[NSArray arrayWithObjects:UMShareToSina,UMShareToTencent,UMShareToRenren,UMShareToQQ,UMShareToQzone,UMShareToWechatSession,UMShareToWechatTimeline,nil]//nil
+                                shareToSnsNames:[NSArray arrayWithObjects:UMShareToSina,UMShareToTencent,UMShareToQQ,UMShareToQzone,UMShareToWechatSession,UMShareToWechatTimeline,nil]//nil
                                        delegate:self];
 
 }
@@ -115,16 +121,19 @@ static const int kTopExistCellNum = 1;
 
 - (void)buyViewBlock
 {
+    if ([HSPublic isLoginInStatus] && [HSDBManager selectFavoritetemWithTableName:[HSDBManager tableNameFavoriteWithUid] keyID:_itemModel.id].length > 0 ) {
+        _buyNumView.collectBtn.selected = YES;
+    }
     __weak typeof(self) wself = self;
     _buyNumView.buyBlock = ^(int num){ /// 购买
         __strong typeof(wself) swself = wself;
-        if (![public isLoginInStatus]) {
+        if (![HSPublic isLoginInStatus]) {
             [wself showHudWithText:@"请先登录"];
             [swself pushViewControllerWithIdentifer:NSStringFromClass([HSLoginInViewController class])];
             return ;
         }
 
-        NSDictionary *dic = @{[public controlNullString:_detailPicModel.id]:[NSNumber numberWithInt:num]};
+        NSDictionary *dic = @{[HSPublic controlNullString:_detailPicModel.id]:[NSNumber numberWithInt:num]};
         NSArray *arr = @[_detailPicModel];
         
         UIStoryboard *storyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
@@ -132,21 +141,21 @@ static const int kTopExistCellNum = 1;
         submitVC.itemNumDic = dic;
         submitVC.itemsDataArray = arr;
         submitVC.title = @"确认订单";
-        submitVC.userInfoModel = [[HSUserInfoModel alloc] initWithDictionary:[public userInfoFromPlist] error:nil];
+        submitVC.userInfoModel = [[HSUserInfoModel alloc] initWithDictionary:[HSPublic userInfoFromPlist] error:nil];
         [wself.navigationController pushViewController:submitVC animated:YES];
         
     };
     
-    _buyNumView.collectBlock = ^(UIButton *collctBtn){ /// 收藏
+    _buyNumView.collectBlock = ^(UIButton *collctBtn){ /// 关注
         
         __strong typeof(wself) swself = wself;
-        if (![public isLoginInStatus]) {
+        if (![HSPublic isLoginInStatus]) {
             [wself showHudWithText:@"请先登录"];
             [swself pushViewControllerWithIdentifer:NSStringFromClass([HSLoginInViewController class])];
             return ;
         }
         
-        HSUserInfoModel *infoModel = [[HSUserInfoModel alloc] initWithDictionary:[public userInfoFromPlist] error:nil];
+        HSUserInfoModel *infoModel = [[HSUserInfoModel alloc] initWithDictionary:[HSPublic userInfoFromPlist] error:nil];
         
         [wself collectItemRequestWithID:swself->_detailPicModel.id uid:infoModel.id sessionCode:infoModel.sessionCode];
     };
@@ -176,10 +185,10 @@ static const int kTopExistCellNum = 1;
     AFHTTPRequestOperationManager *manager = _operationManager;//[AFHTTPRequestOperationManager manager];
     manager.responseSerializer = [AFJSONResponseSerializer serializer];
     //申明请求的数据是json类型
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonid:itemID};
     __weak typeof(self) wself = self;
-    [manager POST:kGetItemByIdURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+    [manager POST:kGetItemByIdURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSLog(@"JSON: %@", responseObject);
         [wself showReqeustFailedMsg];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
@@ -225,27 +234,27 @@ static const int kTopExistCellNum = 1;
 }
 
 #pragma mark -
-#pragma mark  底部添加收藏
+#pragma mark  底部添加关注
 - (void)collectItemRequestWithID:(NSString *)itemID uid:(NSString *)uid sessionCode:(NSString *)sessionCode
 {
    
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonUid:uid,
                                     kPostJsonItemid:itemID,
                                     kPostJsonSessionCode:sessionCode
                                     };
     // 142346261  123456
     
-    [self.httpRequestOperationManager POST:kAddFavoriteURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [self.httpRequestOperationManager POST:kAddFavoriteURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         NSLog(@"success\n%@",operation.responseString);
-        [self showHudWithText:@"收藏失败"];
+        [self showHudWithText:@"关注失败"];
         [self hiddenHudLoading];
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"%s failed\n%@",__func__,operation.responseString);
         [self hiddenHudLoading];
         if (operation.responseData == nil) {
-            [self showHudWithText:@"收藏失败"];
+            [self showHudWithText:@"关注失败"];
             return ;
         }
         NSError *jsonError = nil;
@@ -255,22 +264,23 @@ static const int kTopExistCellNum = 1;
             BOOL isSuccess = [tmpDic[kPostJsonStatus] boolValue];
             _buyNumView.collectBtn.selected = YES;
             if (isSuccess) {
-                [self showHudWithText:@"收藏成功"];
+                [self showHudWithText:@"关注成功"];
+                [HSDBManager saveFavoriteWithTableName:[HSDBManager tableNameFavoriteWithUid] keyID:_itemModel.id];
             }
             else if (tmpDic.allKeys.count == 1)
             {
-                 [self showHudWithText:@"已收藏"];
+                 [self showHudWithText:@"已关注"];
                 
             }
             else
             {
-                 [self showHudWithText:@"收藏失败"];
+                 [self showHudWithText:@"关注失败"];
             }
 
         }
         else
         {
-            [self showHudWithText:@"收藏失败"];
+            [self showHudWithText:@"关注失败"];
         }
     }];
 
@@ -294,24 +304,24 @@ static const int kTopExistCellNum = 1;
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (0 == indexPath.row) {// 顶部轮播图所在的tableviewcell
-        static NSString *topCellIndentifier = @"topCellIndentifer";
-        UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:topCellIndentifier];
-        if (cell == nil) {
-            cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:topCellIndentifier];
-            
-            HSCommodityItemTopBannerView *headView = [[HSCommodityItemTopBannerView alloc] init];
+        
+        UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:kTopCellIndentifier forIndexPath:indexPath];
+        
+        HSCommodityItemTopBannerView *headView = (HSCommodityItemTopBannerView *)[cell.contentView viewWithTag:501];
+        if (headView == nil) {
+            headView = [[HSCommodityItemTopBannerView alloc] initWithFrame:CGRectZero];
             headView.translatesAutoresizingMaskIntoConstraints = NO;
             [cell.contentView addSubview:headView];
             cell.contentView.bounds = tableView.bounds;
             headView.tag = 501;
             [self headViewAutoLayoutInCell:cell headView:headView];
+            headView.bannerView.sourceArr = [self controlBannerArr:_detailPicModel.banner];
+            
             
         }
-        HSCommodityItemTopBannerView *headView = (HSCommodityItemTopBannerView *)[cell.contentView viewWithTag:501];
-        headView.bannerView.sourceArr = [self controlBannerArr:_detailPicModel.banner];
-        [headView.bannerView iniSubviewsWithFrame:CGRectMake(0, 0,CGRectGetWidth(tableView.frame), headView.bannerHeight)];
+        float hei = _placeheadView == nil ? headView.bannerHeight : _placeheadView.bannerHeight;
+        [headView.bannerView iniSubviewsWithFrame:CGRectMake(0, 0,CGRectGetWidth(tableView.frame), hei)];
         headView.bannerView.pageControl.currentPageIndicatorTintColor = kAPPTintColor;
-
         headView.infoView.titleLabel.text = [NSString stringWithFormat:@"%@ %@",_detailPicModel.title,_detailPicModel.standard];
         headView.infoView.priceLabel.text = [NSString stringWithFormat:@"%@元",_detailPicModel.price];
         [headView.infoView collcetStatus:_isCollected];
@@ -319,7 +329,7 @@ static const int kTopExistCellNum = 1;
         headView.infoView.colletActionBlock = ^(UIButton *btn){
             __strong typeof(wself) swself = wself;
             
-            if (![public isLoginInStatus]) {
+            if (![HSPublic isLoginInStatus]) {
                 [swself showHudInWindowWithText:@"请先登录"];
                 [swself pushViewControllerWithIdentifer:NSStringFromClass([HSLoginInViewController class])];
                 return ;
@@ -380,24 +390,32 @@ static const int kTopExistCellNum = 1;
     if (0 == indexPath.row) {
         
         if (_placeheadView == nil) {
-           _placeheadView = [[HSCommodityItemTopBannerView alloc] init];
+           _placeheadView = [[HSCommodityItemTopBannerView alloc] initWithFrame:CGRectZero];
             _placeheadView.bounds = tableView.bounds;
-//            [self.view addSubview:_placeheadView];
+            [_placeheadView setNeedsLayout];
+            [self.view addSubview:_placeheadView];
             _placeheadView.translatesAutoresizingMaskIntoConstraints = NO;
-//            _placeheadView.hidden = YES;
+            _placeheadView.hidden = YES;
+            __weak typeof(tableView) wtableView = tableView;
+            _placeheadView.heightChangeBlcok = ^{
+                [wtableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0]] withRowAnimation:UITableViewRowAnimationAutomatic];
+            };
+            _placeheadView.bannerView.sourceArr = [self controlBannerArr:_detailPicModel.banner];
+            [_placeheadView.bannerView iniSubviewsWithFrame:CGRectMake(0, 0,CGRectGetWidth(tableView.frame), _placeheadView.bannerHeight)];
+
 
         }
-
-//        _placeheadView.infoView.titleLabel.text = [NSString stringWithFormat:@"%@ %@",_detailPicModel.title,_detailPicModel.standard];
-//        _placeheadView.infoView.titleLabel.preferredMaxLayoutWidth = CGRectGetWidth(tableView.frame) - 16;
-//        _placeheadView.infoView.priceLabel.text = [NSString stringWithFormat:@"%@元",_detailPicModel.price];
-//        
-//       
-//        [_placeheadView updateConstraintsIfNeeded];
-//        [_placeheadView layoutIfNeeded];
-//        
-//        height = [_placeheadView systemLayoutSizeFittingSize:UILayoutFittingCompressedSize].height;
-        height = 317;
+        
+        _placeheadView.infoView.titleLabel.text = [NSString stringWithFormat:@"%@ %@",_detailPicModel.title,_detailPicModel.standard];
+        _placeheadView.infoView.titleLabel.preferredMaxLayoutWidth = CGRectGetWidth(tableView.frame) - 16;
+        _placeheadView.infoView.priceLabel.text = [NSString stringWithFormat:@"%@元",_detailPicModel.price];
+        
+       
+        [_placeheadView updateConstraintsIfNeeded];
+        [_placeheadView layoutIfNeeded];
+        
+        height = [_placeheadView systemLayoutSizeFittingSize:UILayoutFittingCompressedSize].height + 1;
+        //height = 317;
         
     }
     
@@ -466,8 +484,16 @@ static const int kTopExistCellNum = 1;
     if (oriUrl.length < 1) {
         return nil;
     }
-    
-    NSString *result = [oriUrl stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:kCommodityImgURLHeader];
+    NSString *result = @"";
+    NSString *pre = [oriUrl substringWithRange:NSMakeRange(0, 1)];
+    if ([pre isEqualToString:@"."]) {
+        result = [oriUrl stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:kCommodityImgURLHeader];
+
+    }
+    else
+    {
+        result = [NSString stringWithFormat:@"%@%@",kCommodityImgURLHeader,oriUrl];
+    }
     return result;
 }
 
@@ -478,6 +504,15 @@ static const int kTopExistCellNum = 1;
     }
     
     NSString *result = [NSString stringWithFormat:@"indexsec%ldrow%ld",(long)index.section,(long)index.row];
+    return result;
+}
+
+#pragma mark -
+#pragma mark 分享的地址 //http://ecommerce.news.cn/index.php?m=Item&a=index&cid=363&id=423
+- (NSString *)p_shareURLWithModel:(HSCommodityItemDetailPicModel *)model
+{
+    NSString *result = [NSString stringWithFormat:@"%@/index.php?m=Item&a=index&cid=%@&id=%@",kURLHeader,model.cate_id,model.id];
+    
     return result;
 }
 

@@ -181,7 +181,7 @@ static const int kPlaceViewTag = 5003;
     hud.yOffset = 150;
     hud.animationType = MBProgressHUDAnimationZoomOut;// | MBProgressHUDAnimationZoomIn;
     hud.removeFromSuperViewOnHide = YES;
-    [hud hide:YES afterDelay:2.0];
+    [hud hide:YES afterDelay:1.5];
 }
 
 

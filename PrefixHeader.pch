@@ -18,7 +18,7 @@
 #import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
 #import "AFNetworking.h"
-#import "public.h"
+#import "HSPublic.h"
 #import "define.h"
 #import "header.h"
 #import "HSBaseViewController.h"
@@ -29,7 +29,7 @@
 //#define kURLHeader@"http://221.226.28.42/wsc" // 前期测试服务器
 
 /// 商品详细介绍的图片
-#define kCommodityImgURLHeader @"http://203.192.7.23"
+#define kCommodityImgURLHeader @"http://ecommerce.news.cn" // @"http://203.192.7.23"
 
 
 /// 保存的版本

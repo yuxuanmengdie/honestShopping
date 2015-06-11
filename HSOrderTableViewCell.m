@@ -25,12 +25,12 @@
 
 - (void)setupWithModel:(HSOrderModel *)orderModel
 {
-    [_commodityImageView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,[public controlNullString:orderModel.img]]] placeholderImage:kPlaceholderImage];
+    [_commodityImageView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,[HSPublic controlNullString:orderModel.img]]] placeholderImage:kPlaceholderImage];
     
-    _orderIDLabel.text = [public controlNullString:orderModel.orderId];
-    _timeLabel.text = [public controlNullString:orderModel.add_time];
-    _priceLabel.text = [public controlNullString:orderModel.order_sumPrice];
-    _stateLabel.text = [public controlNullString:orderModel.status];
+    _orderIDLabel.text = [HSPublic controlNullString:orderModel.orderId];
+    _timeLabel.text = [HSPublic controlNullString:orderModel.add_time];
+    _priceLabel.text = [HSPublic controlNullString:orderModel.order_sumPrice];
+    _stateLabel.text = [HSPublic controlNullString:orderModel.status];
 
 }
 @end

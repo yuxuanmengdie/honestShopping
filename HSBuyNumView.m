@@ -32,12 +32,12 @@
     
 //    [_stepper setIncrementCallback:^(PKYStepper *stepper, float newValue){
 //        if (newValue > weakStepper.maximum) {
-//            [public showHudInWindowWithText:@"亲，不能在多了"];
+//            [HSPublic showHudInWindowWithText:@"亲，不能在多了"];
 //        }
 //    }];
 //    [_stepper setDecrementCallback:^(PKYStepper *stepper, float newValue){
 //        if (newValue < weakStepper.minimum) {
-//            [public showHudInWindowWithText:@"亲，不能在少了"];
+//            [HSPublic showHudInWindowWithText:@"亲，不能在少了"];
 //        }
 //    }];
     
@@ -48,7 +48,7 @@
     
     [_buyBtn setTitle:@"立刻购买" forState:UIControlStateNormal];
     [_buyBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [_buyBtn setBackgroundImage:[public ImageWithColor:kAppYellowColor] forState:UIControlStateNormal];
+    [_buyBtn setBackgroundImage:[HSPublic ImageWithColor:kAppYellowColor] forState:UIControlStateNormal];
     _buyBtn.layer.masksToBounds = YES;
     _buyBtn.layer.cornerRadius = 5.0;
     

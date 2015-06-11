@@ -230,7 +230,7 @@ static NSString *const kRemeberPassword = @"hs_remeberPassword";
 #pragma mark -
 #pragma mark 各平台的key
 static NSString *const kUMengAppKey = @"53290df956240b6b4a0084b3";//@"556e697267e58ee877007380"; /放心吃
-
+// APP ID:1104470651  APP KEY:1VATaXjYJuiJ0itg   URL schema qq41D4E27B
 
 
 #pragma mark -

@@ -51,8 +51,8 @@ static const int kTakePhoneAlertTag = 701;
 - (void)awakeFromNib
 {
     /// 每次进入程序都登录，更新sessioncode
-    if ([public isLoginInStatus]) {
-         [self loginRequest:[public lastUserName] password:[public lastPassword]];
+    if ([HSPublic isLoginInStatus]) {
+         [self loginRequest:[HSPublic lastUserName] password:[HSPublic lastPassword]];
     }
    
 }
@@ -98,8 +98,8 @@ static const int kTakePhoneAlertTag = 701;
 
 - (void)getLastetUserInfoModel
 {
-    if ([public isLoginInStatus]) {
-        NSDictionary *dic = [public userInfoFromPlist];
+    if ([HSPublic isLoginInStatus]) {
+        NSDictionary *dic = [HSPublic userInfoFromPlist];
         _userInfoModel = [[HSUserInfoModel alloc] initWithDictionary:dic error:nil];
     }
     else
@@ -113,13 +113,13 @@ static const int kTakePhoneAlertTag = 701;
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
-    if ([public isLoginInStatus]) {
+    if ([HSPublic isLoginInStatus]) {
         [self setNavBarRightBarWithTitle:@"退出帐号" action:@selector(loginOut)];
     }
 
     
     [self getLastetUserInfoModel];
-    if ([public isLoginInStatus]) {
+    if ([HSPublic isLoginInStatus]) {
         [self userInfoRequest:_userInfoModel.username phone:_userInfoModel.phone];
     }
     
@@ -156,13 +156,13 @@ static const int kTakePhoneAlertTag = 701;
 #pragma mark 登录请求
 - (void)loginRequest:(NSString *)userName password:(NSString *)passWord
 {
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonUserName:userName,
                                     kPostJsonPassWord:passWord
                                     };
     // 142346261  123456
     AFHTTPRequestOperationManager *manager = [[AFHTTPRequestOperationManager alloc] init];
-    [manager POST:kLoginURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [manager POST:kLoginURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         NSLog(@"success\n%@",operation.responseString);
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
@@ -178,7 +178,7 @@ static const int kTakePhoneAlertTag = 701;
             
             _userInfoModel = [[HSUserInfoModel alloc] initWithDictionary:json error:nil];
             if (_userInfoModel.id.length > 0) { /// 登录后返回有数据
-                [public saveUserInfoToPlist:[_userInfoModel toDictionary]];
+                [HSPublic saveUserInfoToPlist:[_userInfoModel toDictionary]];
             }
         }
         else
@@ -194,13 +194,13 @@ static const int kTakePhoneAlertTag = 701;
 - (void)userInfoRequest:(NSString *)userName phone:(NSString *)phone
 {
 
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonUserName:userName,
                                     kPostJsonPhone:phone
                                     };
     // 142346261  123456
     
-    [self.httpRequestOperationManager POST:kGetUserInfoURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [self.httpRequestOperationManager POST:kGetUserInfoURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         NSLog(@"success\n%@",operation.responseString);
         //[self showHudWithText:@"用户信息获取失败"];
         
@@ -219,7 +219,7 @@ static const int kTakePhoneAlertTag = 701;
             if (infoModel.sessionCode.length < 1) { /// 获取的信息 不包含session 保存下来
                 infoModel.sessionCode = _userInfoModel.sessionCode;
             }
-            [public saveUserInfoToPlist:[infoModel toDictionary]];
+            [HSPublic saveUserInfoToPlist:[infoModel toDictionary]];
             _userInfoModel = infoModel;
             [_mineCollectionView reloadData];
         }
@@ -236,11 +236,11 @@ static const int kTakePhoneAlertTag = 701;
 #pragma mark 签到
 - (void)signRequestWithUid:(NSString *)uid  sessionCode:(NSString *)sessionCode
 {
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonUid:uid,
                                     kPostJsonSessionCode:sessionCode
                                     };
-    [self.httpRequestOperationManager POST:kSignURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [self.httpRequestOperationManager POST:kSignURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         NSLog(@"success\n%@",operation.responseString);
         [self showHudWithText:@"签到失败"];
         
@@ -259,7 +259,7 @@ static const int kTakePhoneAlertTag = 701;
                 [self showHudInWindowWithText:@"签到成功"];
                 _userInfoModel.sign = isSign;
                 
-                if ([public isLoginInStatus]) {
+                if ([HSPublic isLoginInStatus]) {
                     [self userInfoRequest:_userInfoModel.username phone:_userInfoModel.phone];
                 }
 
@@ -324,7 +324,7 @@ static const int kTakePhoneAlertTag = 701;
         
         HSMineTopCollectionReusableView *view =  [collectionView dequeueReusableSupplementaryViewOfKind :kind   withReuseIdentifier:reuseIdentifier   forIndexPath:indexPath];
         [view signStatus:NO];
-        if ([public isLoginInStatus]) {
+        if ([HSPublic isLoginInStatus]) {
             [view welcomeText:_userInfoModel.username isLogin:YES];
             [view signStatus:_userInfoModel.sign];
         }
@@ -335,14 +335,14 @@ static const int kTakePhoneAlertTag = 701;
             
         }
         view.bgImageView.image = [UIImage imageNamed:@"icon_mine_headBg.jpg"];
-        view.pointsLabel.text = [NSString stringWithFormat:@"积分：%@",[public controlNullString:_userInfoModel.score]];
+        view.pointsLabel.text = [NSString stringWithFormat:@"积分：%@",[HSPublic controlNullString:_userInfoModel.score]];
         __weak typeof(self) wself = self;
         view.signBlock = ^{ /// 如果没登录  进入登录界面
             __strong typeof(wself) swself = wself;
             if (swself == nil) {
                 return ;
             }
-            if (![public isLoginInStatus]){ /// 没有登录 提示登录
+            if (![HSPublic isLoginInStatus]){ /// 没有登录 提示登录
                 [swself pushViewControllerWithIdentifer:NSStringFromClass([HSLoginInViewController class])];
                 return;
             }
@@ -377,7 +377,7 @@ static const int kTakePhoneAlertTag = 701;
 {
     [collectionView deselectItemAtIndexPath:indexPath animated:YES];
     
-    if (![public isLoginInStatus]){ /// 没有登录 提示登录
+    if (![HSPublic isLoginInStatus]){ /// 没有登录 提示登录
         [self pushViewControllerWithIdentifer:NSStringFromClass([HSLoginInViewController class])];
         return;
     }
@@ -455,7 +455,7 @@ static const int kTakePhoneAlertTag = 701;
     else if (alertView.tag == kLoginOutAlertTag)
     {
         if (buttonIndex == 1) { //退出帐号
-            [public setLoginOut];
+            [HSPublic setLoginOut];
             _userInfoModel = nil;
             [_mineCollectionView reloadData];
             self.navigationItem.rightBarButtonItem = nil;
@@ -493,7 +493,7 @@ static const int kTakePhoneAlertTag = 701;
 {
     if (indexPath.section == 0) {
         HSMineTopTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([HSMineTopTableViewCell class]) forIndexPath:indexPath];
-        if ([public isLoginInStatus]) {
+        if ([HSPublic isLoginInStatus]) {
             [cell welcomeText:_userInfoModel.username isLogin:YES];
             [cell signStatus:_userInfoModel.sign];
         }
@@ -509,7 +509,7 @@ static const int kTakePhoneAlertTag = 701;
             if (swself == nil) {
                 return ;
             }
-            if (![public isLoginInStatus]){ /// 没有登录 提示登录
+            if (![HSPublic isLoginInStatus]){ /// 没有登录 提示登录
                 [swself pushViewControllerWithIdentifer:NSStringFromClass([HSLoginInViewController class])];
                 return;
             }
@@ -557,7 +557,7 @@ static const int kTakePhoneAlertTag = 701;
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    if (![public isLoginInStatus]){ /// 没有登录 提示登录
+    if (![HSPublic isLoginInStatus]){ /// 没有登录 提示登录
         [self pushViewControllerWithIdentifer:NSStringFromClass([HSLoginInViewController class])];
         return;
     }

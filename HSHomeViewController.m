@@ -102,8 +102,8 @@ static const float kFFScrollViewHeight = 200;
 #pragma mark 获取banner 图片
 - (void)getBannerImages
 {
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]]};
-    [self.httpRequestOperationManager GET:kGetBannerURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]]};
+    [self.httpRequestOperationManager GET:kGetBannerURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSLog(@"JSON: %@", responseObject);
         [self getBannerImages];
         
@@ -153,8 +153,8 @@ static const float kFFScrollViewHeight = 200;
 - (void)getIndexItemRequest
 {
     [self showNetLoadingView];
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]]};
-    [self.httpRequestOperationManager POST:kGetIndexItemURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]]};
+    [self.httpRequestOperationManager POST:kGetIndexItemURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         [self hiddenMsg];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
        NSLog(@"%s failed\n%@",__func__,operation.responseString);
@@ -195,8 +195,8 @@ static const float kFFScrollViewHeight = 200;
 #pragma mark 获取优惠券列表
 - (void)couponListRequest
 {
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]]};
-    [self.httpRequestOperationManager POST:kGetCouponListURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]]};
+    [self.httpRequestOperationManager POST:kGetCouponListURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"%s failed\n%@",__func__,operation.responseString);
@@ -234,11 +234,11 @@ static const float kFFScrollViewHeight = 200;
 #pragma mark 领取优惠券
 - (void)blindCouponRequestWithUid:(NSString *)uid couponId:(NSString *)couponId sessionCode:(NSString *)sessionCode
 {
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonUid:uid,
                                     kPostJsonCouponId:couponId,
                                     kPostJsonSessionCode:sessionCode};
-    [self.httpRequestOperationManager POST:kBlindCouponWithUserURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [self.httpRequestOperationManager POST:kBlindCouponWithUserURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
          NSLog(@"%s failed\n%@",__func__,operation.responseString);
@@ -499,14 +499,14 @@ static const float kFFScrollViewHeight = 200;
     [collectionView deselectItemAtIndexPath:indexPath animated:YES];
     
     if (indexPath.section == 0) { /// 领取优惠券
-        if (![public isLoginInStatus]) {
+        if (![HSPublic isLoginInStatus]) {
             [self showHudWithText:@"请先登录"];
             return;
         }
         
         HSCouponModel *model = _couponDataArray[indexPath.row];
-        HSUserInfoModel *userModel = [[HSUserInfoModel alloc] initWithDictionary:[public userInfoFromPlist] error:nil];
-        [self blindCouponRequestWithUid:[public controlNullString:userModel.id] couponId:[public controlNullString:model.id] sessionCode:[public controlNullString:userModel.sessionCode]];
+        HSUserInfoModel *userModel = [[HSUserInfoModel alloc] initWithDictionary:[HSPublic userInfoFromPlist] error:nil];
+        [self blindCouponRequestWithUid:[HSPublic controlNullString:userModel.id] couponId:[HSPublic controlNullString:model.id] sessionCode:[HSPublic controlNullString:userModel.sessionCode]];
         
     }
    else

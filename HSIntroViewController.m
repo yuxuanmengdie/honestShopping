@@ -159,7 +159,7 @@ static const float kMaxLoadingTime = 5.0;
     _introView.skipButton.contentEdgeInsets = UIEdgeInsetsMake(5, 8, 5, 8);
     [_introView.skipButton setTitle:@"体验新版" forState:UIControlStateNormal];
     [_introView.skipButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [_introView.skipButton setBackgroundImage:[public ImageWithColor:kAPPTintColor] forState:UIControlStateNormal];
+    [_introView.skipButton setBackgroundImage:[HSPublic ImageWithColor:kAPPTintColor] forState:UIControlStateNormal];
     _introView.skipButton.layer.masksToBounds = YES;
     _introView.skipButton.layer.cornerRadius = 5.0;
 //    CGPoint center = CGPointMake(CGRectGetWidth(self.view.frame)/2.0, _introView.pageControlY - 40);
@@ -245,7 +245,7 @@ static const float kMaxLoadingTime = 5.0;
     NSMutableArray *tmp = [[NSMutableArray alloc] initWithCapacity:bannerArr.count];
     [bannerArr enumerateObjectsUsingBlock:^(HSBannerModel *obj, NSUInteger idx, BOOL *stop) {
         EAIntroPage *page = [EAIntroPage page];
-        NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kBannerImageHeaderURL,[public controlNullString:obj.content]]];
+        NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kBannerImageHeaderURL,[HSPublic controlNullString:obj.content]]];
         NSString *key = [[SDWebImageManager sharedManager] cacheKeyForURL:url];
         page.bgImage = [[SDImageCache sharedImageCache] imageFromDiskCacheForKey:key];
         [tmp addObject:page];
@@ -260,7 +260,7 @@ static const float kMaxLoadingTime = 5.0;
     _introView.skipButton.contentEdgeInsets = UIEdgeInsetsMake(5, 8, 5, 8);
     [_introView.skipButton setTitle:@"体验新版" forState:UIControlStateNormal];
     [_introView.skipButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [_introView.skipButton setBackgroundImage:[public ImageWithColor:kAPPTintColor] forState:UIControlStateNormal];
+    [_introView.skipButton setBackgroundImage:[HSPublic ImageWithColor:kAPPTintColor] forState:UIControlStateNormal];
     _introView.skipButton.layer.masksToBounds = YES;
     _introView.skipButton.layer.cornerRadius = 5.0;
     [_introView.skipButton sizeToFit];
@@ -286,7 +286,7 @@ static const float kMaxLoadingTime = 5.0;
         //_introView.scrollingEnabled = NO;
         _introView.tapToNext = YES;
         _introView.skipButton.hidden = YES;
-        _introView.swipeToExit = NO;
+        //_introView.swipeToExit = NO;
         [self welcomeAutoGo:_introView];
     }
 
@@ -296,11 +296,11 @@ static const float kMaxLoadingTime = 5.0;
 #pragma mark 引导图
 - (void)getGuideRequest
 {
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]]};
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]]};
     // 142346261  123456
     
     AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
-    [manager POST:kGetGuideURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [manager POST:kGetGuideURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         NSLog(@"success\n%@",operation.responseString);
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"%s failed\n%@",__func__,operation.responseString);
@@ -335,10 +335,10 @@ static const float kMaxLoadingTime = 5.0;
 - (void)getWelcomeRequest
 {
     
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]]};
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]]};
     // 142346261  123456
     AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
-    [manager POST:kGetWelcomeURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [manager POST:kGetWelcomeURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         NSLog(@"success\n%@",operation.responseString);
         
         
@@ -379,7 +379,7 @@ static const float kMaxLoadingTime = 5.0;
     }
     
     [bannerArr enumerateObjectsUsingBlock:^(HSBannerModel *obj, NSUInteger idx, BOOL *stop) {
-        NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kBannerImageHeaderURL,[public controlNullString:obj.content]]];
+        NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kBannerImageHeaderURL,[HSPublic controlNullString:obj.content]]];
         BOOL isCache = [[SDWebImageManager sharedManager] cachedImageExistsForURL:url];
         if (!isCache) {
             [self downloadImageWihtURL:url arr:bannerArr];
@@ -417,7 +417,7 @@ static const float kMaxLoadingTime = 5.0;
     __block BOOL isSuc = YES;
     
     [bannerArr enumerateObjectsUsingBlock:^(HSBannerModel *obj, NSUInteger idx, BOOL *stop) {
-        NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kBannerImageHeaderURL,[public controlNullString:obj.content]]];
+        NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kBannerImageHeaderURL,[HSPublic controlNullString:obj.content]]];
         BOOL isCache = [[SDWebImageManager sharedManager] cachedImageExistsForURL:url];
         if (!isCache) {
             isSuc = NO;

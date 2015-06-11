@@ -88,7 +88,7 @@
     _verifyButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [_verifyButton setTitle:@"验证" forState:UIControlStateNormal];
     [_verifyButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [_verifyButton setBackgroundImage:[public ImageWithColor:kAPPTintColor] forState:UIControlStateNormal];
+    [_verifyButton setBackgroundImage:[HSPublic ImageWithColor:kAPPTintColor] forState:UIControlStateNormal];
     _verifyButton.titleLabel.font = [UIFont systemFontOfSize:14];
     _verifyButton.layer.masksToBounds = YES;
     _verifyButton.layer.cornerRadius = 5.0;

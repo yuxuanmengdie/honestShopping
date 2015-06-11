@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 #import "FMDatabase.h"
 
-
 @interface HSDBManager : NSObject
 
 /****/
@@ -75,4 +74,17 @@
 + (NSMutableArray *)selectAllWithTableName:(NSString *)tableName;
 
 
+#pragma mark -
+#pragma mark 收藏的数据表
++ (NSString *)tableNameFavoriteWithUid;
+
++ (BOOL)saveFavoriteWithTableName:(NSString *)tableName keyID:(NSString *)keyID;
+
++ (BOOL)saveFavoriteArrayWithTableName:(NSString *)tableName arr:(NSArray *)keyArr;
+
++ (NSString *)selectFavoritetemWithTableName:(NSString *)tableName keyID:(NSString *)keyID;
+
++ (BOOL)deleteFavoriteItemWithTableName:(NSString *)tableName keyID:(NSString *)keyID;
+
++ (NSMutableArray *)selectFavoriteAllWithTableName:(NSString *)tableName;
 @end

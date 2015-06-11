@@ -25,10 +25,10 @@
 {
     [_couponImageView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kCoupImageHeaderURL,couponModle.img]] placeholderImage:kPlaceholderImage];
     
-    _validDateLabel.text = [public controlNullString:couponModle.endtime];
-    _dateLabel.text = [public controlNullString:couponModle.starttime];
-    _introLabel.text = [public controlNullString:couponModle.desc];
-    _explainLabel.text = [public controlNullString:couponModle.name];
+    _validDateLabel.text = [HSPublic controlNullString:couponModle.endtime];
+    _dateLabel.text = [HSPublic controlNullString:couponModle.starttime];
+    _introLabel.text = [HSPublic controlNullString:couponModle.desc];
+    _explainLabel.text = [HSPublic controlNullString:couponModle.name];
 }
 
 @end

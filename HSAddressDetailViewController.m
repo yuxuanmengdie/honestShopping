@@ -74,7 +74,7 @@ UITableViewDataSource>
     _confirmButton = button;
     button.contentEdgeInsets = UIEdgeInsetsMake(8, 16, 8, 16);
     [button setTitle:@"设置为默认收货地址" forState:UIControlStateNormal];
-    [button setBackgroundImage:[public ImageWithColor:kAPPTintColor] forState:UIControlStateNormal];
+    [button setBackgroundImage:[HSPublic ImageWithColor:kAPPTintColor] forState:UIControlStateNormal];
     [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     button.titleLabel.font = [UIFont systemFontOfSize:16];
     button.layer.masksToBounds = YES;
@@ -92,14 +92,14 @@ UITableViewDataSource>
 #pragma mark 修改默认地址的响应
 - (void)confirmAction
 {
-    [self defaultAddressRequestWithUid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode] add_id:_addressModel.id];
+    [self defaultAddressRequestWithUid:[HSPublic controlNullString:_userInfoModel.id] sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode] add_id:_addressModel.id];
 }
 
 #pragma mark -
 #pragma mark 地址内容信息 构造成数组
 - (void)contentDataInitWithAddressModel:(HSAddressModel *)model
 {
-    _contentDataArray = @[[public controlNullString:model.consignee],[public controlNullString:model.mobile],[NSString stringWithFormat:@"%@%@%@",[public controlNullString:model.sheng],[public controlNullString:model.shi],[public controlNullString:model.qu]],[public controlNullString:model.address]];
+    _contentDataArray = @[[HSPublic controlNullString:model.consignee],[HSPublic controlNullString:model.mobile],[NSString stringWithFormat:@"%@%@%@",[HSPublic controlNullString:model.sheng],[HSPublic controlNullString:model.shi],[HSPublic controlNullString:model.qu]],[HSPublic controlNullString:model.address]];
 }
 
 #pragma mark -
@@ -128,12 +128,12 @@ UITableViewDataSource>
 - (void)defaultAddressRequestWithUid:(NSString *)uid sessionCode:(NSString *)sessionCode add_id:(NSString *)add_id
 {
     [self showhudLoadingInWindowWithText:@"设置中..." isDimBackground:YES];
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonUid:uid,
                                     kPostJsonAddId:add_id,
                                     kPostJsonSessionCode:sessionCode
                                     };
-    [self.httpRequestOperationManager POST:kSetDefaultAddressURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [self.httpRequestOperationManager POST:kSetDefaultAddressURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         [self hiddenHudLoading];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"%s failed\n%@",__func__,operation.responseString);

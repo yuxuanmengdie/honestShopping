@@ -132,7 +132,7 @@ static const int kAdsCellImageViewTag = 600;
         }
         
         
-        [wself dataRequestWithWithCid:_cateID size:kSizeNum key:[public md5Str:[public getIPAddress:YES]] page:_itemsData.count/kSizeNum + 1];
+        [wself dataRequestWithWithCid:_cateID size:kSizeNum key:[HSPublic md5Str:[HSPublic getIPAddress:YES]] page:_itemsData.count/kSizeNum + 1];
     }];
     _isAdsLoding = NO;
     
@@ -146,7 +146,7 @@ static const int kAdsCellImageViewTag = 600;
     LogFunc;
     [_commdityCollectionView reloadData];
     if (_adsData.count == 0 && !_isAdsLoding) {
-        [self adsRequestWithCid:_cateID key:[public md5Str:[public getIPAddress:YES]]];
+        [self adsRequestWithCid:_cateID key:[HSPublic md5Str:[HSPublic getIPAddress:YES]]];
     }
     
     if (_itemsData.count == 0 && !_commdityCollectionView.footer.isRefreshing) { /// 数据为空 并且 不在刷新
@@ -253,8 +253,8 @@ static const int kAdsCellImageViewTag = 600;
                                     kPostJsonSize:[NSNumber numberWithInteger:size],
                                     kPostJsonPage:[NSNumber numberWithInteger:page]};
     
-    [self.httpRequestOperationManager POST:kGetItemsByCateURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
-        NSLog(@"JSON: %@/n %@", responseObject,[public dictionaryToJson:parametersDic]);
+    [self.httpRequestOperationManager POST:kGetItemsByCateURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSLog(@"JSON: %@/n %@", responseObject,[HSPublic dictionaryToJson:parametersDic]);
        [_commdityCollectionView.footer endRefreshing];
         
         
@@ -308,8 +308,8 @@ static const int kAdsCellImageViewTag = 600;
                                     kPostJsonCid:[NSNumber numberWithLongLong:[cid longLongValue]],
                                   };
     
-    [self.httpRequestOperationManager POST:kGetAdsByCateURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
-        NSLog(@"JSON: %@/n %@", responseObject,[public dictionaryToJson:parametersDic]);
+    [self.httpRequestOperationManager POST:kGetAdsByCateURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSLog(@"JSON: %@/n %@", responseObject,[HSPublic dictionaryToJson:parametersDic]);
         _isAdsLoding = NO;
         
         

@@ -10,6 +10,7 @@
 #import "HSFavoriteTableViewCell.h"
 
 #import "HSCommodtyItemModel.h"
+#import "HSDBManager.h"
 
 @interface HSMineFavoriteViewController ()<UITableViewDataSource,
 UITableViewDelegate>
@@ -32,7 +33,7 @@ UITableViewDelegate>
     _favoriteTableView.dataSource = self;
     _favoriteTableView.delegate = self;
 
-    [self favoriteRequestWithUid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
+    [self favoriteRequestWithUid:[HSPublic controlNullString:_userInfoModel.id] sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode]];
 
 }
 
@@ -56,11 +57,11 @@ UITableViewDelegate>
 - (void)favoriteRequestWithUid:(NSString *)uid sessionCode:(NSString *)sessionCode
 {
     [self showNetLoadingView];
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonUid:uid,
                                     kPostJsonSessionCode:sessionCode
                                     };
-    [self.httpRequestOperationManager POST:kGetFavoriteURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [self.httpRequestOperationManager POST:kGetFavoriteURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         [self hiddenMsg];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"%s failed\n%@",__func__,operation.responseString);
@@ -74,14 +75,16 @@ UITableViewDelegate>
         if (jsonError == nil && [json isKindOfClass:[NSArray class]]) {
             NSArray *jsonArr = (NSArray *)json;
             NSMutableArray *tmp = [[NSMutableArray alloc] initWithCapacity:jsonArr.count];
-            
+            NSMutableArray *dbArr = [[NSMutableArray alloc] initWithCapacity:jsonArr.count];
+            [HSDBManager deleteTableName:[HSDBManager tableNameFavoriteWithUid]];
             [jsonArr enumerateObjectsUsingBlock:^(NSDictionary *obj, NSUInteger idx, BOOL *stop) {
                 @autoreleasepool {
                     HSCommodtyItemModel *itemModel = [[HSCommodtyItemModel alloc] initWithDictionary:obj error:nil];
                     [tmp addObject:itemModel];
+                    [dbArr addObject:itemModel.id];
                 }
             }];
-            
+            [HSDBManager saveFavoriteArrayWithTableName:[HSDBManager tableNameFavoriteWithUid] arr:dbArr];
             _favoriteDataArray = tmp;
             [_favoriteTableView reloadData];
             
@@ -96,7 +99,7 @@ UITableViewDelegate>
 
 - (void)reloadRequestData
 {
-    [self favoriteRequestWithUid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
+    [self favoriteRequestWithUid:[HSPublic controlNullString:_userInfoModel.id] sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode]];
 
 }
 

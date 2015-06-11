@@ -63,7 +63,7 @@
     _confirmButton = button;
     button.contentEdgeInsets = UIEdgeInsetsMake(8, 16, 8, 16);
     [button setTitle:@"确定" forState:UIControlStateNormal];
-    [button setBackgroundImage:[public ImageWithColor:kAPPTintColor] forState:UIControlStateNormal];
+    [button setBackgroundImage:[HSPublic ImageWithColor:kAPPTintColor] forState:UIControlStateNormal];
     [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     button.titleLabel.font = [UIFont systemFontOfSize:16];
     button.layer.masksToBounds = YES;

@@ -130,14 +130,14 @@ static const int kSizeNum = 10;
 - (void)searchRequest:(NSString *)keyWord page:(int)page size:(int)size isMore:(BOOL)isMore
 {
     [self showhudLoadingWithText:nil isDimBackground:YES];
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonPage:[NSNumber numberWithInt:page],
                                     kPostJsonSize:[NSNumber numberWithInt:size],
                                     kPostJsonKeyWord:keyWord
                                     };
     // 142346261  123456
     
-    [self.httpRequestOperationManager POST:kGetSearchListURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [self.httpRequestOperationManager POST:kGetSearchListURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         NSLog(@"success\n%@",operation.responseString);
         [self hiddenHudLoading];
         

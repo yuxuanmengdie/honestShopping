@@ -61,22 +61,22 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
     [self leftViewWithTextFiled:_userNameTextField imgName:kUserImageName];
     [self leftViewWithTextFiled:_passWordTextFiled imgName:kPassWordImageName];
     
-    if ([public loginType] == kAccountLoginType) { /// 帐号登录
-        _userNameTextField.text = [public controlNullString:[public lastUserName]];
+    if ([HSPublic loginType] == kAccountLoginType) { /// 帐号登录
+        _userNameTextField.text = [HSPublic controlNullString:[HSPublic lastUserName]];
         
-        if ([public isRemeberPassword]) {
-            _passWordTextFiled.text = [public controlNullString:[public lastPassword]];
+        if ([HSPublic isRemeberPassword]) {
+            _passWordTextFiled.text = [HSPublic controlNullString:[HSPublic lastPassword]];
         }
     }
     
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     NSNumber *result = [userDefaults objectForKey:kRemeberPassword];
     if (result == nil) {
-        [public setRemeberPassword:YES];
+        [HSPublic setRemeberPassword:YES];
     }
     else
     {
-        _remeberPWButton.selected = [public isRemeberPassword];
+        _remeberPWButton.selected = [HSPublic isRemeberPassword];
     }
 
 
@@ -149,7 +149,7 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
     [_findPWButton setImage:[UIImage imageNamed:kPassWordImageName] forState:UIControlStateNormal];
     
     [_commitButton setTitle:@"登录" forState:UIControlStateNormal];
-    [_commitButton setBackgroundImage:[public ImageWithColor:kAPPTintColor] forState:UIControlStateNormal];
+    [_commitButton setBackgroundImage:[HSPublic ImageWithColor:kAPPTintColor] forState:UIControlStateNormal];
     _commitButton.layer.masksToBounds = YES;
     _commitButton.layer.cornerRadius = 5.0;
     [_commitButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
@@ -170,7 +170,7 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
 
 - (IBAction)remeberPWAction:(id)sender {
     _remeberPWButton.selected = !_remeberPWButton.selected;
-    [public setRemeberPassword:_remeberPWButton.isSelected];
+    [HSPublic setRemeberPassword:_remeberPWButton.isSelected];
 }
 
 - (IBAction)findPWAction:(id)sender {
@@ -196,13 +196,13 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
 - (void)loginRequest:(NSString *)userName password:(NSString *)passWord
 {
     [self showhudLoadingWithText:@"正在登录..." isDimBackground:YES];
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonUserName:userName,
                                     kPostJsonPassWord:passWord
                                     };
     // 142346261  123456
     
-    [self.httpRequestOperationManager POST:kLoginURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [self.httpRequestOperationManager POST:kLoginURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         NSLog(@"success\n%@",operation.responseString);
         [self showHudWithText:@"登录失败"];
         [self hiddenHudLoading];
@@ -221,11 +221,11 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
             _userInfoModel = [[HSUserInfoModel alloc] initWithDictionary:json error:nil];
             if (_userInfoModel.id.length > 0) { /// 登录后返回有数据
                 [self showHudInWindowWithText:@"登录成功"];
-                [public saveUserInfoToPlist:[_userInfoModel toDictionary]];
-                [public setLoginInStatus:YES type:kAccountLoginType];
+                [HSPublic saveUserInfoToPlist:[_userInfoModel toDictionary]];
+                [HSPublic setLoginInStatus:YES type:kAccountLoginType];
                 
-                [public saveLastUserName:userName];
-                [public saveLastPassword:passWord];
+                [HSPublic saveLastUserName:userName];
+                [HSPublic saveLastPassword:passWord];
                 if (_remeberPWButton.selected) {
                     
                 }
@@ -332,12 +332,12 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
 - (void)loginInWithOtherID:(NSString *)openID type:(HSLoginType)loginType
 {
     [self showhudLoadingWithText:@"正在登录..." isDimBackground:YES];
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonOpenid:openID
                                     };
     // 142346261  123456
     
-    [self.httpRequestOperationManager POST:kWeixinLoginURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [self.httpRequestOperationManager POST:kWeixinLoginURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         NSLog(@"success\n%@",operation.responseString);
         [self showHudWithText:@"登录失败"];
         [self hiddenHudLoading];
@@ -356,11 +356,11 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
             _userInfoModel = [[HSUserInfoModel alloc] initWithDictionary:json error:nil];
             if (_userInfoModel.id.length > 0) { /// 登录后返回有数据
                 [self showHudInWindowWithText:@"登录成功"];
-//                [public saveUserInfoToPlist:[_userInfoModel toDictionary]];
-                [public setLoginInStatus:YES type:loginType];
+//                [HSPublic saveUserInfoToPlist:[_userInfoModel toDictionary]];
+                [HSPublic setLoginInStatus:YES type:loginType];
                 
-//                [public saveLastUserName:userName];
-//                [public saveLastPassword:passWord];
+//                [HSPublic saveLastUserName:userName];
+//                [HSPublic saveLastPassword:passWord];
                 if (_remeberPWButton.selected) {
                     
                 }

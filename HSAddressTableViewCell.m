@@ -28,7 +28,7 @@
         _detailLabel.textColor = [UIColor whiteColor];
         _defaultImageView.hidden = NO;
         self.contentView.backgroundColor = kAPPTintColor;
-        _detailLabel.text = [NSString stringWithFormat:@"[默认]%@", [public controlNullString:_detailLabel.text]];
+        _detailLabel.text = [NSString stringWithFormat:@"[默认]%@", [HSPublic controlNullString:_detailLabel.text]];
     }
     else
     {
@@ -43,9 +43,9 @@
 
 - (void)setupWithModel:(HSAddressModel *)addressModel
 {
-    _nickNameLabel.text = [public controlNullString:addressModel.consignee];
-    _phoneLabel.text = [public controlNullString:addressModel.mobile];
-    _detailLabel.text = [NSString stringWithFormat:@"%@%@%@%@",[public controlNullString:addressModel.sheng],[public controlNullString:addressModel.shi],[public controlNullString:addressModel.qu],[public controlNullString:addressModel.address]];
+    _nickNameLabel.text = [HSPublic controlNullString:addressModel.consignee];
+    _phoneLabel.text = [HSPublic controlNullString:addressModel.mobile];
+    _detailLabel.text = [NSString stringWithFormat:@"%@%@%@%@",[HSPublic controlNullString:addressModel.sheng],[HSPublic controlNullString:addressModel.shi],[HSPublic controlNullString:addressModel.qu],[HSPublic controlNullString:addressModel.address]];
     BOOL isDefault = [addressModel.is_default isEqualToString:@"1"];
     [self addressIsDefault:isDefault];
     

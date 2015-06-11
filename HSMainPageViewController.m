@@ -69,7 +69,7 @@ static NSString *const kCategariesCollectionViewCellIdentifier = @"CommodityCell
 
 static NSString *const kContentCollectionViewIdentifier = @"contentCollectionViewIdentifier";
 
-static const float kFFScrollViewHeight = 200;
+//static const float kFFScrollViewHeight = 200;
 //static const float kItemSize = 10;
 
 static const int kContentViewTag = 1000;
@@ -438,8 +438,8 @@ static const int kContentViewTag = 1000;
 //    NSDictionary *dic = @{@"1":@"2"};
 //    NSLog(@";;;;;%@",[self dictionaryToJson:dic]);
     //@"{\"key\":\"f528764d624db129b32c21fbca0cb8d6\"}"
-    NSDictionary *parametersDic = @{@"key":[public md5Str:[public getIPAddress:YES]]};
-    [self.httpRequestOperationManager POST:kGetCateURL parameters:@{@"JsonArray":[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+    NSDictionary *parametersDic = @{@"key":[HSPublic md5Str:[HSPublic getIPAddress:YES]]};
+    [self.httpRequestOperationManager POST:kGetCateURL parameters:@{@"JsonArray":[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSLog(@"JSON: %@", responseObject);
         [self showReqeustFailedMsg];
         
@@ -495,8 +495,8 @@ static const int kContentViewTag = 1000;
     //    NSDictionary *dic = @{@"1":@"2"};
     //    NSLog(@";;;;;%@",[self dictionaryToJson:dic]);
     //@"{\"key\":\"f528764d624db129b32c21fbca0cb8d6\"}"
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]]};
-    [self.httpRequestOperationManager GET:kGetBannerURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]]};
+    [self.httpRequestOperationManager GET:kGetBannerURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSLog(@"JSON: %@", responseObject);
         [self getBannerImages];
         
@@ -559,8 +559,8 @@ static const int kContentViewTag = 1000;
                                     kPostJsonSize:[NSNumber numberWithInteger:size],
                                     kPostJsonPage:[NSNumber numberWithInteger:page]};
     
-    [self.httpRequestOperationManager POST:kGetItemsByCateURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
-        NSLog(@"JSON: %@/n %@", responseObject,[public dictionaryToJson:parametersDic]);
+    [self.httpRequestOperationManager POST:kGetItemsByCateURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSLog(@"JSON: %@/n %@", responseObject,[HSPublic dictionaryToJson:parametersDic]);
         
         NSString *str = (NSString *)responseObject;
         NSData *data =  [str dataUsingEncoding:NSUTF8StringEncoding];
@@ -570,7 +570,7 @@ static const int kContentViewTag = 1000;
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"response=%@",operation.responseString);
-         NSLog(@"JSON:  %@",[public dictionaryToJson:parametersDic]);
+         NSLog(@"JSON:  %@",[HSPublic dictionaryToJson:parametersDic]);
         NSString *str = (NSString *)operation.responseString;
         
         NSData *data =  [str dataUsingEncoding:NSUTF8StringEncoding];

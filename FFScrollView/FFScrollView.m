@@ -25,6 +25,7 @@ static const float kTimerInterval = 5.0;
     if (self) {
         selectionType = FFScrollViewSelecttionTypeTap;
         _imageContentMode = UIViewContentModeScaleToFill;
+        _isFirstLoad = NO;
     }
     return self;
 }
@@ -36,6 +37,7 @@ static const float kTimerInterval = 5.0;
     if (self) {
         selectionType = FFScrollViewSelecttionTypeTap;
         sourceArr = views;
+        _isFirstLoad = NO;
         self.userInteractionEnabled = YES;
         [self iniSubviewsWithFrame:frame];
     }
@@ -46,6 +48,10 @@ static const float kTimerInterval = 5.0;
 {
     if (sourceArr.count < 1) {
         return;
+    }
+    
+    for (UIView *sub in self.scrollView.subviews) {
+        [sub removeFromSuperview];
     }
     
     
@@ -61,16 +67,26 @@ static const float kTimerInterval = 5.0;
     self.scrollView.showsHorizontalScrollIndicator = NO;
     [self addSubview:self.scrollView];
     
+    __weak typeof(self) wself = self;
     NSString *lastModel = [sourceArr lastObject];
     UIImageView *firstImageView = [[UIImageView alloc]initWithFrame:fitRect];
-    [firstImageView sd_setImageWithURL:[NSURL URLWithString:lastModel]];
+    firstImageView.contentMode = _imageContentMode;
+    [firstImageView sd_setImageWithURL:[NSURL URLWithString:lastModel] placeholderImage:kPlaceholderImage completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+        if (image) {
+            [wself p_imageLoadFinished:[wself p_imageViewHeightWithWid:width imageSize:image.size]];
+        }
+    }];
     [self.scrollView addSubview:firstImageView];
     
     for (int i = 0; i < sourceArr.count; i++) {
         UIImageView *imageview = [[UIImageView alloc]initWithFrame:CGRectMake(width*(i+1), 0, width, height)];
         imageview.contentMode = _imageContentMode;
         NSString *model = [sourceArr objectAtIndex:i];
-        [imageview sd_setImageWithURL:[NSURL URLWithString:model]];
+        [imageview sd_setImageWithURL:[NSURL URLWithString:model] placeholderImage:kPlaceholderImage completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+            if (image) {
+                [wself p_imageLoadFinished:[wself p_imageViewHeightWithWid:width imageSize:image.size]];
+            }
+        }];
 //       imageview.image = [UIImage imageNamed:model.img];
         [self.scrollView addSubview:imageview];
         
@@ -78,7 +94,12 @@ static const float kTimerInterval = 5.0;
     
     NSString *firstModel = [sourceArr firstObject];
     UIImageView *lastImageView = [[UIImageView alloc]initWithFrame:CGRectMake(width*(sourceArr.count+1), 0, width, height)];
-    [lastImageView sd_setImageWithURL:[NSURL URLWithString:firstModel]];
+    lastImageView.contentMode = _imageContentMode;
+    [lastImageView sd_setImageWithURL:[NSURL URLWithString:firstModel] placeholderImage:kPlaceholderImage completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+        if (image) {
+            [wself p_imageLoadFinished:[wself p_imageViewHeightWithWid:width imageSize:image.size]];
+        }
+    }];
     [self.scrollView addSubview:lastImageView];
     
     self.pageControl = [[UIPageControl alloc]initWithFrame:CGRectMake(0, height-30, width, 30)];
@@ -99,9 +120,13 @@ static const float kTimerInterval = 5.0;
     
     timer = [NSTimer scheduledTimerWithTimeInterval:kTimerInterval target:self selector:@selector(nextPage:) userInfo:nil repeats:YES];
     
-    UITapGestureRecognizer *singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(singleTap:)];
-    singleTap.numberOfTapsRequired = 1;
-    [self addGestureRecognizer:singleTap];
+    if (_singleTap == nil) {
+        UITapGestureRecognizer *singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(singleTap:)];
+        _singleTap = singleTap;
+        singleTap.numberOfTapsRequired = 1;
+        [self addGestureRecognizer:singleTap];
+
+    }
 }
 
 #pragma mark --- custom methods
@@ -184,7 +209,44 @@ static const float kTimerInterval = 5.0;
     //拖动完毕的时候 重新开始计时器控制跳转
     timer = [NSTimer scheduledTimerWithTimeInterval:kTimerInterval target:self selector:@selector(nextPage:) userInfo:nil repeats:YES];
     
+}
+
+#pragma mark -
+#pragma mark 计算image的高度
+- (CGFloat)p_imageViewHeightWithWid:(float)width imageSize:(CGSize)imgSize
+{
+    float hei = 0.0;
+    if (imgSize.width == 0) {
+        hei = 0.0;
     }
+    else
+    {
+        hei = (float)width * ((float)imgSize.height / imgSize.width);
+    }
+    return hei;
+}
+
+- (void)p_imageLoadFinished:(float)height
+{
+    if (!_isFirstLoad && self.heightBlock && height > 0.0) {
+        _isFirstLoad = YES;
+        self.heightBlock(height);
+        
+        CGRect scrollFrame = self.scrollView.frame;
+        scrollFrame.size.height = height;
+        self.scrollView.frame = scrollFrame;
+        
+        for (UIView *sub in self.scrollView.subviews) {
+            CGRect frame = sub.frame;
+            frame.size.height = height;
+            sub.frame = frame;
+        }
+        
+        CGRect frame = self.pageControl.frame;
+        frame.size.height = height - 30;
+        self.pageControl.frame = frame;
+    }
+}
 
 - (void)dealloc
 {

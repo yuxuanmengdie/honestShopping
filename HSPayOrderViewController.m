@@ -21,9 +21,11 @@
 
 #import "HSCommodityItemDetailPicModel.h"
 #import "HSOrderModel.h"
+#import "payRequsestHandler.h"
+#import "WXApi.h"
 
 @interface HSPayOrderViewController ()<UITableViewDataSource,
-UITableViewDelegate>
+UITableViewDelegate,WXApiDelegate>
 {
     
     NSArray *_commdityDataArray;
@@ -61,7 +63,7 @@ UITableViewDelegate>
     _orderDetailTableView.delegate = self;
 
 //    [self setupSettleView];
-    [self getOrderDetailRequest:[public controlNullString:_userInfoModel.id] orderID:[public controlNullString:_orderID] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
+    [self getOrderDetailRequest:[HSPublic controlNullString:_userInfoModel.id] orderID:[HSPublic controlNullString:_orderID] sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode]];
     
     _settleView.hidden = YES;
     
@@ -84,6 +86,13 @@ UITableViewDelegate>
     
     _settleView.settleBlock = ^{
        // [wself aliPay];
+        __strong typeof(wself) swself = wself;
+        if (_payType == 0) {
+            [swself aliPayWithOrderModel:swself->_orderModel title:[HSPublic controlNullString:[swself productName:swself->_orderModel]] desc:[HSPublic controlNullString:[swself productName:swself->_orderModel]]];
+        }else
+        {
+            [swself weixinPay:swself->_orderModel];
+        }
     };
 }
 
@@ -92,14 +101,14 @@ UITableViewDelegate>
 - (void)getOrderDetailRequest:(NSString *)uid orderID:(NSString *)orderID sessionCode:(NSString *)sessionCode
 {
     [self showNetLoadingView];
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonUid:uid,
                                     kPostJsonOrderId:orderID,
                                     kPostJsonSessionCode:sessionCode
                                     };
     // 142346261  123456
     
-    [self.httpRequestOperationManager POST:kGetOrderDetailURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [self.httpRequestOperationManager POST:kGetOrderDetailURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         NSLog(@"success\n%@",operation.responseString);
         
         [self hiddenMsg];
@@ -135,7 +144,7 @@ UITableViewDelegate>
 #pragma mark 重新请求
 - (void)reloadRequestData
 {
-    [self getOrderDetailRequest:[public controlNullString:_userInfoModel.id] orderID:[public controlNullString:_orderID] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
+    [self getOrderDetailRequest:[HSPublic controlNullString:_userInfoModel.id] orderID:[HSPublic controlNullString:_orderID] sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode]];
 
 }
 
@@ -164,7 +173,7 @@ UITableViewDelegate>
 //    __block float total = 0.0;
 //    [_commdityDataArray enumerateObjectsUsingBlock:^(HSCommodityItemDetailPicModel *obj, NSUInteger idx, BOOL *stop) {
 //        
-//        NSString *cid = [public controlNullString:obj.id];
+//        NSString *cid = [HSPublic controlNullString:obj.id];
 //        NSNumber *num = _itemNumDic[cid];
 //        int count = [num intValue] < 0 ? 0 : [num intValue];
 //        float price = [obj.price floatValue] < 0 ? 0: [obj.price floatValue];
@@ -188,7 +197,7 @@ UITableViewDelegate>
 #pragma mark -
 #pragma mark 支付宝支付
 
-- (void)aliPay
+- (void)aliPayWithOrderModel:(HSOrderModel *)orderModel title:(NSString *)title desc:(NSString *)desc
 {
     /*
      *点击获取prodcut实例并初始化订单信息
@@ -231,9 +240,9 @@ UITableViewDelegate>
     Order *order = [[Order alloc] init];
     order.partner = partner;
     order.seller = seller;
-    order.tradeNO = @"1sdwdw";//[self generateTradeNO]; //订单ID（由商家自行制定）
-    order.productName = @"商品";//product.subject; //商品标题
-    order.productDescription = @"这是一个描述";//product.body; //商品描述
+    order.tradeNO = _orderModel.orderId;//[self generateTradeNO]; //订单ID（由商家自行制定）
+    order.productName = title;//product.subject; //商品标题
+    order.productDescription = desc;//product.body; //商品描述
     order.amount = @"0.01";//[NSString stringWithFormat:@"%.2f",product.price]; //商品价格
     order.notifyURL =  @"http://www.xxx.com"; //回调URL
     
@@ -268,8 +277,148 @@ UITableViewDelegate>
 
 }
 
+#pragma mark - 
+#pragma mark 微信支付
+- (void)weixinPay:(HSOrderModel *)model
+{
+    //本实例只是演示签名过程， 请将该过程在商户服务器上实现
+    
+    //创建支付签名对象
+    payRequsestHandler *req = [payRequsestHandler alloc] ;
+    //初始化支付签名对象
+    [req init:APP_ID mch_id:MCH_ID];
+    //设置密钥
+    [req setKey:PARTNER_ID];
+    
+    //}}}
+    
+    //获取到实际调起微信支付的参数后，在app端调起支付
+    NSMutableDictionary *dict =  [self wenxinPayInfo:req model:model];//[req sendPay_demo];
+    
+    if(dict == nil){
+        //错误提示
+        NSString *debug = [req getDebugifo];
+        
+        [self alert:@"提示信息" msg:debug];
+        
+        NSLog(@"%@\n\n",debug);
+    }else{
+        NSLog(@"%@\n\n",[req getDebugifo]);
+        //[self alert:@"确认" msg:@"下单成功，点击OK后调起支付！"];
+        
+        NSMutableString *stamp  = [dict objectForKey:@"timestamp"];
+        
+        //调起微信支付
+        PayReq* req             = [[PayReq alloc] init];
+        req.openID              = [dict objectForKey:@"appid"];
+        req.partnerId           = [dict objectForKey:@"partnerid"];
+        req.prepayId            = [dict objectForKey:@"prepayid"];
+        req.nonceStr            = [dict objectForKey:@"noncestr"];
+        req.timeStamp           = stamp.intValue;
+        req.package             = [dict objectForKey:@"package"];
+        req.sign                = [dict objectForKey:@"sign"];
+        
+        [WXApi sendReq:req];
+    }
+
+}
+
 #pragma mark -
-#pragma mark
+#pragma mark 返回微信参数
+- (NSMutableDictionary *)wenxinPayInfo:(payRequsestHandler *)payRequsestHandler model:(HSOrderModel *)model
+{
+    
+    //订单标题，展示给用户
+    NSString *order_name    =  [self productName:model];//@"V3支付测试";
+    //订单金额,单位（分）
+    NSString *order_price   = @"1";//1分钱测试
+    
+    
+    //================================
+    //预付单参数订单设置
+    //================================
+    srand( (unsigned)time(0) );
+    NSString *noncestr  = [NSString stringWithFormat:@"%d", rand()];
+    NSString *orderno   =  model.orderId;//[NSString stringWithFormat:@"%ld",time(0)];
+    NSMutableDictionary *packageParams = [NSMutableDictionary dictionary];
+    
+    [packageParams setObject: APP_ID             forKey:@"appid"];       //开放平台appid
+    [packageParams setObject: MCH_ID             forKey:@"mch_id"];      //商户号
+    [packageParams setObject: @"APP-001"        forKey:@"device_info"]; //支付设备号或门店号
+    [packageParams setObject: noncestr          forKey:@"nonce_str"];   //随机串
+    [packageParams setObject: @"APP"            forKey:@"trade_type"];  //支付类型，固定为APP
+    [packageParams setObject: order_name        forKey:@"body"];        //订单描述，展示给用户
+    [packageParams setObject: NOTIFY_URL        forKey:@"notify_url"];  //支付结果异步通知
+    [packageParams setObject: orderno           forKey:@"out_trade_no"];//商户订单号
+    [packageParams setObject: @"196.168.1.1"    forKey:@"spbill_create_ip"];//发器支付的机器ip
+    [packageParams setObject: order_price       forKey:@"total_fee"];       //订单金额，单位为分
+    
+    //获取prepayId（预支付交易会话标识）
+    NSString *prePayid;
+    prePayid            = [payRequsestHandler sendPrepay:packageParams];
+    
+    if ( prePayid != nil) {
+        //获取到prepayid后进行第二次签名
+        
+        NSString    *package, *time_stamp, *nonce_str;
+        //设置支付参数
+        time_t now;
+        time(&now);
+        time_stamp  = [NSString stringWithFormat:@"%ld", now];
+        nonce_str	= [WXUtil md5:time_stamp];
+        //重新按提交格式组包，微信客户端暂只支持package=Sign=WXPay格式，须考虑升级后支持携带package具体参数的情况
+        //package       = [NSString stringWithFormat:@"Sign=%@",package];
+        package         = @"Sign=WXPay";
+        //第二次签名参数列表
+        NSMutableDictionary *signParams = [NSMutableDictionary dictionary];
+        [signParams setObject: APP_ID        forKey:@"appid"];
+        [signParams setObject: nonce_str    forKey:@"noncestr"];
+        [signParams setObject: package      forKey:@"package"];
+        [signParams setObject: MCH_ID        forKey:@"partnerid"];
+        [signParams setObject: time_stamp   forKey:@"timestamp"];
+        [signParams setObject: prePayid     forKey:@"prepayid"];
+        //[signParams setObject: @"MD5"       forKey:@"signType"];
+        //生成签名
+        NSString *sign  = [payRequsestHandler createMd5Sign:signParams];
+        
+        //添加签名
+        [signParams setObject: sign         forKey:@"sign"];
+        
+        //返回参数列表
+        return signParams;
+        
+    }else{
+
+    }
+    return nil;
+
+}
+
+#pragma mark - 
+#pragma mark 获取商品标题
+- (NSString *)productName:(HSOrderModel *)orderModel
+{
+   __block NSString *result = nil;
+    
+    [orderModel.item_list enumerateObjectsUsingBlock:^(HSOrderitemModel *obj, NSUInteger idx, BOOL *stop) {
+        if (result == nil) {
+            result = obj.title;
+        }
+        else
+        {
+            result = [NSString stringWithFormat:@"%@\n%@",result,[HSPublic controlNullString:obj.title ]];
+        }
+        
+    }];
+    
+    return result;
+}
+
+#pragma mark -
+#pragma mark 获取商品描述
+
+#pragma mark -
+#pragma mark tableview dataSource and delegate
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
@@ -296,9 +445,9 @@ UITableViewDelegate>
         
         if (indexPath.row == 0) {
             HSOrderStatusTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([HSOrderStatusTableViewCell class]) forIndexPath:indexPath];
-            cell.orderStatusLabel.text = [NSString stringWithFormat:@"订单状态：%@",[public orderStatusStrWithState:_orderModel.status]];
-            cell.orderIDLabel.text = [NSString stringWithFormat:@"订单编号：%@",[public controlNullString:_orderModel.orderId]];
-            cell.orderTimeLabel.text = [NSString stringWithFormat:@"订单时间：%@",[public controlNullString:_orderModel.add_time]];
+            cell.orderStatusLabel.text = [NSString stringWithFormat:@"订单状态：%@",[HSPublic orderStatusStrWithState:_orderModel.status]];
+            cell.orderIDLabel.text = [NSString stringWithFormat:@"订单编号：%@",[HSPublic controlNullString:_orderModel.orderId]];
+            cell.orderTimeLabel.text = [NSString stringWithFormat:@"订单时间：%@",[HSPublic controlNullString:_orderModel.add_time]];
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
             return cell;
             
@@ -353,7 +502,7 @@ UITableViewDelegate>
                     
                 }
                 leftLabel.text = @"运费：";
-                rightLabel.text = @"江浙沪包邮，其他省市12元";
+                rightLabel.text = [NSString stringWithFormat:@"%@元",_orderModel.freeprice];
                 
                 cell.selectionStyle = UITableViewCellSelectionStyleNone;
                 return cell;
@@ -510,6 +659,46 @@ UITableViewDelegate>
     }
     
     return height;
+}
+
+
+//客户端提示信息
+- (void)alert:(NSString *)title msg:(NSString *)msg
+{
+    UIAlertView *alter = [[UIAlertView alloc] initWithTitle:title message:msg delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    
+    [alter show];
+}
+
+
+-(void) onResp:(BaseResp*)resp
+{
+    NSString *strMsg = [NSString stringWithFormat:@"errcode:%d", resp.errCode];
+    NSString *strTitle;
+    
+    if([resp isKindOfClass:[SendMessageToWXResp class]])
+    {
+        strTitle = [NSString stringWithFormat:@"发送媒体消息结果"];
+    }
+    if([resp isKindOfClass:[PayResp class]]){
+        //支付返回结果，实际支付结果需要去微信服务器端查询
+        strTitle = [NSString stringWithFormat:@"支付结果"];
+        
+        switch (resp.errCode) {
+            case WXSuccess:
+                strMsg = @"支付结果：成功！";
+                NSLog(@"支付成功－PaySuccess，retcode = %d", resp.errCode);
+                break;
+                
+            default:
+                strMsg = [NSString stringWithFormat:@"支付结果：失败！retcode = %d, retstr = %@", resp.errCode,resp.errStr];
+                NSLog(@"错误，retcode = %d, retstr = %@", resp.errCode,resp.errStr);
+                break;
+        }
+    }
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:strTitle message:strMsg delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+    [alert show];
+    
 }
 
 

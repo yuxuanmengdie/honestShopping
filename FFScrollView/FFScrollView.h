@@ -20,10 +20,14 @@ typedef enum
 
 @end
 
+typedef void(^FFFFScrollViewHeightBlock)(float height);
+
 @interface FFScrollView : UIView <UIScrollViewDelegate>
 {
     NSTimer *timer;
     NSArray *sourceArr;
+    BOOL _isFirstLoad;
+    UITapGestureRecognizer *_singleTap;
 }
 @property (strong, nonatomic) NSArray *sourceArr;
 
@@ -31,6 +35,8 @@ typedef enum
 @property(strong,nonatomic) UIPageControl *pageControl;
 @property(assign,nonatomic) FFScrollViewSelecttionType selectionType;
 @property(assign,nonatomic) id <FFScrollViewDelegate> pageViewDelegate;
+
+@property (copy, nonatomic) FFFFScrollViewHeightBlock heightBlock;
 
 /// 默认UIViewContentModeScaleToFill
 @property (nonatomic) UIViewContentMode imageContentMode;

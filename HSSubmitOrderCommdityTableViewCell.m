@@ -23,21 +23,21 @@
 
 - (void)setUpWithModel:(HSCommodityItemDetailPicModel *)detailModel imagePreURl:(NSString *)preURL num:(int)num
 {
-    [_commdityImageView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",[public controlNullString:preURL],[public controlNullString:detailModel.img]]] placeholderImage:kPlaceholderImage];
-    _titleLabel.text = [public controlNullString:detailModel.title];
-    _priceLabel.text = [NSString stringWithFormat:@"￥%@",[public controlNullString:detailModel.price]];
-    _detailLabel.text = [public controlNullString:detailModel.intro];
+    [_commdityImageView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",[HSPublic controlNullString:preURL],[HSPublic controlNullString:detailModel.img]]] placeholderImage:kPlaceholderImage];
+    _titleLabel.text = [HSPublic controlNullString:detailModel.title];
+    _priceLabel.text = [NSString stringWithFormat:@"￥%@",[HSPublic controlNullString:detailModel.price]];
+    _detailLabel.text = [HSPublic controlNullString:detailModel.intro];
     _numLabel.text = [NSString stringWithFormat:@"x%d",num];
 }
 
 
 - (void)setupWithOrderItemModel:(HSOrderitemModel *)itemModel
 {
-    [_commdityImageView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,[public controlNullString:itemModel.img]]] placeholderImage:kPlaceholderImage];
-    _titleLabel.text = [public controlNullString:itemModel.title];
-    _priceLabel.text = [NSString stringWithFormat:@"￥%@",[public controlNullString:itemModel.price]];
-    _detailLabel.text = [public controlNullString:itemModel.title];
-    _numLabel.text = [NSString stringWithFormat:@"x%@",[public controlNullString:itemModel.quantity]];
+    [_commdityImageView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,[HSPublic controlNullString:itemModel.img]]] placeholderImage:kPlaceholderImage];
+    _titleLabel.text = [HSPublic controlNullString:itemModel.title];
+    _priceLabel.text = [NSString stringWithFormat:@"￥%@",[HSPublic controlNullString:itemModel.price]];
+    _detailLabel.text = [HSPublic controlNullString:itemModel.title];
+    _numLabel.text = [NSString stringWithFormat:@"x%@",[HSPublic controlNullString:itemModel.quantity]];
 
 }
 

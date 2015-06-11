@@ -105,7 +105,7 @@ UITableViewDelegate>
     _priceLabel.text = @"0.00元";
     
     [_buyButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [_buyButton setBackgroundImage:[public ImageWithColor:kAppYellowColor] forState:UIControlStateNormal];
+    [_buyButton setBackgroundImage:[HSPublic ImageWithColor:kAppYellowColor] forState:UIControlStateNormal];
     [_buyButton setTitle:@"立即购买" forState:UIControlStateNormal];
     _buyButton.layer.masksToBounds = YES;
     _buyButton.layer.cornerRadius = 5.0;
@@ -163,7 +163,7 @@ UITableViewDelegate>
 
 - (IBAction)buyAction:(id)sender {
     
-    if (![public isLoginInStatus]) {
+    if (![HSPublic isLoginInStatus]) {
         [self showHudWithText:@"请先登录"];
         [self pushViewControllerWithIdentifer:NSStringFromClass([HSLoginInViewController class])];
         return ;
@@ -180,7 +180,7 @@ UITableViewDelegate>
     submitVC.itemsDataArray = [self selectedItems];
     submitVC.title = @"确认订单";
     submitVC.hidesBottomBarWhenPushed = YES;
-    submitVC.userInfoModel = [[HSUserInfoModel alloc] initWithDictionary:[public userInfoFromPlist] error:nil];
+    submitVC.userInfoModel = [[HSUserInfoModel alloc] initWithDictionary:[HSPublic userInfoFromPlist] error:nil];
     [self.navigationController pushViewController:submitVC animated:YES];
 
     
@@ -348,7 +348,7 @@ UITableViewDelegate>
         NSNumber *suc = [_seletedDic objectForKey:[self keyFromItemID:obj[kPostJsonid]]];
         BOOL isSuc = suc == nil ? NO :[suc boolValue];
         if (isSuc) {
-            [tmp setObject:[NSNumber numberWithInt:count] forKey:[public controlNullString:model.id]];
+            [tmp setObject:[NSNumber numberWithInt:count] forKey:[HSPublic controlNullString:model.id]];
         }
         
         

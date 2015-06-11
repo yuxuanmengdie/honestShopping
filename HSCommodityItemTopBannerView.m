@@ -32,18 +32,18 @@
     
     if (self) {
         
-        _bannerHeight = 240;
+        _bannerHeight = 330;
         
         _bannerView = [[FFScrollView alloc] initWithFrame:CGRectZero];
         _bannerView.translatesAutoresizingMaskIntoConstraints = NO;
-        //_bannerView.imageContentMode = UIViewContentModeScaleAspectFit;
+        _bannerView.imageContentMode = UIViewContentModeScaleAspectFit;
         _bannerView.backgroundColor = [UIColor whiteColor];
-        
         [self addSubview:_bannerView];
         
         _infoView = [[[NSBundle mainBundle] loadNibNamed:@"HSItemBuyInfoView" owner:nil
                                                 options:nil] firstObject];
         _infoView.translatesAutoresizingMaskIntoConstraints = NO;
+        [_infoView setNeedsLayout];
         [self addSubview:_infoView];
         
         NSString *vfl1 = @"H:|[_bannerView]|";
@@ -59,6 +59,16 @@
         [self addConstraints:arr2];
         [self addConstraints:arr3];
         [self addConstraint:_bannerHeightConstraint];
+        
+        __weak typeof(self) wself = self;
+        _bannerView.heightBlock = ^(float height){
+            __strong typeof(wself) swself = wself;
+            [swself setBannerHeight:height];
+            
+            if (swself.heightChangeBlcok) {
+                swself.heightChangeBlcok();
+            }
+        };
         
     
     }
@@ -79,9 +89,9 @@
     [self layoutIfNeeded];
 }
 
-//- (void)layoutSubviews {
-//    // Custom code which potentially messes with constraints
-//    [super layoutSubviews]; // No code after this and this is called last
-//}
+- (void)layoutSubviews {
+    // Custom code which potentially messes with constraints
+    [super layoutSubviews]; // No code after this and this is called last
+}
 
 @end

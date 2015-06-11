@@ -57,7 +57,7 @@ static NSString *const kUserImageName = @"icon_activity";
                 return ;
             }
             
-            if (![public isPhoneNumberRegex:swself->_containterTableVC.phoneTextFiled.text]) { /// 手机号码不合法
+            if (![HSPublic isPhoneNumberRegex:swself->_containterTableVC.phoneTextFiled.text]) { /// 手机号码不合法
                 errorTip = @"输入正确的手机号码";
                 [swself showHudWithText:errorTip];
                 return;
@@ -105,7 +105,7 @@ static NSString *const kUserImageName = @"icon_activity";
                 return ;
             }
             
-            if (![public isPhoneNumberRegex:swself->_containterTableVC.phoneTextFiled.text]) { /// 手机号码不合法
+            if (![HSPublic isPhoneNumberRegex:swself->_containterTableVC.phoneTextFiled.text]) { /// 手机号码不合法
                 errorTip = @"输入正确的手机号码";
                 [swself showHudWithText:errorTip];
                 return;
@@ -148,14 +148,14 @@ static NSString *const kUserImageName = @"icon_activity";
 - (void)registerRequest:(NSString *)phone password:(NSString *)passWord
 {
     [self showhudLoadingWithText:nil isDimBackground:YES];
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonPhone:phone,
                                     kPostJsonUserName:phone,
                                     kPostJsonPassWord:passWord
                                     };
     // 142346261  123456
     
-    [self.httpRequestOperationManager POST:kRegisterURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [self.httpRequestOperationManager POST:kRegisterURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         NSLog(@"success\n%@",operation.responseString);
         [self showHudWithText:@"注册失败"];
         [self hiddenHudLoading];
@@ -198,14 +198,14 @@ static NSString *const kUserImageName = @"icon_activity";
 - (void)FindPWRequest:(NSString *)phone password:(NSString *)passWord
 {
     [self showhudLoadingWithText:nil isDimBackground:YES];
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonPhone:phone,
                                     kPostJsonUserName:phone,
                                     kPostJsonPassWord:passWord
                                     };
     // 142346261  123456
     
-    [self.httpRequestOperationManager POST:kSetPasswordURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [self.httpRequestOperationManager POST:kSetPasswordURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         NSLog(@"success\n%@",operation.responseString);
         [self showHudWithText:@"设置失败"];
         [self hiddenHudLoading];
@@ -257,12 +257,12 @@ static NSString *const kUserImageName = @"icon_activity";
 #pragma mark  发送验证码
 - (void)sendCaptchas:(NSString *)phone
 {
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonPhone:phone
                                     };
     // 142346261  123456
     
-    [self.httpRequestOperationManager POST:kGetVerifyCodeURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [self.httpRequestOperationManager POST:kGetVerifyCodeURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         [self showHudWithText:@"发送失败"];
         NSLog(@"success\n%@",operation.responseString);
         [self hiddenHudLoading];
@@ -304,13 +304,13 @@ static NSString *const kUserImageName = @"icon_activity";
 {
     
     [self showhudLoadingWithText:nil isDimBackground:YES];
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonPhone:phone,
                                     kPostJsonCode:code
                                     };
     // 142346261  123456
     
-    [self.httpRequestOperationManager POST:kVerifyCodeURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [self.httpRequestOperationManager POST:kVerifyCodeURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         NSLog(@"success\n%@",operation.responseString);
         [self showHudWithText:@"验证失败"];
         [self hiddenHudLoading];

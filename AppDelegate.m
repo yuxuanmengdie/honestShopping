@@ -12,7 +12,10 @@
 #import "UMSocialQQHandler.h"
 #import <AlipaySDK/AlipaySDK.h>
 
-@interface AppDelegate ()
+#import "WXApi.h"
+#import "payRequsestHandler.h"
+
+@interface AppDelegate ()<WXApiDelegate>
 
 @end
 
@@ -21,12 +24,13 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
-    [public addSkipBackupAttributeDoc];
-    [public timedLoginIn];
+    [HSPublic addSkipBackupAttributeDoc];
+    [HSPublic timedLoginIn];
     [UMSocialData setAppKey:kUMengAppKey];
     
     //设置微信AppId，设置分享url，默认使用友盟的网址
-    [UMSocialWechatHandler setWXAppId:@"wxd930ea5d5a258f4f" appSecret:@"db426a9829e4b49a0dcac7b4162da6b6" url:@"http://www.umeng.com/social"];
+    [UMSocialWechatHandler setWXAppId:@"wxf674afd7fa6b3db1" appSecret:@"768ef498760a90567afeac93211abfa9" url:kURLHeader];
+    
     
     //打开新浪微博的SSO开关
     //    [UMSocialSinaHandler openSSOWithRedirectURL:@"http://sns.whalecloud.com/sina2/callback"];
@@ -36,7 +40,10 @@
     //    [UMSocialTencentWeiboHandler openSSOWithRedirectUrl:@"http://sns.whalecloud.com/tencent2/callback"];
     
     //    //设置分享到QQ空间的应用Id，和分享url 链接
-    [UMSocialQQHandler setQQWithAppId:@"100424468" appKey:@"c7394704798a158208a74ab60104f0ba" url:@"http://www.umeng.com/social"];
+    [UMSocialQQHandler setQQWithAppId:@"1104470651" appKey:@"1VATaXjYJuiJ0itg" url:kURLHeader];
+    
+    //向微信注册
+    [WXApi registerApp:APP_ID withDescription:@"放心吃"];
 
     return YES;
 }
@@ -53,7 +60,7 @@
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
     // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
-    [public loginIn]; /// 每次从后台进入都重新登录
+    [HSPublic loginIn]; /// 每次从后台进入都重新登录
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
@@ -68,6 +75,39 @@
 
 - (BOOL)application:(UIApplication *)application handleOpenURL:(NSURL *)url
 {
+    NSLog(@"%s %@",__func__,url.absoluteString);
+    NSString *string =[url absoluteString];
+    
+    if ([string hasPrefix:@"hsalisdkdemo"])
+    {
+        if ([url.host isEqualToString:@"safepay"]) {
+            
+            [[AlipaySDK defaultService] processOrderWithPaymentResult:url
+                                                      standbyCallback:^(NSDictionary *resultDic) {
+                                                          NSLog(@"result = %@",resultDic);
+                                                      }];
+            //}
+            
+            [[AlipaySDK defaultService] processAuth_V2Result:url
+                                             standbyCallback:^(NSDictionary *resultDic) {
+                                                 NSLog(@"result = %@",resultDic);
+                                                 NSString *resultStr = resultDic[@"result"];
+                                             }];
+            
+        }
+        
+        if ([url.host isEqualToString:@"platformapi"]){//支付宝钱包快登授权返回 authCode
+            [[AlipaySDK defaultService] processAuthResult:url standbyCallback:^(NSDictionary *resultDic) {
+                NSLog(@"result = %@",resultDic);
+            }];
+        }
+        
+    }
+    else if ([string hasPrefix:APP_ID])
+    {
+        [WXApi handleOpenURL:url delegate:self];
+    }
+
     return  [UMSocialSnsService handleOpenURL:url];
 }
 
@@ -76,30 +116,117 @@
   sourceApplication:(NSString *)sourceApplication
          annotation:(id)annotation
 {
+     NSLog(@"%s %@",__func__,url.absoluteString);
+    NSString *string =[url absoluteString];
     
-    if ([url.host isEqualToString:@"safepay"]) {
+    if ([string hasPrefix:@"hsalisdkdemo"])
+    {
+        if ([url.host isEqualToString:@"safepay"]) {
+            
+            [[AlipaySDK defaultService] processOrderWithPaymentResult:url
+                                                      standbyCallback:^(NSDictionary *resultDic) {
+                                                          NSLog(@"result = %@",resultDic);
+                                                      }];
+            //}
+            
+            [[AlipaySDK defaultService] processAuth_V2Result:url
+                                             standbyCallback:^(NSDictionary *resultDic) {
+                                                 NSLog(@"result = %@",resultDic);
+                                                 NSString *resultStr = resultDic[@"result"];
+                                             }];
+            
+        }
         
-        [[AlipaySDK defaultService] processOrderWithPaymentResult:url
-                                                  standbyCallback:^(NSDictionary *resultDic) {
-                                                      NSLog(@"result = %@",resultDic);
-                                                  }];
-        //}
-        
-                 [[AlipaySDK defaultService] processAuth_V2Result:url
-                                               standbyCallback:^(NSDictionary *resultDic) {
-                  NSLog(@"result = %@",resultDic);
-                  NSString *resultStr = resultDic[@"result"];
-                }];
+        if ([url.host isEqualToString:@"platformapi"]){//支付宝钱包快登授权返回 authCode
+            [[AlipaySDK defaultService] processAuthResult:url standbyCallback:^(NSDictionary *resultDic) {
+                NSLog(@"result = %@",resultDic);
+            }];
+        }
+
+    }
+    else if ([string hasPrefix:APP_ID])
+    {
+         [WXApi handleOpenURL:url delegate:self];
+    }
+    else if ([string hasPrefix:@"QQ41D4E27B"])
+    {
         
     }
-    
-    if ([url.host isEqualToString:@"platformapi"]){//支付宝钱包快登授权返回 authCode
-        [[AlipaySDK defaultService] processAuthResult:url standbyCallback:^(NSDictionary *resultDic) {
-            NSLog(@"result = %@",resultDic);
-        }];
-    }
+   
     
 
     return  [UMSocialSnsService handleOpenURL:url];
 }
+
+#pragma mark -
+#pragma mark 微信delegate
+-(void) onReq:(BaseReq*)req
+{
+    if([req isKindOfClass:[GetMessageFromWXReq class]])
+    {
+        // 微信请求App提供内容， 需要app提供内容后使用sendRsp返回
+        NSString *strTitle = [NSString stringWithFormat:@"微信请求App提供内容"];
+        NSString *strMsg = @"微信请求App提供内容，App要调用sendResp:GetMessageFromWXResp返回给微信";
+        
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:strTitle message:strMsg delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+        alert.tag = 1000;
+        [alert show];
+       
+    }
+    else if([req isKindOfClass:[ShowMessageFromWXReq class]])
+    {
+        ShowMessageFromWXReq* temp = (ShowMessageFromWXReq*)req;
+        WXMediaMessage *msg = temp.message;
+        
+        //显示微信传过来的内容
+        WXAppExtendObject *obj = msg.mediaObject;
+        
+        NSString *strTitle = [NSString stringWithFormat:@"微信请求App显示内容"];
+        NSString *strMsg = [NSString stringWithFormat:@"标题：%@ \n内容：%@ \n附带信息：%@ \n缩略图:%lu bytes\n\n", msg.title, msg.description, obj.extInfo, msg.thumbData.length];
+        
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:strTitle message:strMsg delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+        [alert show];
+        
+    }
+    else if([req isKindOfClass:[LaunchFromWXReq class]])
+    {
+        //从微信启动App
+        NSString *strTitle = [NSString stringWithFormat:@"从微信启动"];
+        NSString *strMsg = @"这是从微信启动的消息";
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:strTitle message:strMsg delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+        [alert show];
+       
+    }
+}
+
+-(void) onResp:(BaseResp*)resp
+{
+    NSString *strMsg = [NSString stringWithFormat:@"errcode:%d", resp.errCode];
+    NSString *strTitle;
+    
+    if([resp isKindOfClass:[SendMessageToWXResp class]])
+    {
+        strTitle = [NSString stringWithFormat:@"发送媒体消息结果"];
+    }
+    if([resp isKindOfClass:[PayResp class]]){
+        //支付返回结果，实际支付结果需要去微信服务器端查询
+        strTitle = [NSString stringWithFormat:@"支付结果"];
+        
+        switch (resp.errCode) {
+            case WXSuccess:
+                strMsg = @"支付结果：成功！";
+                NSLog(@"支付成功－PaySuccess，retcode = %d", resp.errCode);
+                break;
+                
+            default:
+                strMsg = [NSString stringWithFormat:@"支付结果：失败！retcode = %d, retstr = %@", resp.errCode,resp.errStr];
+                NSLog(@"错误，retcode = %d, retstr = %@", resp.errCode,resp.errStr);
+                break;
+        }
+    }
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:strTitle message:strMsg delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+    [alert show];
+}
+
+
 @end

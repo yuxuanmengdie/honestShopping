@@ -23,7 +23,7 @@
 - (void)awakeFromNib
 {
     [_settltButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [_settltButton setBackgroundImage:[public ImageWithColor:kAppYellowColor] forState:UIControlStateNormal];
+    [_settltButton setBackgroundImage:[HSPublic ImageWithColor:kAppYellowColor] forState:UIControlStateNormal];
     _textLabel.textColor = [UIColor redColor];
     _settltButton.layer.masksToBounds = YES;
     _settltButton.layer.cornerRadius = 5.0;

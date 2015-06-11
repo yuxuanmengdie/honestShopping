@@ -62,9 +62,9 @@ UITableViewDelegate>
                      context:nil];
     [self segmentSetup];
     
-    [self orderRequestWithStatus:MineOrderAwaitPayStatus uid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
-    [self orderRequestWithStatus:MineOrderAwaitShippedStatus uid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
-    [self orderRequestWithStatus:MineOrderAwaitReceivingStatus uid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
+    [self orderRequestWithStatus:MineOrderAwaitPayStatus uid:[HSPublic controlNullString:_userInfoModel.id] sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode]];
+    [self orderRequestWithStatus:MineOrderAwaitShippedStatus uid:[HSPublic controlNullString:_userInfoModel.id] sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode]];
+    [self orderRequestWithStatus:MineOrderAwaitReceivingStatus uid:[HSPublic controlNullString:_userInfoModel.id] sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode]];
     
     [self showNetLoadingView];
     _completeOrderLoading = NO;
@@ -99,12 +99,12 @@ UITableViewDelegate>
         _completeOrderLoading = YES;
     }
     
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonUid:uid,
                                     kPostJsonSessionCode:sessionCode,
                                     kPostJsonStatus:[NSString stringWithFormat:@"%d",status]
                                     };
-    [self.httpRequestOperationManager POST:kGetOrderListURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [self.httpRequestOperationManager POST:kGetOrderListURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"%s failed\n%@",__func__,operation.responseString);
@@ -160,7 +160,7 @@ UITableViewDelegate>
     _finishedTableView.hidden = (idx == 0);
     
     if (idx != 0 && !_completeOrderLoading && _finishedDataArray.count == 0) {
-        [self orderRequestWithStatus:MineOrderSuccessStatus uid:[public controlNullString:_userInfoModel.id] sessionCode:[public controlNullString:_userInfoModel.sessionCode]];
+        [self orderRequestWithStatus:MineOrderSuccessStatus uid:[HSPublic controlNullString:_userInfoModel.id] sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode]];
     }
     
 }

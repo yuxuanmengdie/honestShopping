@@ -141,7 +141,7 @@ static const int kSanpinCollectionViewTagOri = 800;
         NSNumber *isLoading = _typeLoadingDic[[self p_keyFromType:type]];
         NSArray *typeArr = _sanpinDataDic[[self p_keyFromType:type]];
         if ((isLoading == nil || ![isLoading boolValue]) && typeArr.count == 0) {
-            [swself sanpinTypeRequest:type key:[public md5Str:[public getIPAddress:YES]]];
+            [swself sanpinTypeRequest:type key:[HSPublic md5Str:[HSPublic getIPAddress:YES]]];
         }
         [[swself sanpinViewWithIdx:idx] reloadData];
         
@@ -174,8 +174,8 @@ static const int kSanpinCollectionViewTagOri = 800;
                                     kPostJsonType:[NSNumber numberWithInt:type]
                                     };
     
-    [self.httpRequestOperationManager POST:kGetSpybByTypeURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
-        NSLog(@"JSON: %@/n %@", responseObject,[public dictionaryToJson:parametersDic]);
+    [self.httpRequestOperationManager POST:kGetSpybByTypeURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSLog(@"JSON: %@/n %@", responseObject,[HSPublic dictionaryToJson:parametersDic]);
         [_typeLoadingDic setObject:@NO forKey:[self p_keyFromType:type]];
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {

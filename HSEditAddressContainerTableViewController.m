@@ -59,14 +59,14 @@ UITextFieldDelegate>
         return;
     }
     
-    _userNameTextFiled.text = [public controlNullString:addressModel.consignee];
-    _phoneTextFiled.text = [public controlNullString:addressModel.mobile];
-    _addressLabel.text = [NSString stringWithFormat:@"%@%@%@",[public controlNullString:addressModel.sheng],[public controlNullString:addressModel.shi],[public controlNullString:addressModel.qu]];
-    _detailAddressTextView.text = [public controlNullString:addressModel.address];
+    _userNameTextFiled.text = [HSPublic controlNullString:addressModel.consignee];
+    _phoneTextFiled.text = [HSPublic controlNullString:addressModel.mobile];
+    _addressLabel.text = [NSString stringWithFormat:@"%@%@%@",[HSPublic controlNullString:addressModel.sheng],[HSPublic controlNullString:addressModel.shi],[HSPublic controlNullString:addressModel.qu]];
+    _detailAddressTextView.text = [HSPublic controlNullString:addressModel.address];
     
-    _sheng = [public controlNullString:addressModel.sheng];
-    _shi = [public controlNullString:addressModel.shi];
-    _qu = [public controlNullString:addressModel.qu];
+    _sheng = [HSPublic controlNullString:addressModel.sheng];
+    _shi = [HSPublic controlNullString:addressModel.shi];
+    _qu = [HSPublic controlNullString:addressModel.qu];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -221,7 +221,7 @@ UITextFieldDelegate>
             wself.sheng = sheng;
             wself.shi = shi;
             wself.qu = qu;
-            wself.addressLabel.text = [NSString stringWithFormat:@"%@%@%@",[public controlNullString:sheng],[public controlNullString:shi],[public controlNullString:qu]];
+            wself.addressLabel.text = [NSString stringWithFormat:@"%@%@%@",[HSPublic controlNullString:sheng],[HSPublic controlNullString:shi],[HSPublic controlNullString:qu]];
         };
 
     }

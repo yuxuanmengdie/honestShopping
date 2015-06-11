@@ -16,7 +16,7 @@ typedef NS_ENUM(NSUInteger, HSLoginType) {
     kSinaLoginType,
     kNoneLoginType
 };
-@interface public : NSObject
+@interface HSPublic : NSObject
 
 
 ///color画图

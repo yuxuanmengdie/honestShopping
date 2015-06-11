@@ -13,7 +13,7 @@
 - (void)awakeFromNib {
     // Initialization code
     _signButton.contentEdgeInsets = UIEdgeInsetsMake(5, 16, 5, 16);
-    [_signButton setBackgroundImage:[public ImageWithColor:kAPPTintColor] forState:UIControlStateNormal];
+    [_signButton setBackgroundImage:[HSPublic ImageWithColor:kAPPTintColor] forState:UIControlStateNormal];
     [_signButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     _signButton.layer.masksToBounds = YES;
     _signButton.layer.cornerRadius = 5.0;

@@ -21,6 +21,13 @@
 - (void)awakeFromNib
 {
    [_collectButton setTitle:@"加入购物车" forState:UIControlStateNormal];
+    
+    _collectButton.contentEdgeInsets = UIEdgeInsetsMake(5, 16, 5, 16);
+    _collectButton.layer.masksToBounds = YES;
+    _collectButton.layer.cornerRadius = 5.0;
+    [_collectButton setBackgroundImage:[HSPublic ImageWithColor:[UIColor colorWithRed:39/255.0 green:147/255.0 blue:68/255.0 alpha:1.0]] forState:UIControlStateNormal];
+    _priceLabel.textColor = ColorRGB(207, 0, 0);
+
 }
 
 - (void)collcetStatus:(BOOL)isCollected
@@ -92,14 +99,9 @@
 }
 
 
-- (void)layoutSubviews
-{
-    
-    _collectButton.contentEdgeInsets = UIEdgeInsetsMake(5, 16, 5, 16);
-    _collectButton.layer.masksToBounds = YES;
-    _collectButton.layer.cornerRadius = 5.0;
-    [_collectButton setBackgroundImage:[public ImageWithColor:[UIColor colorWithRed:39/255.0 green:147/255.0 blue:68/255.0 alpha:1.0]] forState:UIControlStateNormal];
-    _priceLabel.textColor = ColorRGB(207, 0, 0);
-    
-}
+//- (void)layoutSubviews
+//{
+//    [super layoutSubviews];
+//    
+//}
 @end

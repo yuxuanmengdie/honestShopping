@@ -20,7 +20,6 @@ static NSString *const kColumnIDKey = @"id";
 
 static NSString *const kColumnDataDicKey = @"dataDic";
 
-
 + (FMDatabase *)shareDataBase {
     static dispatch_once_t onceToken;
     static FMDatabase *dataBase = nil;
@@ -119,11 +118,11 @@ static NSString *const kColumnDataDicKey = @"dataDic";
 
 + (NSString *)tableNameWithUid
 {
-    if (![public isLoginInStatus]) {
+    if (![HSPublic isLoginInStatus]) {
         return kCartTableName;
     }
     
-    NSDictionary *userInfo = [public userInfoFromPlist];
+    NSDictionary *userInfo = [HSPublic userInfoFromPlist];
     NSString *uid = userInfo[kPostJsonid];
     NSString *result = [NSString stringWithFormat:@"%@%@",kCartTableName,uid];
     return result;
@@ -194,6 +193,129 @@ static NSString *const kColumnDataDicKey = @"dataDic";
     return nil;
 }
 
+#pragma -
+#pragma mark 已经收藏的表
+
+static NSString *const kFavoriteTableName = @"favoriteTable";
+
+static NSString *const kFavoriteColumnID = @"favoriteID";
+
++ (NSString *)tableNameFavoriteWithUid
+{
+    if (![HSPublic isLoginInStatus]) {
+        return [HSPublic controlNullString:kFavoriteTableName];
+    }
+    
+    NSDictionary *userInfo = [HSPublic userInfoFromPlist];
+    NSString *uid = userInfo[kPostJsonid];
+    NSString *result = [NSString stringWithFormat:@"%@%@",kFavoriteTableName,uid];
+    return result;
+
+}
+
++ (BOOL)createFavoriteTableWithTableName:(NSString *)tableName
+{
+    NSLog(@"%@",dataBasePath);
+    
+    
+    if ([[self shareDataBase] open]) {
+        if (![HSDBManager isTableExist:tableName]) {
+            //                    NSString *sql = [NSString stringWithFormat:@"CREATE TABLE \"%@\" (\"message_id\" TEXT PRIMARY KEY  NOT NULL  check(typeof(\"message_id\") = 'text') , \"att\" BLOB)",tableName];
+            NSString *sql = [NSString stringWithFormat:@"CREATE TABLE %@  (%@ text  primary key)",tableName,kFavoriteColumnID];
+            
+            NSLog(@"no Medicine ");
+            [[self shareDataBase] executeUpdate:sql];
+            
+            
+        }
+        [[self shareDataBase] close];
+    }
+    
+    
+    return YES;
+    
+}
+
+/// 保存单个记录
++ (BOOL)saveFavoriteWithTableName:(NSString *)tableName keyID:(NSString *)keyID
+{
+    BOOL isOk = NO;
+    [HSDBManager createFavoriteTableWithTableName:tableName];
+    if ([[self shareDataBase] open]) {
+        NSString *sql = [NSString stringWithFormat:@"INSERT INTO %@ (%@) VALUES(?)",tableName,kFavoriteColumnID];
+        
+        isOk = [[self shareDataBase] executeUpdate:
+                sql,keyID];
+        [[self shareDataBase] close];
+    }
+    return isOk;
+    
+}
+
++ (BOOL)saveFavoriteArrayWithTableName:(NSString *)tableName arr:(NSArray *)keyArr
+{
+    __block BOOL isOk = NO;
+    [HSDBManager createFavoriteTableWithTableName:tableName];
+    if ([[self shareDataBase] open]) {
+        [keyArr enumerateObjectsUsingBlock:^(NSString *obj, NSUInteger idx, BOOL *stop) {
+            NSString *sql = [NSString stringWithFormat:@"INSERT INTO %@ (%@) VALUES(?)",tableName,kFavoriteColumnID];
+            
+            isOk = [[self shareDataBase] executeUpdate:
+                    sql,obj];
+
+        }];
+        [[self shareDataBase] close];
+    }
+    return isOk;
+
+}
+
++ (NSString *)selectFavoritetemWithTableName:(NSString *)tableName keyID:(NSString *)keyID
+{
+    NSString *resultDic = nil;
+    if ([[self shareDataBase] open]) {
+        FMResultSet *s = [[self shareDataBase] executeQuery:[NSString stringWithFormat:@"SELECT * FROM %@ WHERE %@ = '%@'",tableName,kFavoriteColumnID,keyID]];
+        if ([s next]) {
+            resultDic = [s objectForColumnName:kFavoriteColumnID];
+        }
+        [[self shareDataBase] close];
+    }
+    return resultDic;
+}
+
++ (BOOL)deleteFavoriteItemWithTableName:(NSString *)tableName keyID:(NSString *)keyID
+{
+    BOOL isOK = NO;
+    if ([[self shareDataBase] open])
+    {
+        //   NSString *str = [];
+        isOK = [[self shareDataBase] executeUpdate:[NSString stringWithFormat:@"DELETE FROM %@ WHERE %@ = '%@'",tableName,kFavoriteColumnID,keyID]];
+        [[self shareDataBase] close];
+    }
+    return isOK;
+}
+
+
++ (NSMutableArray *)selectFavoriteAllWithTableName:(NSString *)tableName
+{
+    
+    if ([[self shareDataBase] open])
+    {
+        
+        NSMutableArray *arr = [[NSMutableArray alloc] init];
+        
+        FMResultSet *Result = [[self shareDataBase] executeQuery:[NSString stringWithFormat:@"SELECT * FROM %@ ",tableName]];
+        while ([Result next])
+        {
+            NSString *text = [Result objectForColumnName:kFavoriteColumnID];
+            [arr addObject:text];
+        }
+        [[self shareDataBase] close];
+        
+        return arr;
+    }
+    return nil;
+}
 
 
 @end

@@ -1,12 +1,12 @@
 //
-//  public.m
+//  HSPublic.m
 //  honestShopping
 //
 //  Created by 张国俗 on 15-3-17.
 //  Copyright (c) 2015年 张国俗. All rights reserved.
 //
 
-#import "public.h"
+#import "HSPublic.h"
 #import "HSUserInfoModel.h"
 #import "MBProgressHUD.h"
 
@@ -21,7 +21,7 @@
 #define IP_ADDR_IPv4    @"ipv4"
 #define IP_ADDR_IPv6    @"ipv6"
 
-@implementation public
+@implementation HSPublic
 
 
 
@@ -275,7 +275,7 @@
 /// 取出用户信息
 + (NSDictionary *)userInfoFromPlist
 {
-    if (![public isLoginInStatus]) { /// 不是登录状态
+    if (![HSPublic isLoginInStatus]) { /// 不是登录状态
         return nil;
     }
     
@@ -332,7 +332,7 @@
 + (void)saveOtherOpenID:(NSString *)openID
 {
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    [userDefaults setObject:[public controlNullString:openID ] forKey:kOtherOpenID];
+    [userDefaults setObject:[HSPublic controlNullString:openID ] forKey:kOtherOpenID];
     [userDefaults synchronize];
 }
 
@@ -401,19 +401,19 @@ static NSString *const kPasswordKey = @"lastPasswordKey";
 
 + (void)loginIn
 {
-    if (![public isLoginInStatus]) { /// 不在登录状态 
+    if (![HSPublic isLoginInStatus]) { /// 不在登录状态 
         return;
     }
-    NSString *userName = [public lastUserName];
-    NSString *passWord = [public lastPassword];
+    NSString *userName = [HSPublic lastUserName];
+    NSString *passWord = [HSPublic lastPassword];
     
-    NSDictionary *parametersDic = @{kPostJsonKey:[public md5Str:[public getIPAddress:YES]],
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
                                     kPostJsonUserName:userName,
                                     kPostJsonPassWord:passWord
                                     };
     // 142346261  123456
     AFHTTPRequestOperationManager *manager = [[AFHTTPRequestOperationManager alloc] init];
-    [manager POST:kLoginURL parameters:@{kJsonArray:[public dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [manager POST:kLoginURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         NSLog(@"success\n%@",operation.responseString);
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
@@ -428,7 +428,7 @@ static NSString *const kPasswordKey = @"lastPasswordKey";
             
             HSUserInfoModel *userInfoModel = [[HSUserInfoModel alloc] initWithDictionary:json error:nil];
             if (userInfoModel.id.length > 0) { /// 登录后返回有数据
-                [public saveUserInfoToPlist:[userInfoModel toDictionary]];
+                [HSPublic saveUserInfoToPlist:[userInfoModel toDictionary]];
             }
         }
         else
@@ -448,7 +448,7 @@ static const double kTimedLoginInterval = 60*60;
 
 + (void)timerAction
 {
-    [public loginIn];
+    [HSPublic loginIn];
 }
 
 + (void)showHudInWindowWithText:(NSString *)text
