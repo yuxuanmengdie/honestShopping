@@ -126,6 +126,15 @@
             [[AlipaySDK defaultService] processOrderWithPaymentResult:url
                                                       standbyCallback:^(NSDictionary *resultDic) {
                                                           NSLog(@"result = %@",resultDic);
+                                                          NSDictionary *memo = resultDic;
+                                                          
+                                                          if ([HSPublic aliPaySuccess:memo]) {
+                                                              [[NSNotificationCenter defaultCenter] postNotificationName:kHSPaySuccess object:nil userInfo:nil];
+                                                          }
+                                                          else
+                                                          {
+                                                              [[NSNotificationCenter defaultCenter] postNotificationName:kHSPayFailed object:nil userInfo:@{kHSPayResultMsg:[HSPublic controlNullString:memo[kAliPayMemo]]}];
+                                                          }
                                                       }];
             //}
             
@@ -162,41 +171,41 @@
 #pragma mark 微信delegate
 -(void) onReq:(BaseReq*)req
 {
-    if([req isKindOfClass:[GetMessageFromWXReq class]])
-    {
-        // 微信请求App提供内容， 需要app提供内容后使用sendRsp返回
-        NSString *strTitle = [NSString stringWithFormat:@"微信请求App提供内容"];
-        NSString *strMsg = @"微信请求App提供内容，App要调用sendResp:GetMessageFromWXResp返回给微信";
-        
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:strTitle message:strMsg delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
-        alert.tag = 1000;
-        [alert show];
-       
-    }
-    else if([req isKindOfClass:[ShowMessageFromWXReq class]])
-    {
-        ShowMessageFromWXReq* temp = (ShowMessageFromWXReq*)req;
-        WXMediaMessage *msg = temp.message;
-        
-        //显示微信传过来的内容
-        WXAppExtendObject *obj = msg.mediaObject;
-        
-        NSString *strTitle = [NSString stringWithFormat:@"微信请求App显示内容"];
-        NSString *strMsg = [NSString stringWithFormat:@"标题：%@ \n内容：%@ \n附带信息：%@ \n缩略图:%lu bytes\n\n", msg.title, msg.description, obj.extInfo, msg.thumbData.length];
-        
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:strTitle message:strMsg delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
-        [alert show];
-        
-    }
-    else if([req isKindOfClass:[LaunchFromWXReq class]])
-    {
-        //从微信启动App
-        NSString *strTitle = [NSString stringWithFormat:@"从微信启动"];
-        NSString *strMsg = @"这是从微信启动的消息";
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:strTitle message:strMsg delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
-        [alert show];
-       
-    }
+//    if([req isKindOfClass:[GetMessageFromWXReq class]])
+//    {
+//        // 微信请求App提供内容， 需要app提供内容后使用sendRsp返回
+//        NSString *strTitle = [NSString stringWithFormat:@"微信请求App提供内容"];
+//        NSString *strMsg = @"微信请求App提供内容，App要调用sendResp:GetMessageFromWXResp返回给微信";
+//        
+//        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:strTitle message:strMsg delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+//        alert.tag = 1000;
+//        [alert show];
+//       
+//    }
+//    else if([req isKindOfClass:[ShowMessageFromWXReq class]])
+//    {
+//        ShowMessageFromWXReq* temp = (ShowMessageFromWXReq*)req;
+//        WXMediaMessage *msg = temp.message;
+//        
+//        //显示微信传过来的内容
+//        WXAppExtendObject *obj = msg.mediaObject;
+//        
+//        NSString *strTitle = [NSString stringWithFormat:@"微信请求App显示内容"];
+//        NSString *strMsg = [NSString stringWithFormat:@"标题：%@ \n内容：%@ \n附带信息：%@ \n缩略图:%lu bytes\n\n", msg.title, msg.description, obj.extInfo, msg.thumbData.length];
+//        
+//        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:strTitle message:strMsg delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+//        [alert show];
+//        
+//    }
+//    else if([req isKindOfClass:[LaunchFromWXReq class]])
+//    {
+//        //从微信启动App
+//        NSString *strTitle = [NSString stringWithFormat:@"从微信启动"];
+//        NSString *strMsg = @"这是从微信启动的消息";
+//        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:strTitle message:strMsg delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+//        [alert show];
+//       
+//    }
 }
 
 -(void) onResp:(BaseResp*)resp
@@ -214,18 +223,20 @@
         
         switch (resp.errCode) {
             case WXSuccess:
-                strMsg = @"支付结果：成功！";
+                strMsg = @"支付成功！";
                 NSLog(@"支付成功－PaySuccess，retcode = %d", resp.errCode);
+                [[NSNotificationCenter defaultCenter] postNotificationName:kHSPaySuccess object:nil userInfo:nil];
                 break;
                 
             default:
-                strMsg = [NSString stringWithFormat:@"支付结果：失败！retcode = %d, retstr = %@", resp.errCode,resp.errStr];
+                strMsg = [NSString stringWithFormat:@"支付失败！%@",resp.errStr];
                 NSLog(@"错误，retcode = %d, retstr = %@", resp.errCode,resp.errStr);
+                [[NSNotificationCenter defaultCenter] postNotificationName:kHSPayFailed object:nil userInfo:@{kHSPayResultMsg:[HSPublic controlNullString:resp.errStr]}];
                 break;
         }
     }
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:strTitle message:strMsg delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
-    [alert show];
+//    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:strTitle message:strMsg delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+//    [alert show];
 }
 
 

@@ -111,4 +111,12 @@ typedef NS_ENUM(NSUInteger, HSLoginType) {
 /// 根据订单的状态status 返回 具体的描述
 + (NSString *)orderStatusStrWithState:(NSString *)status;
 
+///根据从1970年的double 数字 转换成时间2015-01-01 00：00：00
++ (NSString *)dateFormWithTimeDou:(double)timeDou;
+
+///根据从1970年的double 数字 转换成form定义的时间 例如 @"YYYY-MM-DD HH:mm:ss"
++ (NSString *)dateFormatterWithTimeIntervalSince1970:(double)interval formatter:(NSString *)form;
+
+/// 判断支付宝支付结果
++ (BOOL)aliPaySuccess:(NSDictionary *)dic;
 @end

@@ -7,8 +7,9 @@
 //
 
 #import "HSMineFavoriteViewController.h"
-#import "HSFavoriteTableViewCell.h"
+#import "HSCommodityDetailViewController.h"
 
+#import "HSFavoriteTableViewCell.h"
 #import "HSCommodtyItemModel.h"
 #import "HSDBManager.h"
 
@@ -76,7 +77,7 @@ UITableViewDelegate>
             NSArray *jsonArr = (NSArray *)json;
             NSMutableArray *tmp = [[NSMutableArray alloc] initWithCapacity:jsonArr.count];
             NSMutableArray *dbArr = [[NSMutableArray alloc] initWithCapacity:jsonArr.count];
-            [HSDBManager deleteTableName:[HSDBManager tableNameFavoriteWithUid]];
+            [HSDBManager deleteAllWithTableName:[HSDBManager tableNameFavoriteWithUid]];
             [jsonArr enumerateObjectsUsingBlock:^(NSDictionary *obj, NSUInteger idx, BOOL *stop) {
                 @autoreleasepool {
                     HSCommodtyItemModel *itemModel = [[HSCommodtyItemModel alloc] initWithDictionary:obj error:nil];
@@ -139,6 +140,13 @@ UITableViewDelegate>
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    UIStoryboard *storyBorad = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    HSCommodityDetailViewController *detailVC = [storyBorad instantiateViewControllerWithIdentifier:NSStringFromClass([HSCommodityDetailViewController class])];
+    //detailVC.hidesBottomBarWhenPushed = YES;
+    HSCommodtyItemModel *itemModel = _favoriteDataArray[indexPath.row];;
+    detailVC.itemModel = itemModel;
+    [self.navigationController pushViewController:detailVC animated:YES];
 }
 
 

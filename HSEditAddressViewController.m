@@ -96,6 +96,7 @@
             
             if (status) {
                 [self showHudWithText:@"保存成功"];
+                [self backAction:nil];
             }
             else
             {

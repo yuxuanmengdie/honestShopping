@@ -25,7 +25,7 @@
 #import "WXApi.h"
 
 @interface HSPayOrderViewController ()<UITableViewDataSource,
-UITableViewDelegate,WXApiDelegate>
+UITableViewDelegate>
 {
     
     NSArray *_commdityDataArray;
@@ -52,6 +52,7 @@ UITableViewDelegate,WXApiDelegate>
     // Do any additional setup after loading the view.
     _payType = 0;
     
+    [self setNavBarRightBarWithTitle:@"1分钱测试" action:@selector(payTest)];
     [_orderDetailTableView registerNib:[UINib nibWithNibName:NSStringFromClass([HSSubmitOrderAddressTableViewCell class]) bundle:nil] forCellReuseIdentifier:NSStringFromClass([HSSubmitOrderAddressTableViewCell class])];
     [_orderDetailTableView registerNib:[UINib nibWithNibName:NSStringFromClass([HSSubmitOrderCommdityTableViewCell class]) bundle:nil] forCellReuseIdentifier:NSStringFromClass([HSSubmitOrderCommdityTableViewCell class])];
     [_orderDetailTableView registerNib:[UINib nibWithNibName:NSStringFromClass([HSPayTypeTableViewCell class]) bundle:nil] forCellReuseIdentifier:NSStringFromClass([HSPayTypeTableViewCell class])];
@@ -67,13 +68,31 @@ UITableViewDelegate,WXApiDelegate>
     
     _settleView.hidden = YES;
     
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(p_paySuccess:) name:kHSPaySuccess object:nil];
+     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(p_payFailed:) name:kHSPayFailed object:nil];
+    
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+#pragma mark - 
+#pragma mark 一分钱测试
+- (void)payTest
+{
+    
+    HSOrderModel *model = [_orderModel copy];
+    model.order_sumPrice = @"0.01";
+    if (_payType == 0) {
+        [self aliPayWithOrderModel:model title:[HSPublic controlNullString:[self productName:model]] desc:[HSPublic controlNullString:[self productName:model]]];
+    }else
+    {
+        [self weixinPay:model];
+    }
 
+//     [[NSNotificationCenter defaultCenter] postNotificationName:kHSPaySuccess object:nil userInfo:nil];
+}
 
 #pragma mark -
 #pragma mark settleView 的设置
@@ -81,13 +100,16 @@ UITableViewDelegate,WXApiDelegate>
 {
     [_settleView.settltButton setTitle:@"支付订单" forState:UIControlStateNormal];
     _settleView.textLabel.text = [NSString stringWithFormat:@"应付金额：%0.2f",[self totolMoney]];
+    if (![_orderModel.status isEqualToString:@"1"]) { /// 不是待支付
+        _settleView.settltButton.enabled = NO;
+    }
     
     __weak typeof(self) wself = self;
     
     _settleView.settleBlock = ^{
        // [wself aliPay];
         __strong typeof(wself) swself = wself;
-        if (_payType == 0) {
+        if (swself->_payType == 0) {
             [swself aliPayWithOrderModel:swself->_orderModel title:[HSPublic controlNullString:[swself productName:swself->_orderModel]] desc:[HSPublic controlNullString:[swself productName:swself->_orderModel]]];
         }else
         {
@@ -130,6 +152,7 @@ UITableViewDelegate,WXApiDelegate>
                 _commdityDataArray = _orderModel.item_list;
                 _settleView.hidden = NO;
                 [self setupSettleView];
+                
                 [_orderDetailTableView reloadData];
             }
         }
@@ -271,13 +294,23 @@ UITableViewDelegate,WXApiDelegate>
         
         [[AlipaySDK defaultService] payOrder:orderString fromScheme:appScheme callback:^(NSDictionary *resultDic) {
             NSLog(@"%s reslut = %@", __func__,resultDic);
+            NSDictionary *memo = resultDic;
+            
+            if ([HSPublic aliPaySuccess:memo]) {
+                [[NSNotificationCenter defaultCenter] postNotificationName:kHSPaySuccess object:nil userInfo:nil];
+            }
+            else
+            {
+                [[NSNotificationCenter defaultCenter] postNotificationName:kHSPayFailed object:nil userInfo:@{kHSPayResultMsg:[HSPublic controlNullString:memo[kAliPayMemo]]}];
+            }
+
         }];
         
     }
 
 }
 
-#pragma mark - 
+#pragma mark -
 #pragma mark 微信支付
 - (void)weixinPay:(HSOrderModel *)model
 {
@@ -331,7 +364,7 @@ UITableViewDelegate,WXApiDelegate>
     //订单标题，展示给用户
     NSString *order_name    =  [self productName:model];//@"V3支付测试";
     //订单金额,单位（分）
-    NSString *order_price   = @"1";//1分钱测试
+    NSString *order_price   =  [NSString stringWithFormat:@"%.f",[model.order_sumPrice floatValue]*100];//@"1";//1分钱测试
     
     
     //================================
@@ -398,7 +431,7 @@ UITableViewDelegate,WXApiDelegate>
 #pragma mark 获取商品标题
 - (NSString *)productName:(HSOrderModel *)orderModel
 {
-   __block NSString *result = nil;
+   __block NSString *result = @"";
     
     [orderModel.item_list enumerateObjectsUsingBlock:^(HSOrderitemModel *obj, NSUInteger idx, BOOL *stop) {
         if (result == nil) {
@@ -411,7 +444,9 @@ UITableViewDelegate,WXApiDelegate>
         
     }];
     
+    return @"商品";
     return result;
+
 }
 
 #pragma mark -
@@ -637,7 +672,6 @@ UITableViewDelegate,WXApiDelegate>
                 _placeAddressCell.bounds = tableView.bounds;
                 [_placeAddressCell setNeedsLayout];
             }
-            NSLog(@"cell hei %f", _placeAddressCell.detailLabel.frame.size.width);
             [_placeAddressCell setupWithUserName:_orderModel.userName phone:_orderModel.mobile address:_orderModel.address];
             _placeAddressCell.detailLabel.preferredMaxLayoutWidth = _placeAddressCell.detailLabel.frame.size.width;
             [_placeAddressCell.contentView updateConstraintsIfNeeded];
@@ -665,41 +699,33 @@ UITableViewDelegate,WXApiDelegate>
 //客户端提示信息
 - (void)alert:(NSString *)title msg:(NSString *)msg
 {
-    UIAlertView *alter = [[UIAlertView alloc] initWithTitle:title message:msg delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    UIAlertView *alter = [[UIAlertView alloc] initWithTitle:title message:msg delegate:nil cancelButtonTitle:@"好的" otherButtonTitles:nil];
     
     [alter show];
 }
-
-
--(void) onResp:(BaseResp*)resp
+#pragma mark -
+#pragma mark 支付结果
+- (void)p_paySuccess:(NSNotification *)noti
 {
-    NSString *strMsg = [NSString stringWithFormat:@"errcode:%d", resp.errCode];
-    NSString *strTitle;
-    
-    if([resp isKindOfClass:[SendMessageToWXResp class]])
-    {
-        strTitle = [NSString stringWithFormat:@"发送媒体消息结果"];
-    }
-    if([resp isKindOfClass:[PayResp class]]){
-        //支付返回结果，实际支付结果需要去微信服务器端查询
-        strTitle = [NSString stringWithFormat:@"支付结果"];
-        
-        switch (resp.errCode) {
-            case WXSuccess:
-                strMsg = @"支付结果：成功！";
-                NSLog(@"支付成功－PaySuccess，retcode = %d", resp.errCode);
-                break;
-                
-            default:
-                strMsg = [NSString stringWithFormat:@"支付结果：失败！retcode = %d, retstr = %@", resp.errCode,resp.errStr];
-                NSLog(@"错误，retcode = %d, retstr = %@", resp.errCode,resp.errStr);
-                break;
-        }
-    }
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:strTitle message:strMsg delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
-    [alert show];
-    
+    //[self.navigationController popToRootViewControllerAnimated:YES];
+    [self alert:@"" msg:@"支付成功!"];
+    [self popToRootNav];
+   //
 }
 
+- (void)p_payFailed:(NSNotification *)noti
+{
+    NSDictionary *userInfo = noti.userInfo;
+    [self alert:@"支付失败!" msg:[HSPublic controlNullString:userInfo[kHSPayResultMsg]]];
+}
+
+#pragma mark -
+#pragma mark delloc
+- (void)dealloc
+{
+    [self.httpRequestOperationManager.operationQueue cancelAllOperations];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    NSLog(@"%s",__func__);
+}
 
 @end

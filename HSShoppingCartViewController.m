@@ -174,6 +174,7 @@ UITableViewDelegate>
         return;
     }
     
+    //[self pushViewControllerWithIdentifer:NSStringFromClass([HSLoginInViewController class])];
     UIStoryboard *storyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
     HSSubmitOrderViewController *submitVC = [storyBoard instantiateViewControllerWithIdentifier:NSStringFromClass([HSSubmitOrderViewController class])];
     submitVC.itemNumDic = [self selectedItemNum];

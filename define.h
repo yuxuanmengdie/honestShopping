@@ -230,9 +230,25 @@ static NSString *const kRemeberPassword = @"hs_remeberPassword";
 #pragma mark -
 #pragma mark 各平台的key
 static NSString *const kUMengAppKey = @"53290df956240b6b4a0084b3";//@"556e697267e58ee877007380"; /放心吃
-// APP ID:1104470651  APP KEY:1VATaXjYJuiJ0itg   URL schema qq41D4E27B
+//qq APP ID:1104470651  APP KEY:1VATaXjYJuiJ0itg   URL schema QQ41D4E27B
 
 
 #pragma mark -
 #pragma mark 支付宝key
+
+static NSString *const kAliPayMemo = @"memo";
+
+static NSString *const kAliPayResultStatus = @"ResultStatus";
+/// 支付成功的status
+static NSString *const kAliPaySuccessResultStatus = @"9000";
+
+#pragma mark - 
+#pragma mark  支付成功， 支付失败的通知key
+
+static NSString *const kHSPaySuccess = @"kHSPaySuccess1111";
+
+static NSString *const kHSPayFailed = @"kHSPayFailed111";
+
+static NSString *const kHSPayResultMsg = @"kHSPayResultMsg";
+
 #endif

@@ -13,7 +13,7 @@
 
 - (void)awakeFromNib {
     // Initialization code
-    _priceLabel.textColor = kAppYellowColor;
+    _priceLabel.textColor = [UIColor redColor];
     _stateLabel.textColor = kAppYellowColor;
 }
 
@@ -28,9 +28,9 @@
     [_commodityImageView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,[HSPublic controlNullString:orderModel.img]]] placeholderImage:kPlaceholderImage];
     
     _orderIDLabel.text = [HSPublic controlNullString:orderModel.orderId];
-    _timeLabel.text = [HSPublic controlNullString:orderModel.add_time];
-    _priceLabel.text = [HSPublic controlNullString:orderModel.order_sumPrice];
-    _stateLabel.text = [HSPublic controlNullString:orderModel.status];
+    _timeLabel.text = [HSPublic controlNullString:[HSPublic dateFormWithTimeDou:[orderModel.add_time doubleValue]]];
+    _priceLabel.text = [NSString stringWithFormat:@"￥%@元",[HSPublic controlNullString:orderModel.order_sumPrice] ];
+    _stateLabel.text = [HSPublic controlNullString:[HSPublic orderStatusStrWithState:orderModel.status]];
 
 }
 @end

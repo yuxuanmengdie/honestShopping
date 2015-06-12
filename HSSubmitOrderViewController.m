@@ -29,7 +29,7 @@ UITableViewDataSource>
     HSAddressModel *_addressModel;
     
     /// 选择优惠券的底部视图
-    UIView *_bgView;
+    UIView *_couponBgView;
     /// 优惠券 选择视图
     HSCouponSelectedView *_couponView;
     
@@ -123,17 +123,17 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
 #pragma mark 选择优惠券view
 - (void)p_showCouponSelectedView
 {
-    if (_bgView == nil) {
-        _bgView = [[UIView alloc] initWithFrame:CGRectZero];
-        _bgView.backgroundColor = [UIColor blackColor];
-        _bgView.alpha = 0.6;
-        _bgView.translatesAutoresizingMaskIntoConstraints = NO;
-        [self.view addSubview:_bgView];
-        [self.view HS_edgeFillWithSubView:_bgView];
+    if (_couponBgView == nil) {
+        _couponBgView = [[UIView alloc] initWithFrame:CGRectZero];
+        _couponBgView.backgroundColor = [UIColor blackColor];
+        _couponBgView.alpha = 0.6;
+        _couponBgView.translatesAutoresizingMaskIntoConstraints = NO;
+        [self.view addSubview:_couponBgView];
+        [self.view HS_edgeFillWithSubView:_couponBgView];
         
-        _bgView.userInteractionEnabled = YES;
+        _couponBgView.userInteractionEnabled = YES;
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(bgTapAction)];
-        [_bgView addGestureRecognizer:tap];
+        [_couponBgView addGestureRecognizer:tap];
     }
     
     if (_couponView == nil) {
@@ -153,7 +153,7 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
         
     }
     
-    _bgView.hidden = NO;
+    _couponBgView.hidden = NO;
     _couponView.hidden = NO;
     
     __weak typeof(self) wself = self;
@@ -171,7 +171,7 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
 
 - (void)bgTapAction
 {
-    _bgView.hidden = YES;
+    _couponBgView.hidden = YES;
     _couponView.hidden = YES;
     [_couponView.couponTextField resignFirstResponder];
 }
@@ -823,5 +823,11 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
      [_submitOrdertableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0],[NSIndexPath indexPathForRow:_commdityDataArray.count inSection:1],[NSIndexPath indexPathForRow:_commdityDataArray.count+1 inSection:1],[NSIndexPath indexPathForRow:_commdityDataArray.count+2 inSection:1]] withRowAnimation:UITableViewRowAnimationAutomatic];
     
 
+}
+
+- (void)dealloc
+{
+     [self.httpRequestOperationManager.operationQueue cancelAllOperations];
+     [_postageRequestOperation.operationQueue cancelAllOperations];
 }
 @end

@@ -25,8 +25,8 @@
 {
     [_couponImageView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kCoupImageHeaderURL,couponModle.img]] placeholderImage:kPlaceholderImage];
     
-    _validDateLabel.text = [HSPublic controlNullString:couponModle.endtime];
-    _dateLabel.text = [HSPublic controlNullString:couponModle.starttime];
+    _validDateLabel.text = @"有效期至：";//[HSPublic controlNullString:couponModle.endtime];
+    _dateLabel.text = [HSPublic controlNullString:[HSPublic dateFormatterWithTimeIntervalSince1970:[couponModle.endtime doubleValue] formatter:@"YYYY-MM-dd"]];//[HSPublic controlNullString:couponModle.starttime];
     _introLabel.text = [HSPublic controlNullString:couponModle.desc];
     _explainLabel.text = [HSPublic controlNullString:couponModle.name];
 }

@@ -33,7 +33,7 @@
 {
     _titleLabel.text = [HSPublic controlNullString:itemModel.title];
     _introLabel.text = [HSPublic controlNullString:itemModel.intro];
-    _timeLabel.text = [HSPublic controlNullString:itemModel.add_time];
+    _timeLabel.text = [HSPublic controlNullString:[HSPublic dateFormWithTimeDou:[itemModel.add_time doubleValue]]];
     
     [_commodityImageView sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",kImageHeaderURL,itemModel.img]] placeholderImage:kPlaceholderImage];
 }

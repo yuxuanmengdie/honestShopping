@@ -268,7 +268,10 @@ static const int kPlaceViewTag = 5003;
         UIView *tabView = [main.view viewWithTag:kTabBarViewTag];
         UITabBarController *tabVC = (UITabBarController *)main;
         tabVC.tabBar.hidden = YES;
+//        [tabVC.view bringSubviewToFront:tabView];
         tabView.hidden = NO;
+//        [tabVC.view insertSubview:tabView aboveSubview:tabVC.tabBar];
+    
     }
 
 }
@@ -286,6 +289,26 @@ static const int kPlaceViewTag = 5003;
         }
     }
 
+}
+
+/// pop到顶层的navigation
+- (void)popToRootNav
+{
+    
+    
+    NSLog(@"nav=%@,par = %@",self.navigationController,self.parentViewController);
+    
+    UIViewController *main = self.navigationController.parentViewController;
+    UINavigationController *nav = self.navigationController;
+    [self.navigationController popToRootViewControllerAnimated:YES];
+    if ([main isKindOfClass:[UITabBarController class]] && [nav.viewControllers count] < 2) {
+        UIView *tabView = [main.view viewWithTag:kTabBarViewTag];
+        UITabBarController *tabVC = (UITabBarController *)main;
+        tabVC.tabBar.hidden = YES;
+        tabView.hidden = NO;        
+    }
+
+    
 }
 
 #pragma mark -

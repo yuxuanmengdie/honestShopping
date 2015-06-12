@@ -87,4 +87,6 @@
 + (BOOL)deleteFavoriteItemWithTableName:(NSString *)tableName keyID:(NSString *)keyID;
 
 + (NSMutableArray *)selectFavoriteAllWithTableName:(NSString *)tableName;
+
++ (BOOL)deleteAllWithTableName:(NSString *)tableName;
 @end

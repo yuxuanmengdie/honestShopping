@@ -555,4 +555,38 @@ static const double kTimedLoginInterval = 60*60;
     
     return result;
 }
+
++ (NSString *)dateFormWithTimeDou:(double)timeDou
+{
+    NSString *rst = @"";
+    NSDate *date = [NSDate dateWithTimeIntervalSince1970:timeDou];
+    NSDateFormatter *formtter = [[NSDateFormatter alloc] init];
+    [formtter setDateFormat:@"YYYY-MM-dd HH:mm:ss"];
+    rst = [formtter stringFromDate:date];
+    
+    return rst;
+}
+
++ (NSString *)dateFormatterWithTimeIntervalSince1970:(double)interval formatter:(NSString *)form
+{
+    NSString *rst = @"";
+    NSDate *date = [NSDate dateWithTimeIntervalSince1970:interval];
+    NSDateFormatter *formtter = [[NSDateFormatter alloc] init];
+    [formtter setDateFormat:form];
+    rst = [formtter stringFromDate:date];
+    
+    return rst;
+}
+
++ (BOOL)aliPaySuccess:(NSDictionary *)dic
+{
+    BOOL isSuc = NO;
+    
+    NSString *status = dic[kAliPayResultStatus];
+    if ([status isEqualToString:kAliPaySuccessResultStatus]) {
+        isSuc = YES;
+    }
+    return isSuc;
+}
+
 @end

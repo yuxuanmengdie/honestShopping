@@ -74,4 +74,7 @@
 /// 商品item的完整路径
 - (NSString *)commodityIntroImgFullUrl:(NSString *)oriUrl;
 
+/// pop到顶层的navigation
+- (void)popToRootNav;
+
 @end

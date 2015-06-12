@@ -7,6 +7,7 @@
 //
 
 #import "HSMineOrderViewController.h"
+#import "HSPayOrderViewController.h"
 #import "HSOrderTableViewCell.h"
 
 #import "HSOrderModel.h"
@@ -65,6 +66,7 @@ UITableViewDelegate>
     [self orderRequestWithStatus:MineOrderAwaitPayStatus uid:[HSPublic controlNullString:_userInfoModel.id] sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode]];
     [self orderRequestWithStatus:MineOrderAwaitShippedStatus uid:[HSPublic controlNullString:_userInfoModel.id] sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode]];
     [self orderRequestWithStatus:MineOrderAwaitReceivingStatus uid:[HSPublic controlNullString:_userInfoModel.id] sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode]];
+    [self orderRequestWithStatus:MineOrderClosedStatus uid:[HSPublic controlNullString:_userInfoModel.id] sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode]];
     
     [self showNetLoadingView];
     _completeOrderLoading = NO;
@@ -216,9 +218,24 @@ UITableViewDelegate>
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
+    HSOrderModel *model =  nil;
+
     if (tableView == _unfinishedTableView) {
-        
+        model = _unfinishedDataArray[indexPath.row];
     }
+    else
+    {
+        model = _finishedDataArray[indexPath.row];
+    }
+    
+    UIStoryboard *stroyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    HSPayOrderViewController *pay = [stroyBoard instantiateViewControllerWithIdentifier:NSStringFromClass([HSPayOrderViewController class])];
+    pay.hidesBottomBarWhenPushed = YES;
+    pay.title = @"支付订单";
+    pay.userInfoModel = _userInfoModel;
+    pay.orderID = model.orderId;
+    [self.navigationController pushViewController:pay animated:YES];
+
 }
 
 #pragma mark -
@@ -228,6 +245,8 @@ UITableViewDelegate>
     [self.httpRequestOperationManager.operationQueue cancelAllOperations];
     [self.httpRequestOperationManager.operationQueue removeObserver:self forKeyPath:@"operationCount"];
     self.httpRequestOperationManager = nil;
+    
+    NSLog(@"%s",__func__);
 }
 
 @end

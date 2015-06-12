@@ -37,7 +37,7 @@
 
 #define kAPPTintColor [UIColor colorWithRed:39/255.0 green:147/255.0 blue:68/255.0 alpha:1.0]
 
-#define kTabBarViewTag 601
+#define kTabBarViewTag 3478
 
 #define kTabBarHeight 49
 

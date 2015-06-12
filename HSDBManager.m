@@ -107,8 +107,8 @@ static NSString *const kColumnDataDicKey = @"dataDic";
     if ([[self shareDataBase] open]) {
         if ([HSDBManager isTableExist:tableName]) {
             NSString *sql = [NSString stringWithFormat:@"Drop TABLE %@",tableName];
-            [[self shareDataBase] executeUpdate:sql];
-            isSuc = YES;
+            isSuc = [[self shareDataBase] executeUpdate:sql];
+           
         }
         [[self shareDataBase] close];
     }
@@ -317,5 +317,18 @@ static NSString *const kFavoriteColumnID = @"favoriteID";
     return nil;
 }
 
+
++ (BOOL)deleteAllWithTableName:(NSString *)tableName
+{
+    BOOL isOK = NO;
+    if ([[self shareDataBase] open])
+    {
+        //   NSString *str = [];
+        isOK = [[self shareDataBase] executeUpdate:[NSString stringWithFormat:@"DELETE FROM %@",tableName]];
+        [[self shareDataBase] close];
+    }
+    return isOK;
+
+}
 
 @end
