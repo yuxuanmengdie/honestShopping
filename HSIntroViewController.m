@@ -92,7 +92,7 @@ static const float kMaxLoadingTime = 5.0;
     
     CGSize size = rect.size;
     
-    NSString *imgName = @"icon_more.jpg";
+    NSString *imgName = @"icon_launcher_place.jpg";
     if ( CGSizeEqualToSize(size, CGSizeMake(320, 480))) { // 3.5寸
         
     }
@@ -404,7 +404,11 @@ static const float kMaxLoadingTime = 5.0;
                 [_timer invalidate];
                 _timer = nil;
             }
-            [self introPagesWithBannerArr:arr];
+            else
+            {
+                 [self introPagesWithBannerArr:arr];
+            }
+           
         }
     }];
     

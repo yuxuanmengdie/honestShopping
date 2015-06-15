@@ -61,8 +61,11 @@ static NSString  *const kTopCellIndentifier = @"topCellIndentifer";
     _imageSizeDic = [[NSMutableDictionary alloc] init];
     _buyNumView.hidden = YES;
     self.title = @"商品详情";
-    [self setNavBarRightBarWithTitle:@"分享" action:@selector(shareAction)];
-    [self requestDetailByItemID:_itemModel.id];
+    //[self setNavBarRightBarWithTitle:@"分享" action:@selector(shareAction)];
+    UIBarButtonItem *shareItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemTrash target:self action:@selector(shareAction)];
+    self.navigationItem.rightBarButtonItem = shareItem;
+    
+    [self requestDetailByItemID:[HSPublic controlNullString:_itemModel.id]];
     [self buyViewBlock];
     _isCollected = [HSDBManager selectedItemWithTableName:[HSDBManager tableNameWithUid] keyID:_itemModel.id] == nil ? NO : YES;
     
@@ -157,7 +160,7 @@ static NSString  *const kTopCellIndentifier = @"topCellIndentifer";
         
         HSUserInfoModel *infoModel = [[HSUserInfoModel alloc] initWithDictionary:[HSPublic userInfoFromPlist] error:nil];
         
-        [wself collectItemRequestWithID:swself->_detailPicModel.id uid:infoModel.id sessionCode:infoModel.sessionCode];
+        [wself collectItemRequestWithID:[HSPublic controlNullString:swself->_detailPicModel.id] uid:[HSPublic controlNullString:infoModel.id] sessionCode:[HSPublic controlNullString:infoModel.sessionCode]];
     };
 }
 
@@ -291,7 +294,7 @@ static NSString  *const kTopCellIndentifier = @"topCellIndentifer";
 #pragma mark  重新加载
 - (void)reloadRequestData
 {
-    [self requestDetailByItemID:_itemModel.id];
+    [self requestDetailByItemID:[HSPublic controlNullString:_itemModel.id]];
 }
 
 #pragma mark -

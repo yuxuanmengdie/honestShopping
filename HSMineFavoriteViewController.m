@@ -106,6 +106,67 @@ UITableViewDelegate>
 
 #pragma mark -
 #pragma mark 取消关注
+- (void)delFavoriteReqeust:(NSString *)uid itemId:(NSString *)itemId sessionCode:(NSString *)sessionCode
+{
+    [self showhudLoadingWithText:@"等待中" isDimBackground:YES];
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
+                                    kPostJsonUid:uid,
+                                    kPostJsonSessionCode:sessionCode,
+                                    kPostJsonItemid:itemId
+                                    };
+    [self.httpRequestOperationManager POST:kDelFavoriteURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+        [self hiddenHudLoading];
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"%s failed\n%@",__func__,operation.responseString);
+        [self hiddenHudLoading];
+        if (operation.responseData == nil) {
+            [self showHudWithText:@"取消失败"];
+            return ;
+        }
+        NSError *jsonError = nil;
+        id json = [NSJSONSerialization JSONObjectWithData:operation.responseData options:NSJSONReadingMutableContainers error:&jsonError];
+        if (jsonError == nil && [json isKindOfClass:[NSDictionary class]]) {
+            NSDictionary *jsonDic = (NSDictionary *)json;
+            
+            NSNumber *status = jsonDic[kPostJsonStatus];
+            
+            if (status != nil && [status boolValue]) {
+                [self showHudWithText:@"取消成功"];
+                [HSDBManager deleteFavoriteItemWithTableName:[HSDBManager tableNameFavoriteWithUid] keyID:[HSPublic controlNullString:itemId]];
+                [self favoriteDataWithItemID:itemId];
+                [_favoriteTableView reloadData];
+            }
+            else
+            {
+                [self showHudWithText:@"取消失败"];
+            }
+            
+        }
+    }];
+    
+}
+
+#pragma mark - 
+#pragma mark 删除指定的收藏
+- (void)favoriteDataWithItemID:(NSString *)itemID
+{
+    NSMutableArray *arr = [[NSMutableArray alloc] initWithArray:_favoriteDataArray];
+    
+    __block HSCommodtyItemModel *itemModel = nil;
+    [arr enumerateObjectsUsingBlock:^(HSCommodtyItemModel *obj, NSUInteger idx, BOOL *stop) {
+        
+        if ([obj.id isEqualToString:itemID]) {
+            itemModel = obj;
+            *stop = YES;
+        }
+    }];
+    
+    if (itemModel != nil) {
+        [arr removeObject:itemModel];
+    }
+    _favoriteDataArray = arr;
+}
+
 
 #pragma mark -
 #pragma mark tableView dataSource and delegate
@@ -113,7 +174,7 @@ UITableViewDelegate>
 {
     NSInteger num = _favoriteDataArray.count;
     if (num == 0 && !self.isRequestLoading) {
-        [self placeViewWithImgName:nil text:@"还没有收藏"];
+        [self placeViewWithImgName:@"search_no_content" text:@"还没有收藏"];
     }
     else
     {
@@ -128,6 +189,10 @@ UITableViewDelegate>
     HSFavoriteTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([HSFavoriteTableViewCell class]) forIndexPath:indexPath];
     HSCommodtyItemModel *model = _favoriteDataArray[indexPath.row];
     [cell setupWirhModel:model];
+    __weak typeof(self) wself = self;
+    cell.cancelBlock = ^{
+        [wself delFavoriteReqeust:[HSPublic controlNullString:wself.userInfoModel.id] itemId:[HSPublic controlNullString:model.id] sessionCode:[HSPublic controlNullString:wself.userInfoModel.sessionCode]];
+    };
     
     return cell;
 }

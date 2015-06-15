@@ -255,6 +255,16 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
 }
 
 #pragma mark -
+
+- (IBAction)weixinLoginAction:(id)sender {
+    [self weixinLogin];
+}
+
+- (IBAction)qqLoginAction:(id)sender {
+    [self qqLogin];
+}
+
+#pragma mark -
 #pragma mark 微信登录
 - (void)weixinLogin
 {
@@ -267,6 +277,7 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
             UMSocialAccountEntity *snsAccount = [[UMSocialAccountManager socialAccountDictionary]valueForKey:UMShareToWechatSession];
             
             NSLog(@"username is %@, uid is %@, token is %@ url is %@ , ",snsAccount.userName,snsAccount.usid,snsAccount.accessToken,snsAccount.iconURL);
+            [self loginInWithOtherID:[HSPublic controlNullString:snsAccount.openId] type:kWenxiLoginType];
             
         }
         
@@ -294,6 +305,9 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
             
             NSLog(@"username is %@, uid is %@, token is %@ url is %@",snsAccount.userName,snsAccount.usid,snsAccount.accessToken,snsAccount.iconURL);
             
+            
+           
+            
         }});
     
     //获取accestoken以及新浪用户信息，得到的数据在回调Block对象形参respone的data属性
@@ -317,6 +331,7 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
             UMSocialAccountEntity *snsAccount = [[UMSocialAccountManager socialAccountDictionary] valueForKey:UMShareToQQ];
             
             NSLog(@"username is %@, uid is %@, token is %@ url is %@",snsAccount.userName,snsAccount.usid,snsAccount.accessToken,snsAccount.iconURL);
+             [self loginInWithOtherID:[HSPublic controlNullString:snsAccount.openId] type:kQQLoginType];
             
         }});
     
@@ -332,12 +347,21 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
 - (void)loginInWithOtherID:(NSString *)openID type:(HSLoginType)loginType
 {
     [self showhudLoadingWithText:@"正在登录..." isDimBackground:YES];
-    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
-                                    kPostJsonOpenid:openID
-                                    };
+    
     // 142346261  123456
     
-    [self.httpRequestOperationManager POST:kWeixinLoginURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    NSString *logintypeStr = nil;
+    if (loginType == kWenxiLoginType) {
+        logintypeStr = kOtherLoginWeixinType;
+    }
+    else
+    {
+        logintypeStr = kOtherLoginQQType;
+    }
+    
+    NSDictionary *parametersDic = @{kPostJsonOpenid:openID,
+                                    kPostJsonType:logintypeStr};
+    [self.httpRequestOperationManager POST:kOtherLoginURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         NSLog(@"success\n%@",operation.responseString);
         [self showHudWithText:@"登录失败"];
         [self hiddenHudLoading];
@@ -356,8 +380,9 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
             _userInfoModel = [[HSUserInfoModel alloc] initWithDictionary:json error:nil];
             if (_userInfoModel.id.length > 0) { /// 登录后返回有数据
                 [self showHudInWindowWithText:@"登录成功"];
-//                [HSPublic saveUserInfoToPlist:[_userInfoModel toDictionary]];
+                [HSPublic saveUserInfoToPlist:[_userInfoModel toDictionary]];
                 [HSPublic setLoginInStatus:YES type:loginType];
+                [HSPublic saveOtherOpenID:openID];
                 
 //                [HSPublic saveLastUserName:userName];
 //                [HSPublic saveLastPassword:passWord];

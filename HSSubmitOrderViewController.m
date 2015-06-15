@@ -47,6 +47,8 @@ UITableViewDataSource>
 
 @property (weak, nonatomic) IBOutlet UIView *bottomSepView;
 
+@property (weak, nonatomic) IBOutlet UILabel *prePriceLabel;
+
 @property (weak, nonatomic) IBOutlet UILabel *_totalPriceLabel;
 
 @property (weak, nonatomic) IBOutlet UIButton *submitButton;
@@ -93,6 +95,7 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
 #pragma mark bottomView的状态
 - (void)bottomViewSetup
 {
+    _prePriceLabel.textColor = kAPPTintColor;
     self._totalPriceLabel.textColor = [UIColor redColor];
     float postPrice = 0.0;
     if ([HSPublic isAreaInJiangZheHu:_addressModel.sheng])
@@ -104,7 +107,7 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
         postPrice = 12.0;
     }
 
-    self._totalPriceLabel.text = [NSString stringWithFormat:@"应付金额：%0.2f",[self totolMoneyWithoutPostage]+postPrice];
+    self._totalPriceLabel.text = [NSString stringWithFormat:@"%0.2f元",[self totolMoneyWithoutPostage]+postPrice];
 
     [_submitButton setBackgroundImage:[HSPublic ImageWithColor:kAppYellowColor] forState:UIControlStateNormal];
     [_submitButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
@@ -819,7 +822,7 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
         //postPrice = 12.0;
          postPrice = _postageprice.length > 0 ? [_postageprice floatValue] : 12;
     }
-    self._totalPriceLabel.text = [NSString stringWithFormat:@"应付金额：%0.2f",[self totolMoneyWithoutPostage]+postPrice -[_couponModel.price floatValue]];
+    self._totalPriceLabel.text = [NSString stringWithFormat:@"%0.2f元",[self totolMoneyWithoutPostage]+postPrice -[_couponModel.price floatValue]];
      [_submitOrdertableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0],[NSIndexPath indexPathForRow:_commdityDataArray.count inSection:1],[NSIndexPath indexPathForRow:_commdityDataArray.count+1 inSection:1],[NSIndexPath indexPathForRow:_commdityDataArray.count+2 inSection:1]] withRowAnimation:UITableViewRowAnimationAutomatic];
     
 

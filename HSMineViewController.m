@@ -53,8 +53,9 @@ static const int kTakePhoneAlertTag = 701;
 {
     /// 每次进入程序都登录，更新sessioncode
     if ([HSPublic isLoginInStatus]) {
-         [self loginRequest:[HSPublic lastUserName] password:[HSPublic lastPassword]];
+         [self loginRequest];
     }
+ 
    
 }
 
@@ -121,7 +122,7 @@ static const int kTakePhoneAlertTag = 701;
     
     [self getLastetUserInfoModel];
     if ([HSPublic isLoginInStatus]) {
-        [self userInfoRequest:_userInfoModel.username phone:_userInfoModel.phone];
+        [self userInfoRequest:[HSPublic controlNullString:_userInfoModel.username] phone:[HSPublic controlNullString:_userInfoModel.phone]];
     }
     
     
@@ -155,22 +156,53 @@ static const int kTakePhoneAlertTag = 701;
 
 #pragma mark -
 #pragma mark 登录请求
-- (void)loginRequest:(NSString *)userName password:(NSString *)passWord
+- (void)loginRequest
 {
-    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
-                                    kPostJsonUserName:userName,
-                                    kPostJsonPassWord:passWord
-                                    };
+    
+    if (![HSPublic isLoginInStatus]) { /// 不在登录状态
+        return;
+    }
+    
+    NSString *userName = [HSPublic lastUserName];
+    NSString *passWord = [HSPublic lastPassword];
+    NSString *openID = [HSPublic lastOtherOpenID];
+    
+    NSDictionary *parametersDic;
+    NSString *loginURL = nil;
+    if ([HSPublic loginType] == kAccountLoginType) { /// 帐号登录
+        
+        loginURL = kLoginURL;
+        parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
+                          kPostJsonUserName:userName,
+                          kPostJsonPassWord:passWord
+                          };
+        
+    }
+    else
+    {
+        loginURL = kOtherLoginURL;
+        NSString *type = nil;
+        
+        if ([HSPublic loginType] == kQQLoginType) {
+            type = kOtherLoginQQType;
+        }
+        else
+        {
+            type = kOtherLoginWeixinType;
+        }
+        parametersDic = @{kPostJsonOpenid:openID,
+                          kPostJsonType:type};
+        
+    }
     // 142346261  123456
     AFHTTPRequestOperationManager *manager = [[AFHTTPRequestOperationManager alloc] init];
-    [manager POST:kLoginURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [manager POST:loginURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         NSLog(@"success\n%@",operation.responseString);
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"%s failed\n%@",__func__,operation.responseString);
-       
         if (operation.responseData == nil) {
-            [self loginRequest:userName password:passWord];
+            [self loginRequest];
             return ;
         }
         NSError *jsonError = nil;
@@ -184,9 +216,10 @@ static const int kTakePhoneAlertTag = 701;
         }
         else
         {
-           
+            
         }
     }];
+
 }
 
 
@@ -261,7 +294,7 @@ static const int kTakePhoneAlertTag = 701;
                 _userInfoModel.sign = isSign;
                 
                 if ([HSPublic isLoginInStatus]) {
-                    [self userInfoRequest:_userInfoModel.username phone:_userInfoModel.phone];
+                    [self userInfoRequest:[HSPublic controlNullString:_userInfoModel.username] phone:[HSPublic controlNullString:_userInfoModel.phone]];
                 }
 
                 [_mineCollectionView reloadData];
@@ -348,7 +381,7 @@ static const int kTakePhoneAlertTag = 701;
                 return;
             }
             
-            [swself signRequestWithUid:swself->_userInfoModel.id sessionCode:swself->_userInfoModel.sessionCode];
+            [swself signRequestWithUid:[HSPublic controlNullString:swself->_userInfoModel.id] sessionCode:[HSPublic controlNullString:swself->_userInfoModel.sessionCode]];
         };
 
         return view;
@@ -412,17 +445,17 @@ static const int kTakePhoneAlertTag = 701;
     }
     else if (indexPath.row == 3) // 我的试吃
     {
-        UIStoryboard *storyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
-        HSMineAddressViewController *submitVC = [storyBoard instantiateViewControllerWithIdentifier:NSStringFromClass([HSMineAddressViewController class])];
-//        submitVC.itemNumDic = [self selectedItemNum];
-//        submitVC.itemsDataArray = [self selectedItems];
-        submitVC.title = @"确认订单";
-        submitVC.hidesBottomBarWhenPushed = YES;
-        //submitVC.userInfoModel = [[HSUserInfoModel alloc] initWithDictionary:[HSPublic userInfoFromPlist] error:nil];
-        [self.navigationController pushViewController:submitVC animated:YES];
+//        UIStoryboard *storyBoard = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+//        HSMineAddressViewController *submitVC = [storyBoard instantiateViewControllerWithIdentifier:NSStringFromClass([HSMineAddressViewController class])];
+////        submitVC.itemNumDic = [self selectedItemNum];
+////        submitVC.itemsDataArray = [self selectedItems];
+//        submitVC.title = @"确认订单";
+//        submitVC.hidesBottomBarWhenPushed = YES;
+//        //submitVC.userInfoModel = [[HSUserInfoModel alloc] initWithDictionary:[HSPublic userInfoFromPlist] error:nil];
+//        [self.navigationController pushViewController:submitVC animated:YES];
 
-        //        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"" message:@"敬请期待" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
-//        [alertView show];
+        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"" message:@"敬请期待" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
+        [alertView show];
     }
     else if (indexPath.row == (_mineDataArray.count - 1) - 1) {  /// 打电话 应该提示
         UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:nil message:@"是否拨打客服电话" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"拨打", nil];

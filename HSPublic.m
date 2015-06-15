@@ -338,9 +338,9 @@
 
 + (NSString *)lastOtherOpenID
 {
-     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     NSString *result = [userDefaults objectForKey:kOtherOpenID];
-    return result;
+    return [HSPublic controlNullString:result];
 }
 
 + (NSString *)controlNullString:(NSString *)ori
@@ -404,16 +404,41 @@ static NSString *const kPasswordKey = @"lastPasswordKey";
     if (![HSPublic isLoginInStatus]) { /// 不在登录状态 
         return;
     }
+    
     NSString *userName = [HSPublic lastUserName];
     NSString *passWord = [HSPublic lastPassword];
+    NSString *openID = [HSPublic lastOtherOpenID];
     
-    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
-                                    kPostJsonUserName:userName,
-                                    kPostJsonPassWord:passWord
-                                    };
-    // 142346261  123456
+    NSDictionary *parametersDic;
+    NSString *loginURL = nil;
+    if ([HSPublic loginType] == kAccountLoginType) { /// 帐号登录
+        
+        loginURL = kLoginURL;
+        parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
+                          kPostJsonUserName:userName,
+                          kPostJsonPassWord:passWord
+                          };
+
+    }
+    else
+    {
+        loginURL = kOtherLoginURL;
+        NSString *type = nil;
+        
+        if ([HSPublic loginType] == kQQLoginType) {
+            type = kOtherLoginQQType;
+        }
+        else
+        {
+            type = kOtherLoginWeixinType;
+        }
+        parametersDic = @{kPostJsonOpenid:openID,
+                          kPostJsonType:type};
+
+    }
+       // 142346261  123456
     AFHTTPRequestOperationManager *manager = [[AFHTTPRequestOperationManager alloc] init];
-    [manager POST:kLoginURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+    [manager POST:loginURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
         NSLog(@"success\n%@",operation.responseString);
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {

@@ -365,7 +365,7 @@ UITableViewDelegate>
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     if (_cartArray.count == 0) {
-       [self placeViewWithImgName:@"bank_icon_failed" text:@"购物车空空如也"];
+       [self placeViewWithImgName:@"search_no_content" text:@"购物车空空如也"];
        
     }
     else

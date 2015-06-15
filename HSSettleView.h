@@ -12,6 +12,8 @@ typedef void(^HSSettleActionBlock)(void);
 /// 底部结算的view
 @interface HSSettleView : UIView
 
+@property (weak, nonatomic) IBOutlet UILabel *preLabel;
+
 @property (weak, nonatomic) IBOutlet UILabel *textLabel;
 
 @property (weak, nonatomic) IBOutlet UIButton *settltButton;

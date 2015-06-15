@@ -107,8 +107,12 @@ static NSString *const kPostJsonNum = @"num";
 #define kRegisterURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=register"]
 /// 登录
 #define kLoginURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=login"]
-/// 第三方登录 /index.php?g=api&m=User&a=weixinLogin
+/// 第三方登陆接口(统一接口) weixin or qq
+#define kOtherLoginURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=otherLogin"]
+/// 第三方登录 /index.php?g=api&m=User&a=weixinLogin 微信
 #define kWeixinLoginURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=weixinLogin"]
+/// QQ 登录
+#define kQqnLoginURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=qqnLogin"]
 ///获取手机验证码
 #define kGetVerifyCodeURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=getVerifyCode"]
 /// 验证手机验证码
@@ -251,4 +255,9 @@ static NSString *const kHSPayFailed = @"kHSPayFailed111";
 
 static NSString *const kHSPayResultMsg = @"kHSPayResultMsg";
 
+#pragma mark -
+#pragma mark  第三方登录的type 字段
+static NSString *const kOtherLoginQQType = @"qq";
+
+static NSString *const kOtherLoginWeixinType = @"weixin";
 #endif

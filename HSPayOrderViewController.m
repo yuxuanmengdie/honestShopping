@@ -99,7 +99,7 @@ UITableViewDelegate>
 - (void)setupSettleView
 {
     [_settleView.settltButton setTitle:@"支付订单" forState:UIControlStateNormal];
-    _settleView.textLabel.text = [NSString stringWithFormat:@"应付金额：%0.2f",[self totolMoney]];
+    _settleView.textLabel.text = [NSString stringWithFormat:@"%0.2f元",[self totolMoney]];
     if (![_orderModel.status isEqualToString:@"1"]) { /// 不是待支付
         _settleView.settltButton.enabled = NO;
     }
@@ -266,7 +266,7 @@ UITableViewDelegate>
     order.tradeNO = _orderModel.orderId;//[self generateTradeNO]; //订单ID（由商家自行制定）
     order.productName = title;//product.subject; //商品标题
     order.productDescription = desc;//product.body; //商品描述
-    order.amount = @"0.01";//[NSString stringWithFormat:@"%.2f",product.price]; //商品价格
+    order.amount = [NSString stringWithFormat:@"%.2f",[orderModel.order_sumPrice floatValue]]; //商品价格 @"0.01";//
     order.notifyURL =  @"http://www.xxx.com"; //回调URL
     
     order.service = @"mobile.securitypay.pay";
@@ -332,7 +332,8 @@ UITableViewDelegate>
         //错误提示
         NSString *debug = [req getDebugifo];
         
-        [self alert:@"提示信息" msg:debug];
+        //[self alert:@"提示信息" msg:debug];
+        [self alert:@"" msg:@"签名失败，请重试"];
         
         NSLog(@"%@\n\n",debug);
     }else{

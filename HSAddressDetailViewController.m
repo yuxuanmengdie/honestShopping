@@ -92,7 +92,7 @@ UITableViewDataSource>
 #pragma mark 修改默认地址的响应
 - (void)confirmAction
 {
-    [self defaultAddressRequestWithUid:[HSPublic controlNullString:_userInfoModel.id] sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode] add_id:_addressModel.id];
+    [self defaultAddressRequestWithUid:[HSPublic controlNullString:_userInfoModel.id] sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode] add_id:[HSPublic controlNullString:_addressModel.id]];
 }
 
 #pragma mark -

@@ -132,7 +132,7 @@ static const int kAdsCellImageViewTag = 600;
         }
         
         
-        [wself dataRequestWithWithCid:_cateID size:kSizeNum key:[HSPublic md5Str:[HSPublic getIPAddress:YES]] page:_itemsData.count/kSizeNum + 1];
+        [wself dataRequestWithWithCid:[HSPublic controlNullString:_cateID] size:kSizeNum key:[HSPublic md5Str:[HSPublic getIPAddress:YES]] page:_itemsData.count/kSizeNum + 1];
     }];
     _isAdsLoding = NO;
     
@@ -146,7 +146,7 @@ static const int kAdsCellImageViewTag = 600;
     LogFunc;
     [_commdityCollectionView reloadData];
     if (_adsData.count == 0 && !_isAdsLoding) {
-        [self adsRequestWithCid:_cateID key:[HSPublic md5Str:[HSPublic getIPAddress:YES]]];
+        [self adsRequestWithCid:[HSPublic controlNullString:_cateID ] key:[HSPublic md5Str:[HSPublic getIPAddress:YES]]];
     }
     
     if (_itemsData.count == 0 && !_commdityCollectionView.footer.isRefreshing) { /// 数据为空 并且 不在刷新
