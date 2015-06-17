@@ -403,10 +403,12 @@ static const float kMaxLoadingTime = 5.0;
             if ([_timer isValid]) {
                 [_timer invalidate];
                 _timer = nil;
+                
+                [self introPagesWithBannerArr:arr];
             }
             else
             {
-                 [self introPagesWithBannerArr:arr];
+                 //[self introPagesWithBannerArr:arr];
             }
            
         }

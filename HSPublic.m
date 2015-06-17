@@ -355,9 +355,44 @@
 #pragma mark -
 #pragma mark 帐号信息
 
++ (NSString *)lastOtherUserName
+{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSString *result = [userDefaults objectForKey:kOtherLoginUserName];
+    result = [self controlNullString:result];
+    return result;
+}
+
++ (void)saveLastOtherUserName:(NSString *)userName
+{
+    NSString *result = [self controlNullString:userName];
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setObject:result forKey:kOtherLoginUserName];
+    [userDefaults synchronize];
+}
+
++ (NSString *)lastOtherHeaderImgURL
+{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSString *result = [userDefaults objectForKey:kOtherLoginHeaderImgURL];
+    result = [self controlNullString:result];
+    return result;
+
+}
+
++ (void)savelastOtherHeaderImgURL:(NSString *)imgURL
+{
+    NSString *result = [self controlNullString:imgURL];
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    [userDefaults setObject:result forKey:kOtherLoginHeaderImgURL];
+    [userDefaults synchronize];
+
+}
+
 static NSString *const kUserNameKey = @"lastUserNameKey";
 
 static NSString *const kPasswordKey = @"lastPasswordKey";
+
 /// 保存上次的用户名称
 + (void)saveLastUserName:(NSString *)userName
 {

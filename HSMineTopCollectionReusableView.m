@@ -17,6 +17,11 @@
     [_signButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     _signButton.layer.masksToBounds = YES;
     _signButton.layer.cornerRadius = 5.0;
+    
+    _headerImageView.layer.masksToBounds = YES;
+    _headerImageView.layer.cornerRadius = 40;
+    _headerImageView.layer.borderWidth = 1.0;
+    _headerImageView.layer.borderColor = [UIColor whiteColor].CGColor;
 
 }
 

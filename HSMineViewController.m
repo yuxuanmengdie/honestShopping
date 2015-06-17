@@ -23,6 +23,8 @@
 
 #import "HSUserInfoModel.h"
 
+#import "UIImageView+WebCache.h"
+
 
 @interface HSMineViewController ()<UICollectionViewDataSource,
 UICollectionViewDelegate,
@@ -358,8 +360,18 @@ static const int kTakePhoneAlertTag = 701;
         
         HSMineTopCollectionReusableView *view =  [collectionView dequeueReusableSupplementaryViewOfKind :kind   withReuseIdentifier:reuseIdentifier   forIndexPath:indexPath];
         [view signStatus:NO];
+         view.bgImageView.image = [UIImage imageNamed:@"icon_mine_headBg.jpg"];
+        view.headerImageView.image = [UIImage imageNamed:@"icon_header"];
         if ([HSPublic isLoginInStatus]) {
-            [view welcomeText:_userInfoModel.username isLogin:YES];
+           
+            if ([HSPublic loginType] != kAccountLoginType) { // 第三方登录
+                [view welcomeText:[HSPublic lastOtherUserName] isLogin:YES];
+                [view.headerImageView sd_setImageWithURL:[NSURL URLWithString:[HSPublic lastOtherHeaderImgURL]] placeholderImage:[UIImage imageNamed:@"icon_header"]];
+            }
+            else
+            {
+                 [view welcomeText:_userInfoModel.username isLogin:YES];
+            }
             [view signStatus:_userInfoModel.sign];
         }
         else
@@ -368,7 +380,8 @@ static const int kTakePhoneAlertTag = 701;
             [view welcomeText:nil isLogin:NO];
             
         }
-        view.bgImageView.image = [UIImage imageNamed:@"icon_mine_headBg.jpg"];
+       
+        
         view.pointsLabel.text = [NSString stringWithFormat:@"积分：%@",[HSPublic controlNullString:_userInfoModel.score]];
         __weak typeof(self) wself = self;
         view.signBlock = ^{ /// 如果没登录  进入登录界面

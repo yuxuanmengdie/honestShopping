@@ -37,6 +37,12 @@ UITableViewDelegate>
     
     /// 订单信息
     HSOrderModel *_orderModel;
+    
+    /// 一分钱测试的提示
+    BOOL _payTestFlag;
+    
+    /// 更新订单的尝试次数
+    int _orderUpdateCount;
 }
 
 @property (weak, nonatomic) IBOutlet UITableView *orderDetailTableView;
@@ -47,9 +53,15 @@ UITableViewDelegate>
 
 @implementation HSPayOrderViewController
 
+/// 更新订单最大尝试次数
+static const int kUpdateOrderMaxCount = 5;
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    _payTestFlag = NO;
+    
+    _orderUpdateCount = 0;
     _payType = 0;
     
     [self setNavBarRightBarWithTitle:@"1分钱测试" action:@selector(payTest)];
@@ -81,6 +93,11 @@ UITableViewDelegate>
 #pragma mark 一分钱测试
 - (void)payTest
 {
+    if (!_payTestFlag) {
+        _payTestFlag = YES;
+        [self alert:@"提示" msg:@"切换下面列表中的\"支付方式\"，可以选择支付宝或者微信的1分钱测试"];
+        return;
+    }
     
     HSOrderModel *model = [_orderModel copy];
     model.order_sumPrice = @"0.01";
@@ -432,10 +449,10 @@ UITableViewDelegate>
 #pragma mark 获取商品标题
 - (NSString *)productName:(HSOrderModel *)orderModel
 {
-   __block NSString *result = @"";
+   __block NSString *result = @"商品";
     
     [orderModel.item_list enumerateObjectsUsingBlock:^(HSOrderitemModel *obj, NSUInteger idx, BOOL *stop) {
-        if (result == nil) {
+        if ([result isEqualToString:@"商品"]) {
             result = obj.title;
         }
         else
@@ -445,10 +462,55 @@ UITableViewDelegate>
         
     }];
     
-    return @"商品";
     return result;
 
 }
+
+#pragma mark -
+#pragma mark 更新订单状态
+- (void)updateOrderStatus:(NSString *)orderID uid:(NSString *)uid sessionCode:(NSString *)sessionCode
+{
+    _orderUpdateCount++;
+    [self showhudLoadingInWindowWithText:@"订单完成中..." isDimBackground:NO];
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
+                                    kPostJsonUid:uid,
+                                    kPostJsonOrderId:orderID,
+                                    kPostJsonSessionCode:sessionCode
+                                    };
+    // 142346261  123456
+    
+    [self.httpRequestOperationManager POST:kUpdateOrderNextURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+        NSLog(@"success\n%@",operation.responseString);
+        
+        [self hiddenHudLoading];
+        
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"%s failed\n%@",__func__,operation.responseString);
+        [self hiddenHudLoading];
+        if (operation.responseData == nil) {
+            if (_orderUpdateCount <= kUpdateOrderMaxCount) {
+                [self updateOrderStatus:orderID uid:uid sessionCode:sessionCode];
+            }
+            return ;
+        }
+        NSError *jsonError = nil;
+        id json = [NSJSONSerialization JSONObjectWithData:operation.responseData options:NSJSONReadingMutableContainers error:&jsonError];
+        if (jsonError == nil && [json isKindOfClass:[NSDictionary class]]) {
+            NSDictionary *tmpDic = (NSDictionary *)json;
+            NSNumber *status = tmpDic[kPostJsonStatus];
+            if (status != nil && [status boolValue]) { /// 订单更新成功
+                [self showHudInWindowWithText:@"支付成功，订单已完成!"];
+                [self popToRootNav];
+            }
+            }
+        else
+        {
+            
+        }
+    }];
+
+}
+
 
 #pragma mark -
 #pragma mark 获取商品描述
@@ -483,7 +545,7 @@ UITableViewDelegate>
             HSOrderStatusTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([HSOrderStatusTableViewCell class]) forIndexPath:indexPath];
             cell.orderStatusLabel.text = [NSString stringWithFormat:@"订单状态：%@",[HSPublic orderStatusStrWithState:_orderModel.status]];
             cell.orderIDLabel.text = [NSString stringWithFormat:@"订单编号：%@",[HSPublic controlNullString:_orderModel.orderId]];
-            cell.orderTimeLabel.text = [NSString stringWithFormat:@"订单时间：%@",[HSPublic controlNullString:_orderModel.add_time]];
+            cell.orderTimeLabel.text = [NSString stringWithFormat:@"订单时间：%@",[HSPublic controlNullString:[HSPublic dateFormWithTimeDou:[_orderModel.add_time doubleValue]]]];
             cell.selectionStyle = UITableViewCellSelectionStyleNone;
             return cell;
             
@@ -709,8 +771,9 @@ UITableViewDelegate>
 - (void)p_paySuccess:(NSNotification *)noti
 {
     //[self.navigationController popToRootViewControllerAnimated:YES];
-    [self alert:@"" msg:@"支付成功!"];
-    [self popToRootNav];
+    [self updateOrderStatus:[HSPublic controlNullString:_orderID] uid:[HSPublic controlNullString:_userInfoModel.id] sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode]];
+    //[self alert:@"" msg:@"支付成功!"];
+    //[self popToRootNav];
    //
 }
 

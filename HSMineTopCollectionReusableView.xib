@@ -52,9 +52,11 @@
                 <constraint firstAttribute="centerX" secondItem="zBA-pf-8W9" secondAttribute="centerX" id="ORF-Qv-0zg"/>
                 <constraint firstAttribute="centerX" secondItem="OaC-BT-OQ3" secondAttribute="centerX" id="Qkf-0O-btI"/>
                 <constraint firstAttribute="trailing" secondItem="PEn-tJ-EwN" secondAttribute="trailing" id="UNu-8a-z3i"/>
+                <constraint firstItem="zBA-pf-8W9" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="U6b-Vx-4bR" secondAttribute="leading" constant="8" id="da0-fs-CGu"/>
                 <constraint firstAttribute="centerX" secondItem="HKK-oY-WKa" secondAttribute="centerX" id="fb4-n2-cyg"/>
                 <constraint firstAttribute="bottom" secondItem="PEn-tJ-EwN" secondAttribute="bottom" id="mI6-6q-eCc"/>
                 <constraint firstItem="PEn-tJ-EwN" firstAttribute="leading" secondItem="U6b-Vx-4bR" secondAttribute="leading" id="nc9-nA-unI"/>
+                <constraint firstItem="OaC-BT-OQ3" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="U6b-Vx-4bR" secondAttribute="leading" constant="8" id="px1-zu-f9B"/>
                 <constraint firstItem="PEn-tJ-EwN" firstAttribute="top" secondItem="U6b-Vx-4bR" secondAttribute="top" id="tdK-0i-e0n"/>
                 <constraint firstItem="zBA-pf-8W9" firstAttribute="top" relation="greaterThanOrEqual" secondItem="HKK-oY-WKa" secondAttribute="bottom" constant="20" id="uLd-39-wCZ"/>
                 <constraint firstAttribute="bottom" secondItem="zBA-pf-8W9" secondAttribute="bottom" constant="28" id="wge-GP-Geh"/>

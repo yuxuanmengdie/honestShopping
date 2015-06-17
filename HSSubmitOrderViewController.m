@@ -118,7 +118,9 @@ static NSString *const kCouponTableViewIdentifier = @"hsCouponTableViewIdentifie
 
 
 - (IBAction)submitAction:(id)sender {
-    [self addOrderWithUid:[HSPublic controlNullString:_userInfoModel.id] couponId:[HSPublic controlNullString:_couponModel.id] username:[HSPublic controlNullString:_addressModel.consignee] addressName:@"" mobile:[HSPublic controlNullString:_addressModel.mobile] address:[NSString stringWithFormat:@"%@%@%@%@",[HSPublic controlNullString:_addressModel.sheng],[HSPublic controlNullString:_addressModel.shi],[HSPublic controlNullString:_addressModel.qu],[HSPublic controlNullString:_addressModel.address]]supportmethod:@"1" freetype:@"1" sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode] list:[self listOrder]];
+    
+    NSString *free = [HSPublic isAreaInJiangZheHu:_addressModel.sheng] ? @"0" : @"1";
+    [self addOrderWithUid:[HSPublic controlNullString:_userInfoModel.id] couponId:[HSPublic controlNullString:_couponModel.id] username:[HSPublic controlNullString:_addressModel.consignee] addressName:@"" mobile:[HSPublic controlNullString:_addressModel.mobile] address:[NSString stringWithFormat:@"%@%@%@%@",[HSPublic controlNullString:_addressModel.sheng],[HSPublic controlNullString:_addressModel.shi],[HSPublic controlNullString:_addressModel.qu],[HSPublic controlNullString:_addressModel.address]]supportmethod:@"1" freetype:free sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode] list:[self listOrder]];
     
 }
 

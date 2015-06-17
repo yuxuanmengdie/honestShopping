@@ -174,7 +174,7 @@ UITableViewDelegate>
 {
     NSInteger num = _favoriteDataArray.count;
     if (num == 0 && !self.isRequestLoading) {
-        [self placeViewWithImgName:@"search_no_content" text:@"还没有收藏"];
+        [self placeViewWithImgName:@"search_no_content" text:@"还没有关注"];
     }
     else
     {

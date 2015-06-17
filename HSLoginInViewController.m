@@ -277,7 +277,7 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
             UMSocialAccountEntity *snsAccount = [[UMSocialAccountManager socialAccountDictionary]valueForKey:UMShareToWechatSession];
             
             NSLog(@"username is %@, uid is %@, token is %@ url is %@ , ",snsAccount.userName,snsAccount.usid,snsAccount.accessToken,snsAccount.iconURL);
-            [self loginInWithOtherID:[HSPublic controlNullString:snsAccount.openId] type:kWenxiLoginType];
+            [self loginInWithOtherID:[HSPublic controlNullString:snsAccount.openId] type:kWenxiLoginType userName:snsAccount.userName headerImgURL:snsAccount.iconURL];
             
         }
         
@@ -331,7 +331,8 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
             UMSocialAccountEntity *snsAccount = [[UMSocialAccountManager socialAccountDictionary] valueForKey:UMShareToQQ];
             
             NSLog(@"username is %@, uid is %@, token is %@ url is %@",snsAccount.userName,snsAccount.usid,snsAccount.accessToken,snsAccount.iconURL);
-             [self loginInWithOtherID:[HSPublic controlNullString:snsAccount.openId] type:kQQLoginType];
+            
+             [self loginInWithOtherID:[HSPublic controlNullString:snsAccount.openId] type:kQQLoginType userName:snsAccount.userName headerImgURL:snsAccount.iconURL];
             
         }});
     
@@ -344,7 +345,7 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
 
 #pragma mark -
 #pragma mark 根据第三方的ID 注册
-- (void)loginInWithOtherID:(NSString *)openID type:(HSLoginType)loginType
+- (void)loginInWithOtherID:(NSString *)openID type:(HSLoginType)loginType userName:(NSString *)userName headerImgURL:(NSString *)imgURL
 {
     [self showhudLoadingWithText:@"正在登录..." isDimBackground:YES];
     
@@ -383,9 +384,8 @@ static NSString *const kRemeberPWNormalImageName = @"icon_remeberPW_unsel";
                 [HSPublic saveUserInfoToPlist:[_userInfoModel toDictionary]];
                 [HSPublic setLoginInStatus:YES type:loginType];
                 [HSPublic saveOtherOpenID:openID];
-                
-//                [HSPublic saveLastUserName:userName];
-//                [HSPublic saveLastPassword:passWord];
+                [HSPublic saveLastOtherUserName:userName];
+                [HSPublic savelastOtherHeaderImgURL:imgURL];
                 if (_remeberPWButton.selected) {
                     
                 }

@@ -13,6 +13,7 @@
 #import "HSBuyNumView.h"
 #import "HSCommodityDetailTableViewCell.h"
 #import "HSCommodityItemTopBannerView.h"
+#import "UIView+HSLayout.h"
 
 #import "HSCommodityItemDetailPicModel.h"
 #import "HSUserInfoModel.h"
@@ -61,9 +62,9 @@ static NSString  *const kTopCellIndentifier = @"topCellIndentifer";
     _imageSizeDic = [[NSMutableDictionary alloc] init];
     _buyNumView.hidden = YES;
     self.title = @"商品详情";
-    //[self setNavBarRightBarWithTitle:@"分享" action:@selector(shareAction)];
-    UIBarButtonItem *shareItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemTrash target:self action:@selector(shareAction)];
-    self.navigationItem.rightBarButtonItem = shareItem;
+   
+//    UIBarButtonItem *shareItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemTrash target:self action:@selector(shareAction)];
+//    self.navigationItem.rightBarButtonItem = shareItem;
     
     [self requestDetailByItemID:[HSPublic controlNullString:_itemModel.id]];
     [self buyViewBlock];
@@ -96,14 +97,14 @@ static NSString  *const kTopCellIndentifier = @"topCellIndentifer";
     [UMSocialWechatHandler setWXAppId:@"wxf674afd7fa6b3db1" appSecret:@"768ef498760a90567afeac93211abfa9" url:[self p_shareURLWithModel:_detailPicModel]];
     [UMSocialQQHandler setQQWithAppId:@"1104470651" appKey:@"1VATaXjYJuiJ0itg" url:[self p_shareURLWithModel:_detailPicModel]];
     NSString *shareText = [NSString stringWithFormat:@"%@\n%@", _detailPicModel.title,_detailPicModel.intro];//@"友盟社会化组件可以让移动应用快速具备社会化分享、登录、评论、喜欢等功能，并提供实时、全面的社会化数据统计分析服务。 http://www.umeng.com/social";             //分享内嵌文字
-    UIImage *shareImage = [UIImage imageNamed:@"icon_mine_6"];          //分享内嵌图片
+    UIImage *shareImage = [UIImage imageNamed:@"icon_app60"];          //分享内嵌图片
     
     //调用快速分享接口
     [UMSocialSnsService presentSnsIconSheetView:self
                                          appKey:kUMengAppKey
                                       shareText:shareText
                                      shareImage:shareImage
-                                shareToSnsNames:[NSArray arrayWithObjects:UMShareToSina,UMShareToTencent,UMShareToQQ,UMShareToQzone,UMShareToWechatSession,UMShareToWechatTimeline,nil]//nil
+                                shareToSnsNames:[NSArray arrayWithObjects:UMShareToTencent,UMShareToQQ,UMShareToQzone,UMShareToWechatSession,UMShareToWechatTimeline,nil]//nil
                                        delegate:self];
 
 }
@@ -232,6 +233,8 @@ static NSString  *const kTopCellIndentifier = @"topCellIndentifer";
             
             swself->_buyNumView.stepper.maximum = [swself->_detailPicModel.maxbuy intValue];
             
+            [self setNavBarRightBarWithTitle:@"分享" action:@selector(shareAction)];
+            
         }
     }];
 }
@@ -309,18 +312,23 @@ static NSString  *const kTopCellIndentifier = @"topCellIndentifer";
     if (0 == indexPath.row) {// 顶部轮播图所在的tableviewcell
         
         UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:kTopCellIndentifier forIndexPath:indexPath];
-        
+        //cell.contentView.backgroundColor = [UIColor redColor];
+//        for (UIView *subView in cell.contentView.subviews) {
+//            [subView removeFromSuperview];
+//        }
         HSCommodityItemTopBannerView *headView = (HSCommodityItemTopBannerView *)[cell.contentView viewWithTag:501];
+        
+        
         if (headView == nil) {
-            headView = [[HSCommodityItemTopBannerView alloc] initWithFrame:CGRectZero];
+            headView = [[HSCommodityItemTopBannerView alloc] initWithFrame:cell.frame];
             headView.translatesAutoresizingMaskIntoConstraints = NO;
             [cell.contentView addSubview:headView];
             cell.contentView.bounds = tableView.bounds;
             headView.tag = 501;
+             //headView.frame = cell.contentView.frame;
             [self headViewAutoLayoutInCell:cell headView:headView];
             headView.bannerView.sourceArr = [self controlBannerArr:_detailPicModel.banner];
-            
-            
+  
         }
         float hei = _placeheadView == nil ? headView.bannerHeight : _placeheadView.bannerHeight;
         [headView.bannerView iniSubviewsWithFrame:CGRectMake(0, 0,CGRectGetWidth(tableView.frame), hei)];
@@ -346,7 +354,7 @@ static NSString  *const kTopCellIndentifier = @"topCellIndentifer";
             }
         };
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        cell.selectionStyle = UITableViewCellSeparatorStyleNone;
+//        cell.selectionStyle = UITableViewCellSeparatorStyleNone;
         
         return cell;
     }
@@ -380,7 +388,7 @@ static NSString  *const kTopCellIndentifier = @"topCellIndentifer";
         }
 
     }];
-
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
 }
 

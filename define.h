@@ -139,7 +139,8 @@ static NSString *const kPostJsonNum = @"num";
 #define kGetDefaultAddressURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=getDefaultAddress"]
 /// 设置默认收货地址
 #define kSetDefaultAddressURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=setDefaultAddress"]
-
+/// 删除收货地址
+#define kDelAddressURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=User&a=delAddress"]
 
 /// 分类列表
 #define kGetCateURL  [NSString stringWithFormat:@"%@%@",kURLHeader,@"/index.php?g=api&m=Item&a=getCate"]
@@ -234,6 +235,9 @@ static NSString *const kRemeberPassword = @"hs_remeberPassword";
 #pragma mark -
 #pragma mark 各平台的key
 static NSString *const kUMengAppKey = @"53290df956240b6b4a0084b3";//@"556e697267e58ee877007380"; /放心吃
+/// 友盟推送
+static NSString *const kUMengPushMessageAppKey = @"556e697267e58ee877007380";
+
 //qq APP ID:1104470651  APP KEY:1VATaXjYJuiJ0itg   URL schema QQ41D4E27B
 
 
@@ -242,7 +246,7 @@ static NSString *const kUMengAppKey = @"53290df956240b6b4a0084b3";//@"556e697267
 
 static NSString *const kAliPayMemo = @"memo";
 
-static NSString *const kAliPayResultStatus = @"ResultStatus";
+static NSString *const kAliPayResultStatus = @"resultStatus";
 /// 支付成功的status
 static NSString *const kAliPaySuccessResultStatus = @"9000";
 
@@ -260,4 +264,14 @@ static NSString *const kHSPayResultMsg = @"kHSPayResultMsg";
 static NSString *const kOtherLoginQQType = @"qq";
 
 static NSString *const kOtherLoginWeixinType = @"weixin";
+
+#pragma mark -
+#pragma mark 第三方的username 头像地址等。
+
+static NSString *const kOtherLoginUserName = @"OtherLoginUserName";
+
+static NSString *const kOtherLoginHeaderImgURL = @"OtherLoginHeaderImgURL";
+
+
 #endif
+

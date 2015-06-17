@@ -69,11 +69,25 @@ typedef NS_ENUM(NSUInteger, HSLoginType) {
 /// 返回登录的方式
 + (HSLoginType)loginType;
 
+#pragma mark - 
+#pragma mark 第三方登录
 /// 保存openID
 + (void)saveOtherOpenID:(NSString *)openID;
 
 /// 取出openID
 + (NSString *)lastOtherOpenID;
+
+/// 取出第三方的username
++ (NSString *)lastOtherUserName;
+
+/// 保存第三方的username
++ (void)saveLastOtherUserName:(NSString *)userName;
+
+/// 第三方的头像地址
++ (NSString *)lastOtherHeaderImgURL;
+
+/// 保存第三方头像地址
++ (void)savelastOtherHeaderImgURL:(NSString *)imgURL;
 
 /// 保存上次的用户名称
 + (void)saveLastUserName:(NSString *)userName;

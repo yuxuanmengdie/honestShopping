@@ -124,6 +124,50 @@ UITableViewDataSource>
 
 }
 
+#pragma mark - 
+#pragma mark 删除地址
+- (void)deldelAddressRequestWithUid:(NSString *)uid sessionCode:(NSString *)sessionCode add_id:(NSString *)add_id
+{
+    [self showhudLoadingInWindowWithText:@"删除..." isDimBackground:YES];
+    NSDictionary *parametersDic = @{kPostJsonKey:[HSPublic md5Str:[HSPublic getIPAddress:YES]],
+                                    kPostJsonUid:uid,
+                                    kPostJsonAddId:add_id,
+                                    kPostJsonSessionCode:sessionCode
+                                    };
+    [self.httpRequestOperationManager POST:kDelAddressURL parameters:@{kJsonArray:[HSPublic dictionaryToJson:parametersDic]} success:^(AFHTTPRequestOperation *operation, id responseObject) { /// 失败
+        [self hiddenHudLoading];
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"%s failed\n%@",__func__,operation.responseString);
+        [self hiddenHudLoading];
+        if (operation.responseData == nil) {
+            [self showHudWithText:@"删除失败"];
+            return ;
+        }
+        NSError *jsonError = nil;
+        id json = [NSJSONSerialization JSONObjectWithData:operation.responseData options:NSJSONReadingMutableContainers error:&jsonError];
+        if (jsonError == nil && [json isKindOfClass:[NSDictionary class]]) {
+            NSDictionary *tmp = (NSDictionary *)json;
+            
+           NSNumber *status = tmp[kPostJsonStatus];
+            
+            if (status != nil && [status boolValue]) {
+                [self showHudWithText:@"删除成功"];
+                [self backAction:nil];
+            }
+            else
+            {
+                [self showHudWithText:@"删除失败"];
+            }
+            
+        }
+        else
+        {
+            
+        }
+    }];
+
+}
+
 #pragma mark - 设置为默认地址 {"uid":143,"add_id":10,"sessionCode":"10EEF472-09FE-1B20-900C-E6E4322FF855","key":"f528764d624db129b32c21fbca0cb8d6"}
 - (void)defaultAddressRequestWithUid:(NSString *)uid sessionCode:(NSString *)sessionCode add_id:(NSString *)add_id
 {
@@ -193,7 +237,7 @@ UITableViewDataSource>
 {
     HSAddressDetailTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:NSStringFromClass([HSAddressDetailTableViewCell class]) forIndexPath:indexPath];
 //    cell.separatorInset = UIEdgeInsetsZero;
-    
+    cell.leftTitleLabel.translatesAutoresizingMaskIntoConstraints = NO;
     if (indexPath.section == 1) {
         cell.leftTitleWidthConstraint.constant = 300;
         cell.leftTitleLabel.text = @"删除收货地址";
@@ -243,7 +287,7 @@ UITableViewDataSource>
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     if (indexPath.section == 1) { /// 删除地址
-        
+        [self deldelAddressRequestWithUid:[HSPublic controlNullString:_userInfoModel.id] sessionCode:[HSPublic controlNullString:_userInfoModel.sessionCode] add_id:[HSPublic controlNullString:_addressModel.id]];
     }
 }
 

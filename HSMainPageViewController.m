@@ -446,13 +446,16 @@ static const int kContentViewTag = 1000;
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSString *str = (NSString *)operation.responseString;
         if (str.length <= 1) {
+            [self hiddenMsg];
+            [self getCommofityCategaries:key];
             return ;
         }
         NSString *result = [str substringFromIndex:1];
         
         NSData *data =  [result dataUsingEncoding:NSUTF8StringEncoding];
         if (data == nil) {
-            [self showReqeustFailedMsg];
+            [self hiddenMsg];
+            [self getCommofityCategaries:key];
             return ;
         }
         [self hiddenMsg];

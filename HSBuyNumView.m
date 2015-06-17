@@ -53,8 +53,8 @@
     _buyBtn.layer.cornerRadius = 5.0;
     
     [_collectBtn setTitle:@"" forState:UIControlStateNormal];
-    [_collectBtn setImage:[UIImage imageNamed:@"icon_star_full"] forState:UIControlStateSelected];
-    [_collectBtn setImage:[UIImage imageNamed:@"icon_star_grey"] forState:UIControlStateNormal];
+    [_collectBtn setImage:[UIImage imageNamed:@"icon_favorite_Sel30"] forState:UIControlStateSelected];
+    [_collectBtn setImage:[UIImage imageNamed:@"icon_favorite_unSel30"] forState:UIControlStateNormal];
 }
 
 

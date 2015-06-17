@@ -8,7 +8,7 @@
 
 #import "FFScrollView.h"
 #import "UIImageView+WebCache.h"
-
+#import "UIView+HSLayout.h"
 
 @implementation FFScrollView
 @synthesize scrollView;
@@ -113,7 +113,8 @@ static const float kTimerInterval = 5.0;
     
     [self addSubview:self.pageControl];
     
-    [self.scrollView scrollRectToVisible:CGRectMake(width, 0, width, height) animated:NO];
+    //[self.scrollView scrollRectToVisible:CGRectMake(width, 0, width, height) animated:NO];
+    [self.scrollView setContentOffset:CGPointMake(width, 0) animated:NO];
     if ([timer isValid]) {
         [timer invalidate];
     }
@@ -128,6 +129,95 @@ static const float kTimerInterval = 5.0;
 
     }
 }
+
+/*
+#pragma mark -
+#pragma mark 自动布局来构建
+- (void)initSubViewsByAutolayout:(CGRect)frame;
+{
+    if (sourceArr.count < 1) {
+        return;
+    }
+    
+    for (UIView *sub in self.scrollView.subviews) {
+        [sub removeFromSuperview];
+    }
+    CGFloat width = frame.size.width;
+    CGFloat height = frame.size.height;
+    
+    self.scrollView = [[UIScrollView alloc]initWithFrame:CGRectZero];
+    self.scrollView.pagingEnabled = YES;
+    self.scrollView.delegate = self;
+    self.scrollView.showsVerticalScrollIndicator = NO;
+    self.scrollView.showsHorizontalScrollIndicator = NO;
+    [self addSubview:self.scrollView];
+    self.scrollView.translatesAutoresizingMaskIntoConstraints = NO;
+    
+    __weak typeof(self) wself = self;
+    NSString *lastModel = [sourceArr lastObject];
+    UIImageView *firstImageView = [[UIImageView alloc]initWithFrame:CGRectZero];
+    firstImageView.contentMode = _imageContentMode;
+    firstImageView.translatesAutoresizingMaskIntoConstraints = NO;
+    [self.scrollView addSubview:firstImageView];
+    [firstImageView sd_setImageWithURL:[NSURL URLWithString:lastModel] placeholderImage:kPlaceholderImage completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+        if (image) {
+            [wself p_imageLoadFinished:[wself p_imageViewHeightWithWid:width imageSize:image.size]];
+        }
+    }];
+
+
+    for (int i = 0; i < sourceArr.count; i++) {
+        UIImageView *imageview = [[UIImageView alloc]initWithFrame:CGRectMake(width*(i+1), 0, width, height)];
+        imageview.translatesAutoresizingMaskIntoConstraints = NO;
+        imageview.contentMode = _imageContentMode;
+        NSString *model = [sourceArr objectAtIndex:i];
+        [imageview sd_setImageWithURL:[NSURL URLWithString:model] placeholderImage:kPlaceholderImage completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+            if (image) {
+                [wself p_imageLoadFinished:[wself p_imageViewHeightWithWid:width imageSize:image.size]];
+            }
+        }];
+        [self.scrollView addSubview:imageview];
+        
+    }
+    
+    NSString *firstModel = [sourceArr firstObject];
+    UIImageView *lastImageView = [[UIImageView alloc]initWithFrame:CGRectMake(width*(sourceArr.count+1), 0, width, height)];
+    lastImageView.contentMode = _imageContentMode;
+    [lastImageView sd_setImageWithURL:[NSURL URLWithString:firstModel] placeholderImage:kPlaceholderImage completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+        if (image) {
+            [wself p_imageLoadFinished:[wself p_imageViewHeightWithWid:width imageSize:image.size]];
+        }
+    }];
+    [self.scrollView addSubview:lastImageView];
+    lastImageView.translatesAutoresizingMaskIntoConstraints = NO;
+    
+    self.pageControl = [[UIPageControl alloc]initWithFrame:CGRectMake(0, height-30, width, 30)];
+    
+    self.pageControl.numberOfPages = sourceArr.count;
+    self.pageControl.currentPage = 0;
+    self.pageControl.enabled = YES;
+    CGPoint center = self.pageControl.center;
+    center.x = self.center.x;
+    self.pageControl.center = center;
+    
+    [self addSubview:self.pageControl];
+    
+    [self.scrollView scrollRectToVisible:CGRectMake(width, 0, width, height) animated:NO];
+    if ([timer isValid]) {
+        [timer invalidate];
+    }
+    
+    timer = [NSTimer scheduledTimerWithTimeInterval:kTimerInterval target:self selector:@selector(nextPage:) userInfo:nil repeats:YES];
+    
+    if (_singleTap == nil) {
+        UITapGestureRecognizer *singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(singleTap:)];
+        _singleTap = singleTap;
+        singleTap.numberOfTapsRequired = 1;
+        [self addGestureRecognizer:singleTap];
+        
+    }
+}
+*/
 
 #pragma mark --- custom methods
 //自动滚动到下一页
